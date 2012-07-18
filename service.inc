@@ -21,17 +21,54 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     parent::__construct($server);
 
     // TODO: use server options.
-    $this->elasticaClient = new Elastica_Client(array(
-      'host' => 'localhost',
-      'port' => 9200,
-    ));
+    // TODO: handle clusters.
+    if (class_exists('Elastica_Client')) {
+      $this->elasticaClient = new Elastica_Client(array(
+        'host' => $this->getOption('host'),
+        'port' => $this->getOption('port'),
+      ));
+    }
   }
 
   /**
    * Overrides configurationForm().
    */
   public function configurationForm(array $form, array &$form_state) {
-    // TODO: provide server options.
+    // Daemon settings.
+    $form['daemon_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Elasticsearch daemon settings'),
+      '#tree' => FALSE,
+    );
+
+    // TODO: allow clusters.
+    // Elasticsearch daemon host.
+    $default = '127.0.0.1';
+    $form['daemon_settings']['host'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Host'),
+      '#description' => t('Host to which the elasticsearch daemon will listen for this server. Default is %default.', array(
+        '%default' => $default,
+      )),
+      '#required' => TRUE,
+      '#default_value' => $this->getOption('host', $default),
+      '#parents' => array('options', 'form', 'host'),
+    );
+
+    // Elasticsearch daemon port.
+    $default = 9200;
+    $form['daemon_settings']['port'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Port'),
+      '#description' => t('Port to which the elasticsearch daemon will listen for this server. Default is %default.', array(
+        '%default' => $default,
+      )),
+      '#required' => TRUE,
+      '#default_value' => $this->getOption('port', $default),
+      '#parents' => array('options', 'form', 'port'),
+    );
+
+    // TODO: provide additional server options.
     return $form;
   }
 
@@ -39,6 +76,15 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Overrides configurationFormValidate().
    */
   public function configurationFormValidate(array $form, array &$values, array &$form_state) {
+    // Daemon IP address.
+    if (filter_var($values['host'], FILTER_VALIDATE_IP) === FALSE) {
+      form_set_error('host', t('You must enter a valid IP address for the elasticsearch daemon.'));
+    }
+
+    // Daemon Port.
+    if (filter_var($values['port'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 65535))) === FALSE) {
+      form_set_error('port', t('You must enter a valid Port (between 0 and 65535) for the elasticsearch daemon.'));
+    }
   }
 
   /**
@@ -77,6 +123,13 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    */
   public function viewSettings() {
     $output = array();
+
+    $status = !empty($this->elasticaClient) ? $this->elasticaClient->getStatus()->getServerStatus() : NULL;
+    $output['status'] = array(
+      '#type' => 'item',
+      '#title' => t('Elasticsearch daemon status'),
+      '#markup' => '<div class="elasticsearch-daemon-status"><em>' . (!empty($status['ok']) ? 'running' : 'not running') . '</em></div>',
+    );
 
     // Display settings.
     $form = $form_state = array();
@@ -353,6 +406,14 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     // SEARCH API FACETS.
     $facets = $query->getOption('search_api_facets');
     if (!empty($facets)) {
+      // Active search corresponding to this index.
+      $searcher = key(facetapi_get_active_searchers());
+      // Get the FacetApiAdpater for this searcher.
+      $adapter = isset($searcher) ? facetapi_adapter_load($searcher) : NULL;
+
+      // Date gaps.
+      $gap_weight = array('YEAR' => 2, 'MONTH' => 1, 'DAY' => 0);
+
       // Loop trough facets.
       foreach ($facets as $facet_id => $facet_info) {
         $field_id = $facet_info['field'];
@@ -369,7 +430,61 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
         // TODO: handle different types (GeoDistance and so on).
         if ($field_type === 'date') {
+          $gaps = array();
+          $date_gap = 'YEAR';
 
+          // Get the date granularity.
+          if (isset($adapter)) {
+            // Get the current date gap from the active date filters.
+            $active_items = $adapter->getActiveItems(array('name' => $facet_id));
+            if (!empty($active_items)) {
+              foreach ($active_items as $active_item) {
+                $value = $active_item['value'];
+                if (strpos($value, ' TO ') > 0) {
+                  list($date_min, $date_max) = explode(' TO ', str_replace(array('[', ']'), '', $value), 2);
+                  $gap = self::getDateGap($date_min, $date_max, FALSE);
+                  if (isset($gap_weight[$gap])) {
+                    $gaps[] = $gap_weight[$gap];
+                  }
+                }
+              }
+              if (!empty($gaps)) {
+                // Minimum gap.
+                $date_gap = array_search(min($gaps), $gap_weight);
+              }
+            }
+          }
+
+          switch ($date_gap) {
+            // Already a selected YEAR, we want the months.
+            case 'YEAR':
+              $date_interval = 'month';
+              break;
+
+            // Already a selected MONTH, we want the days.
+            case 'MONTH':
+              $date_interval = 'day';
+              break;
+
+            // Already a selected DAY, we want the hours and so on.
+            case 'DAY':
+              $date_interval = 'hour';
+              break;
+
+            // By default we return result counts by year.
+            default:
+              $date_interval = 'year';
+          }
+
+          $facet = new Elastica_Facet_DateHistogram($facet_id);
+          $facet->setField($field_id);
+          $facet->setInterval($date_interval);
+          $facet->setTimezone('UTC');
+          $facet->setParam('factor', 1000);
+          if ($facet_limit > 0) {
+            $facet->setSize($facet_limit);
+          }
+          $elastica_query->addFacet($facet);
         }
         else {
           $facet = new Elastica_Facet_Terms($facet_id);
@@ -413,7 +528,14 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
             // TODO: handle different types (GeoDistance and so on).
             if ($field_type === 'date') {
-
+              foreach ($facet_data['entries'] as $entry) {
+                if ($entry['count'] >= $facet_min_count) {
+                  $search_result['search_api_facets'][$facet_id][] = array(
+                    'count' => $entry['count'],
+                    'filter' => '"' . $entry['time'] / 1000 . '"',
+                  );
+                }
+              }
             }
             else {
               foreach ($facet_data['terms'] as $term) {
@@ -525,7 +647,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
                 ));
                 break;
 
-              case '>=':
+              case '<=':
                 $filter = new Elastica_Filter_Range($field_id, array(
                   'from' => NULL,
                   'to' => $filter_value,
@@ -639,7 +761,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Helper function. Get an Elastica index.
    */
   public function getElasticaIndex(SearchApiIndex $index) {
-    if (!empty($index)) {
+    if (!empty($index) && !empty($this->elasticaClient)) {
       $index_name = $this->getIndexName($index);
       // TODO: catch exception.
       return $this->elasticaClient->getIndex($index_name);
@@ -702,4 +824,52 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
         return NULL;
     }
   }
+
+  /**
+   * Helper function. Return date gap from two dates or timestamps.
+   *
+   * @see facetapi_get_timestamp_gap()
+   */
+  protected static function getDateGap($min, $max, $timestamp = TRUE) {
+    if ($timestamp !== TRUE) {
+      $min = strtotime($min);
+      $max = strtotime($max);
+    }
+
+    if (empty($min) || empty($max)) {
+      return 'DAY';
+    }
+
+    $diff = $max - $min;
+
+    switch (TRUE) {
+      case ($diff > 86400 * 365):
+        return 'NONE';
+
+      case ($diff > 86400 * gmdate('t', $min)):
+        return 'YEAR';
+
+      case ($diff > 86400):
+        return 'MONTH';
+
+      default:
+        return 'DAY';
+    }
+  }
+
+  /**
+   * Helper function. Return server options.
+   */
+  public function getOptions() {
+    return $this->options;
+  }
+
+  /**
+   * Helper function. Return a server option.
+   */
+  public function getOption($option, $default = NULL) {
+    $options = $this->getOptions();
+    return isset($options[$option]) ? $options[$option] : $default;
+  }
+
 }

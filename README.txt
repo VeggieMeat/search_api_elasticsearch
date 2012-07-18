@@ -23,7 +23,7 @@ Install Notes
 Notes
 -----
 
-- Currently host (localhost) and port (9200) are hardcoded.
+- Currently Only one host and port are supported (no cluster).
   It will be changed soon to be in the server options.
 
 - Currently no options to set up the number of shards and
