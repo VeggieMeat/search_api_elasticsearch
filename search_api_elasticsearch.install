@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * Implements hook_requirements().
+ */
+function search_api_elasticsearch_requirements($phase) {
+  if ($phase === 'install') {
+    $t = get_t();
+    module_load_include('module', 'search_api_elasticsearch');
+    spl_autoload_register('_search_api_elasticsearch_autoload');
+    if (class_exists('Elastica_Client')) {
+      return array(
+        'search_api_elasticsearch' => array(
+          'title' => $t('Elastica PHP library'),
+          'description' => $t('The library was correctly installed.'),
+          'severity' => REQUIREMENT_OK,
+        ),
+      );
+    }
+    else {
+      return array(
+        'search_api_elasticsearch' => array(
+          'title' => $t('Elastica PHP library'),
+          'description' => $t('The library was not correctly installed. Please see INSTALL.txt for instructions.'),
+          'severity' => REQUIREMENT_ERROR,
+        ),
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function search_api_elasticsearch_uninstall() {
+  if (module_exists('search_api')) {
+    db_delete('search_api_server')
+      ->condition('class', 'search_api_elasticsearch_service')
+      ->execute();
+  }
+}

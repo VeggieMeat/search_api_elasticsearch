@@ -18,7 +18,7 @@ Supported features
 Install Notes
 -------------
 
-- Clone or extract Elastica into the search_api_elasticsearch module.
+- See INSTALL.txt
 
 Notes
 -----

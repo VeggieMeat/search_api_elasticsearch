@@ -322,20 +322,20 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Overrides search().
    */
   public function search(SearchApiQueryInterface $query) {
+    // Results.
+    $search_result = array('result count' => 0); 
+
     $index = $query->getIndex();
 
     $elastica_type = $this->getElasticaType($index);
 
     // Check elasticsearch index.
     if (empty($elastica_type)) {
-      return array();
+      return $search_result;
     }
 
     // Indexed fields.
     $index_fields = $index->getFields();
-
-    // Results.
-    $search_result = array();
 
     // Query options.
     $query_options = $query->getOptions();
