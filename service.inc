@@ -283,17 +283,18 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       return array();
     }
 
+    $documents = array();
     foreach ($items as $id => $fields) {
       $data = array('id' => $id);
       foreach ($fields as $field_id => $field_data) {
         $data[$field_id] = $field_data['value'];
       }
       // TODO: error handling.
-      // TODO: use bulk operation.
-      $document = new Elastica_Document($id, $data);
-      $elastica_type->addDocument($document);
-      $elastica_type->getIndex()->refresh();
+      $documents[] = new Elastica_Document($id, $data);
     }
+
+    $elastica_type->addDocuments($documents);
+    $elastica_type->getIndex()->refresh();
 
     return array_keys($items);
   }
@@ -311,7 +312,6 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       // Faster to delete the index and recreate it.
       $this->removeIndex($index);
       $this->addIndex($index);
-      $this->fieldsUpdated($index);
     }
     else {
       $elastica_type = $this->getElasticaType($index);
