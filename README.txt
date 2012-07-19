@@ -14,6 +14,7 @@ Supported features
 ------------------
 
 - Search API facets
+- Search API facets OR
 
 Install Notes
 -------------

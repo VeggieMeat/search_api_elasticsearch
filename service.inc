@@ -93,7 +93,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function supportsFeature($feature) {
     $supported = drupal_map_assoc(array(
       'search_api_facets',
-      //'search_api_facets_operator_or',
+      'search_api_facets_operator_or',
       //'search_api_mlt',
     ));
     return isset($supported[$feature]);
@@ -488,23 +488,44 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
           $facet = new Elastica_Facet_DateHistogram($facet_id);
           $facet->setInterval($date_interval);
+          // Maybe get php timezone?
           $facet->setTimezone('UTC');
+          // Use factor 1000 as we store dates as seconds from epoch
+          // not milliseconds.
           $facet->setParam('factor', 1000);
         }
         else {
           $facet = new Elastica_Facet_Terms($facet_id);
+          // We may want missing facets.
           $facet->setAllTerms($facet_missing);
         }
 
         // Add the facet.
         if (!empty($facet)) {
+          // Set the field.
           $facet->setField($field_id);
 
-          // Filter the facet.
-          if (!empty($query_search_filter)) {
-            $facet->setFilter($query_search_filter);
+
+          // OR facet. We remove filters affecting the assiociated field.
+          // TODO: distinguish between normal filters and facet filters.
+          // See http://drupal.org/node/1390598.
+          if (isset($facet_info['operator']) && drupal_strtolower($facet_info['operator']) == 'or') {
+            $facet_search_filter = $this->parseFilter($query->getFilter(), $index_fields, $field_id);
+            if (!empty($facet_search_filter)) {
+              $facet_search_filter = $facet_search_filter[0];
+            }
+          }
+          // Normal facet, we just use the main query filters.
+          else {
+            $facet_search_filter = $query_search_filter;
           }
 
+          // Filter the facet.
+          if (!empty($facet_search_filter)) {
+            $facet->setFilter($facet_search_filter);
+          }
+
+          // Limit the number of returned entries.
           if ($facet_limit > 0) {
             $facet->setSize($facet_limit);
           }
@@ -546,9 +567,11 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
             if ($field_type === 'date') {
               foreach ($facet_data['entries'] as $entry) {
                 if ($entry['count'] >= $facet_min_count) {
+                  // Divide time by 1000 as we want seconds from epoch
+                  // not milliseconds.
                   $search_result['search_api_facets'][$facet_id][] = array(
                     'count' => $entry['count'],
-                    'filter' => '"' . $entry['time'] / 1000 . '"',
+                    'filter' => '"' . ($entry['time'] / 1000) . '"',
                   );
                 }
               }
