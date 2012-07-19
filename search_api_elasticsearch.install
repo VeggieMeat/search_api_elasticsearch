@@ -1,7 +1,16 @@
 <?php
+/**
+ * @file
+ * Install/unstall tasks for the Search API elasticsearch module.
+ *
+ * Part of the code is borrowed from Thomas Seidl (drunken monkey)'s
+ * Search Api Solr search module.
+ */
 
 /**
  * Implements hook_requirements().
+ *
+ * Check Elastica installation.
  */
 function search_api_elasticsearch_requirements($phase) {
   if ($phase === 'install') {
@@ -30,7 +39,23 @@ function search_api_elasticsearch_requirements($phase) {
 }
 
 /**
+ * Implements hook_disable().
+ *
+ * Disable Search Api elasticsearch servers and associated indexes.
+ */
+function search_api_elasticsearch_disable() {
+  if (module_exists('search_api')) {
+    module_load_include('module', 'search_api');
+    foreach (search_api_server_load_multiple(FALSE, array('class' => 'search_api_elasticsearch_service'), TRUE) as $server) {
+      $server->update(array('enabled' => 0));
+    }
+  }
+}
+
+/**
  * Implements hook_uninstall().
+ *
+ * Delete Search Api elasticsearch servers.
  */
 function search_api_elasticsearch_uninstall() {
   if (module_exists('search_api')) {

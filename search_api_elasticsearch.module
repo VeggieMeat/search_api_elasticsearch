@@ -14,11 +14,12 @@ function search_api_elasticsearch_search_api_service_info() {
     <p>Index items using a !url_elasticsearch search server.</p>
     <ul>
     <li>All field types are supported.</li>
+    <li>Search API facets are supported.</li>
     <li>Will use internal elasticsearch preprocessors, so Search API preprocessors should for the most part be deactivated.</li>
     <li>See the README.txt file provided with this module for details.</li>
     </ul>',
     array(
-      '!url_sphinx' => l(t('Elasticsearch'), 'http://http://www.elasticsearch.org/'),
+      '!url_elasticsearch' => l(t('Elasticsearch'), 'http://www.elasticsearch.org/'),
     )),
     'class' => 'SearchApiElasticsearchService',
   );
@@ -37,8 +38,12 @@ function search_api_elasticsearch_init() {
 /**
  * Return path to Elastica library path, or FALSE if not found.
  */
-function _search_api_elasticsearch_elastica_path() {
+function _search_api_elasticsearch_elastica_path($reset = FALSE) {
   static $path = NULL;
+
+  if ($reset === TRUE) {
+    $path = NULL;
+  }
 
   if (!isset($path)) {
     $path = FALSE;
@@ -67,7 +72,7 @@ function _search_api_elasticsearch_elastica_path() {
   }
 
   if ($path === FALSE) {
-    throw new Exception('Elastica library not found! Please follow the instructions in search_api_elasticsearch/INSTALL.txt for installing the Search API elasticsearch module.');
+    throw new Exception('Elastica library not found! Please follow the instructions in search_api_elasticsearch/INSTALL.txt for installing the library.');
   }
 
   return $path;

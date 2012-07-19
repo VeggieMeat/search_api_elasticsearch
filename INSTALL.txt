@@ -1,17 +1,24 @@
 Prerequisite
 ------------
 
-- Java 1.6 or higher
+- Java 6 or higher
 - Elasticsearch 0.19.8 or higher
+
 
 Steps
 -----
 
 - Install Elastica library.
-- Set-up elasticsearch
+- Set up elasticsearch
+
 
 Install Elastica library
 ------------------------
+
+Elastica is an external php library used to communicate with elasticsearch
+and required by the search_api_elasticsearch module.
+
+To install it:
 
 Download the archive at [1] and extract it in "sites/all/libraries" or
 any other valid path reachable by the Drupal libraries module.
@@ -25,15 +32,31 @@ any other valid path reachable by the Drupal libraries module.
 
 [1] https://github.com/ruflin/Elastica
 
+
+Alternatively, you can use drush to download Elastica in "sites/all/libraries".
+
+> drush download-elastica
+
+Please, also note that if you use drush to install search_api_elasticsearch,
+drush will attempt to download Elastica for you if not already present.
+
+> drush pm-enable search_api_elasticsearch
+
+
+If you uninstall search_api_elasticsearch, you will have to remove the
+Elastica library manually.
+
+
 Set up elasticsearch
 --------------------
 
-Read the elasticsearch documentation at [2].
+Read the elasticsearch documentation at [2] and tutorials at [3].
 
 Make sure you have enough file descriptors and that server host and port
 match the ones defined in the Search API elasticsearch server configuration.
 
-Ideally, set up a new user to run elasticsearch as a non-root user. See [3].
+Ideally, set up a new user to run elasticsearch as a non-root user. See [4].
 
 [2] http://www.elasticsearch.org/guide/
-[3] http://www.elasticsearch.org/tutorials/2011/02/22/running-elasticsearch-as-a-non-root-user.html
+[3] http://www.elasticsearch.org/tutorials/
+[4] http://www.elasticsearch.org/tutorials/2011/02/22/running-elasticsearch-as-a-non-root-user.html
