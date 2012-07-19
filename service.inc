@@ -223,6 +223,9 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
         'number_of_replicas' => 1,
 
       ), true);
+
+      // Update mapping.
+      $this->fieldsUpdated($index);
     }
   }
 
@@ -323,7 +326,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    */
   public function search(SearchApiQueryInterface $query) {
     // Results.
-    $search_result = array('result count' => 0); 
+    $search_result = array('result count' => 0);
 
     $index = $query->getIndex();
 
@@ -339,6 +342,10 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
     // Query options.
     $query_options = $query->getOptions();
+
+    // Range.
+    $query_offset = empty($query_options['offset']) ? 0 : $query_options['offset'];
+    $query_limit = empty($query_options['limit']) ? 10 : $query_options['limit'];
 
     // Query string.
     $query_search_string = NULL;
@@ -372,6 +379,8 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
     // Main query.
     $elastica_query = new Elastica_Query();
+    $elastica_query->setFrom($query_offset);
+    $elastica_query->setSize($query_limit);
 
     // Build the query.
     if (!empty($query_search_string) && !empty($query_search_filter)) {
@@ -416,6 +425,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
       // Loop trough facets.
       foreach ($facets as $facet_id => $facet_info) {
+        $facet = NULL;
         $field_id = $facet_info['field'];
 
         // Skip if not recognized as a known field.
@@ -477,22 +487,28 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           }
 
           $facet = new Elastica_Facet_DateHistogram($facet_id);
-          $facet->setField($field_id);
           $facet->setInterval($date_interval);
           $facet->setTimezone('UTC');
           $facet->setParam('factor', 1000);
-          if ($facet_limit > 0) {
-            $facet->setSize($facet_limit);
-          }
-          $elastica_query->addFacet($facet);
         }
         else {
           $facet = new Elastica_Facet_Terms($facet_id);
           $facet->setAllTerms($facet_missing);
+        }
+
+        // Add the facet.
+        if (!empty($facet)) {
           $facet->setField($field_id);
+
+          // Filter the facet.
+          if (!empty($query_search_filter)) {
+            $facet->setFilter($query_search_filter);
+          }
+
           if ($facet_limit > 0) {
             $facet->setSize($facet_limit);
           }
+
           $elastica_query->addFacet($facet);
         }
       }
