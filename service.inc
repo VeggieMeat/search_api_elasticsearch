@@ -68,6 +68,28 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       '#parents' => array('options', 'form', 'port'),
     );
 
+    if (module_exists('search_api_facetapi')) {
+      // Facet settings.
+      $form['facet_settings'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Elasticsearch facet settings'),
+        '#tree' => FALSE,
+      );
+
+      // Elasticsearch facet limit.
+      $default = 10;
+      $form['facet_settings']['facet_limit'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Facet limit'),
+        '#description' => t("Maximum number of facet elements to be returned by the server if 'no limit' is selected as hard limit is the facet option. Default is %default.", array(
+          '%default' => $default,
+        )),
+        '#required' => TRUE,
+        '#default_value' => $this->getOption('facet_limit', $default),
+        '#parents' => array('options', 'form', 'facet_limit'),
+      );
+    }
+
     // TODO: provide additional server options.
     return $form;
   }
@@ -78,12 +100,17 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function configurationFormValidate(array $form, array &$values, array &$form_state) {
     // Daemon IP address.
     if (filter_var($values['host'], FILTER_VALIDATE_IP) === FALSE) {
-      form_set_error('host', t('You must enter a valid IP address for the elasticsearch daemon.'));
+      form_set_error('options][form][host', t('You must enter a valid IP address for the elasticsearch daemon.'));
     }
 
     // Daemon Port.
     if (filter_var($values['port'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 65535))) === FALSE) {
-      form_set_error('port', t('You must enter a valid Port (between 0 and 65535) for the elasticsearch daemon.'));
+      form_set_error('options][form][port', t('You must enter a valid Port (between 0 and 65535) for the elasticsearch daemon.'));
+    }
+
+    // Facet limit.
+    if (filter_var($values['facet_limit'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0))) === FALSE) {
+      form_set_error('options][form][facet_limit', t('You must enter a positive integer for the elasticsearch facet limit.'));
     }
   }
 
@@ -433,7 +460,11 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           continue;
         }
 
+        // If no limit (-1) is selected, use the server facet limit option.
         $facet_limit = !empty($facet_info['limit']) ? $facet_info['limit'] : -1;
+        if ($facet_limit < 0) {
+          $facet_limit = $this->getOption('facet_limit', 10);
+        }
         $facet_missing = $facet_info['missing'];
 
         $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
@@ -526,7 +557,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           }
 
           // Limit the number of returned entries.
-          if ($facet_limit > 0) {
+          if ($facet_limit > 0 && method_exists($facet, 'setSize')) {
             $facet->setSize($facet_limit);
           }
 
