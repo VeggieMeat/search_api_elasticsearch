@@ -640,7 +640,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
                 break;
 
               case '<>':
-                $filter = new Elastica_Filter_Not(new Elastica_Exists($field_id));
+                $filter = new Elastica_Filter_Not(new Elastica_Filter_Exists($field_id));
                 break;
 
               default:
@@ -656,7 +656,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
                 break;
 
               case '<>':
-                $filter = new Elastica_Filter_Not(new Elastica_Term(array($field_id => $filter_value)));
+                $filter = new Elastica_Filter_Not(new Elastica_Filter_Term(array($field_id => $filter_value)));
                 break;
 
               case '>':
