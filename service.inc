@@ -635,11 +635,11 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           // Handles "empty", "not empty" operators.
           if (!isset($filter_value)) {
             switch ($filter_operator) {
-              case '=':
+              case '<>':
                 $filter = new Elastica_Filter_Exists($field_id);
                 break;
 
-              case '<>':
+              case '=':
                 $filter = new Elastica_Filter_Not(new Elastica_Filter_Exists($field_id));
                 break;
 
