@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Provides a Elasticsearch-based service class for the Search API.
@@ -20,13 +21,53 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function __construct(SearchApiServer $server) {
     parent::__construct($server);
 
-    // TODO: use server options.
-    // TODO: handle clusters.
     if (class_exists('Elastica_Client')) {
-      $this->elasticaClient = new Elastica_Client(array(
-        'host' => $this->getOption('host'),
-        'port' => $this->getOption('port'),
-      ));
+      $config = array();
+      $count_options = array();
+
+      $options = $this->getOptions();
+
+      if (isset($options) && !empty($options)) {
+        $count_options = $options;
+        if (module_exists('search_api_facetapi')) {
+          unset($count_options['facet_limit']);
+        }
+
+        if (count($count_options) > 1) {
+          foreach ($count_options as $id => $option) {
+            $config[] = $option;
+          }
+
+          try {
+            $this->elasticaClient = new Elastica_Client(array('servers' => $config));
+          }
+          catch (Exception $e) {
+            watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+            drupal_set_message(check_plain($e->getMessage()), 'error');
+            return FALSE;
+          }
+        }
+        else {
+          $config = reset($count_options);
+          if (module_exists('search_api_facetapi')) {
+            if (isset($options['facet_limit'])) {
+              $config['facet_limit'] = $options['facet_limit'];
+            }
+          }
+          try {
+            $this->elasticaClient = new Elastica_Client($config);
+          }
+          catch (Exception $e) {
+            watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+            drupal_set_message(check_plain($e->getMessage()), 'error');
+            return FALSE;
+          }
+        }
+      }
+    }
+    else {
+      watchdog('Elastica Search', 'Elastica Client does not exist', array(), WATCHDOG_ERROR);
+      return FALSE;
     }
   }
 
@@ -34,38 +75,195 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Overrides configurationForm().
    */
   public function configurationForm(array $form, array &$form_state) {
+    $options = $this->options + array(
+      'host' => '127.0.0.1',
+      'port' => 9200,
+      'path' => '',
+      'url' => NULL,
+      'transport' => 'Http',
+      'persistent' => TRUE,
+      'timeout' => 300,
+      'log' => FALSE,
+      'retryOnConflict' => 0,
+    );
+
     // Daemon settings.
     $form['daemon_settings'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Elasticsearch daemon settings'),
-      '#tree' => FALSE,
+      '#title' => t('Elasticsearch client settings'),
+      '#tree' => TRUE,
+      '#prefix' => '<div id="elasticsearch-ajax-wrapper">',
+      '#suffix' => '</div>',
     );
 
-    // TODO: allow clusters.
-    // Elasticsearch daemon host.
-    $default = '127.0.0.1';
-    $form['daemon_settings']['host'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Host'),
-      '#description' => t('Host to which the elasticsearch daemon will listen for this server. Default is %default.', array(
-        '%default' => $default,
-      )),
-      '#required' => TRUE,
-      '#default_value' => $this->getOption('host', $default),
-      '#parents' => array('options', 'form', 'host'),
-    );
+    $delta = 1;
+    $i = 1;
+    if (isset($form_state['values']['options']['form']) && !empty($form_state['values']['options']['form']) && !isset($form_state['values']['remove_delta'])) {
+      unset($form_state['values']['options']['form']['add_more']);
+      if (isset($form_state['values']['options']['form']['facet_limit'])) {
+        unset($form_state['values']['options']['form']['facet_settings']);
+        unset($form_state['values']['options']['form']['facet_limit']);
+      }
 
-    // Elasticsearch daemon port.
-    $default = 9200;
-    $form['daemon_settings']['port'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Port'),
-      '#description' => t('Port to which the elasticsearch daemon will listen for this server. Default is %default.', array(
-        '%default' => $default,
-      )),
-      '#required' => TRUE,
-      '#default_value' => $this->getOption('port', $default),
-      '#parents' => array('options', 'form', 'port'),
+      $delta = count($form_state['values']['options']['form'])+1;
+    }
+    elseif (isset($form_state['values']['remove_delta'])) {
+      unset($form_state['values']['options']['form']['add_more']);
+      if (isset($form_state['values']['options']['form']['facet_limit'])) {
+        unset($form_state['values']['options']['form']['facet_settings']);
+        unset($form_state['values']['options']['form']['facet_limit']);
+      }
+
+      $delta = count($form_state['values']['options']['form']);
+    }
+    elseif (isset($this->options) && !empty($this->options)) {
+      if (isset($this->options['facet_limit'])) {
+        unset($this->options['facet_limit']);
+      }
+      $delta = count($this->options);
+    }
+
+    for ($c = 0; $c < $delta; $c++) {
+      if (isset($form_state['values']['remove_delta']) && $c == $form_state['values']['remove_delta']) {
+        unset($form_state['values']['options']['form'][$form_state['values']['remove_delta']]);
+        continue;
+      }
+      else {
+        // Daemon settings.
+        $form['daemon_settings']['fieldset'][$c] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Node :id', array(':id' => $i)),
+          '#tree' => TRUE,
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+        );
+
+        // Elasticsearch daemon host.
+        $form['daemon_settings']['fieldset'][$c]['host'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Host'),
+          '#description' => t('Host to which the elasticsearch daemon will listen for this server. Default is %default.', array(
+            '%default' => $options['host'],
+          )),
+          '#required' => TRUE,
+          '#default_value' => ($options[$c]['host']) ? $options[$c]['host'] : $options['host'],
+          '#parents' => array('options', 'form', $c, 'host'),
+        );
+
+        // Elasticsearch daemon port.
+        $form['daemon_settings']['fieldset'][$c]['port'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Port'),
+          '#description' => t('Port to which the elasticsearch daemon will listen for this server. Default is %default.', array(
+            '%default' => $options['port'],
+          )),
+          '#required' => TRUE,
+          '#default_value' => ($options[$c]['port']) ? $options[$c]['port'] : $options['port'],
+          '#parents' => array('options', 'form', $c, 'port'),
+        );
+
+        // Elasticsearch daemon path.
+        $form['daemon_settings']['fieldset'][$c]['path'] = array(
+          '#type' => 'textfield',
+          '#title' => t('ElasticSearch path prefix'),
+          '#description' => t('Normally empty. Use when you have remapped the ElasticSearch server API path.'),
+          '#required' => FALSE,
+          '#default_value' => ($options[$c]['path']) ? $options[$c]['path'] : $options['path'],
+          '#parents' => array('options', 'form', $c, 'path'),
+        );
+
+        // Elasticsearch daemon URL.
+        $form['daemon_settings']['fieldset'][$c]['url'] = array(
+          '#type' => 'textfield',
+          '#title' => t('ElasticSearch url'),
+          '#description' => t('Normally empty. Use instead of host/port when you have remapped the ElasticSearch server API url.'),
+          '#required' => FALSE,
+          '#default_value' => ($options[$c]['url']) ? $options[$c]['url'] : $options['url'],
+          '#parents' => array('options', 'form', $c, 'url'),
+        );
+
+        // Elasticsearch daemon transport.
+        $form['daemon_settings']['fieldset'][$c]['transport'] = array(
+          '#type' => 'select',
+          '#title' => t('Select transport'),
+          '#description' => t('Transport to connect to this elasticsearch server.'),
+          '#options' => array(
+            'Http' => 'HTTP',
+            'Https' => 'HTTPS',
+            'Memcache' => 'Memcache',
+            'Null' => 'NULL',
+          ),
+          '#default_value' => ($options[$c]['transport']) ? $options[$c]['transport'] : $options['transport'],
+          '#parents' => array('options', 'form', $c, 'transport'),
+        );
+
+        // Elasticsearch daemon persistent.
+        $form['daemon_settings']['fieldset'][$c]['persistent'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Persistent connection'),
+          '#description' => t('Use persistent connection when connecting to this node.'),
+          '#default_value' => (isset($options[$c]['persistent'])) ? $options[$c]['persistent'] : $options['persistent'],
+          '#parents' => array('options', 'form', $c, 'persistent'),
+        );
+
+        // Elasticsearch daemon timeout.
+        $form['daemon_settings']['fieldset'][$c]['timeout'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Timeout in ms'),
+          '#description' => t('Timeout in ms for waiting this elastic server to respond'),
+          '#default_value' => ($options[$c]['timeout']) ? $options[$c]['timeout'] : $options['timeout'],
+          '#parents' => array('options', 'form', $c, 'timeout'),
+        );
+
+        // Elasticsearch daemon log.
+        $form['daemon_settings']['fieldset'][$c]['log'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Log'),
+          '#description' => t('Log this elasticsearch server queries to the default log.'),
+          '#default_value' => ($options[$c]['log']) ? $options[$c]['log'] : $options['log'],
+          '#parents' => array('options', 'form', $c, 'log'),
+        );
+
+        // Elasticsearch daemon retryOnConflict.
+        $form['daemon_settings']['fieldset'][$c]['retryOnConflict'] = array(
+          '#type' => 'textfield',
+          '#title' => t('retryOnConflict'),
+          '#description' => t('Sets the number of retries of a version conflict occurs because the document was updated between getting it and updating it.'),
+          '#default_value' => ($options[$c]['retryOnConflict']) ? $options[$c]['retryOnConflict'] : $options['retryOnConflict'],
+          '#parents' => array('options', 'form', $c, 'retryOnConflict'),
+        );
+
+        if ((!isset($form_state['values']['remove_delta']) && $delta > 1) || (isset($form_state['values']['remove_delta']) && $delta > 2)) {
+          // Elasticsearch daemon retryOnConflict.
+          $form['daemon_settings']['fieldset'][$c]['remove_node'] = array(
+            '#type' => 'submit',
+            '#value' => t('Remove node') . ' ' . $i,
+            '#submit' => array('_search_api_elasticsearch_configuration_form_remove_custom'),
+            '#ajax' => array(
+              'callback' => '_search_api_elasticsearch_configuration_form_remove_ajax',
+              'wrapper' => 'elasticsearch-ajax-wrapper',
+              'method' => 'replace',
+              'effect' => 'fade',
+            ),
+            '#remove_delta' => $c,
+            '#parents' => array('options', 'form', $c, 'remove_node'),
+          );
+        }
+      }
+      $i++;
+    }
+
+    // Elasticsearch daemon retryOnConflict.
+    $form['add_more'] = array(
+      '#type' => 'submit',
+      '#value' => t('+'),
+      '#submit' => array('_search_api_elasticsearch_configuration_form_submit_custom'),
+      '#ajax' => array(
+        'callback' => '_search_api_elasticsearch_configuration_form_ajax',
+        'wrapper' => 'elasticsearch-ajax-wrapper',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
     );
 
     if (module_exists('search_api_facetapi')) {
@@ -85,12 +283,11 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '%default' => $default,
         )),
         '#required' => TRUE,
-        '#default_value' => $this->getOption('facet_limit', $default),
+        '#default_value' => (isset($options['facet_limit'])) ? $options['facet_limit'] : $default,
         '#parents' => array('options', 'form', 'facet_limit'),
       );
     }
 
-    // TODO: provide additional server options.
     return $form;
   }
 
@@ -98,20 +295,48 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Overrides configurationFormValidate().
    */
   public function configurationFormValidate(array $form, array &$values, array &$form_state) {
-    // Daemon IP address.
-    if (filter_var($values['host'], FILTER_VALIDATE_IP) === FALSE) {
-      form_set_error('options][form][host', t('You must enter a valid IP address for the elasticsearch daemon.'));
+    unset($values['add_more']);
+    $count_nodes = count($values);
+
+    // PATCH - Validation breaks when trying to create new server without the Search API Facetapi module installed
+    if (module_exists('search_api_facetapi')) {
+      // Facet limit.
+      if (filter_var($values['facet_limit'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0))) === FALSE) {
+        form_set_error('options][form][facet_limit', t('You must enter a positive integer for the elasticsearch facet limit.'));
+      }
     }
 
-    // Daemon Port.
-    if (filter_var($values['port'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 65535))) === FALSE) {
-      form_set_error('options][form][port', t('You must enter a valid Port (between 0 and 65535) for the elasticsearch daemon.'));
+    foreach ($values as $i => $setting) {
+      if ($i != 'facet_limit') {
+        // Daemon IP address.
+        if (filter_var($values[$i]['host'], FILTER_VALIDATE_IP) === FALSE) {
+          form_set_error('options][form]' . $i . '[host', t('You must enter a valid IP address for the elasticsearch daemon.'));
+        }
+
+        // Daemon Port.
+        if (filter_var($values[$i]['port'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0, 'max_range' => 65535))) === FALSE) {
+          form_set_error('options][form]' . $i . '[port', t('You must enter a valid Port (between 0 and 65535) for the elasticsearch daemon.'));
+        }
+
+        $values[$i]['path'] = $this->setPath($values[$i]['path']);
+      }
+    }
+  }
+
+  /**
+   * Overrides configurationFormSubmit().
+   */
+  public function configurationFormSubmit(array $form, array &$values, array &$form_state) {
+    $facet_limit = '';
+
+    if (isset($values['facet_limit'])) {
+      $facet_limit = $values['facet_limit'];
+      unset($values['facet_limit']);
     }
 
-    // Facet limit.
-    if (filter_var($values['facet_limit'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0))) === FALSE) {
-      form_set_error('options][form][facet_limit', t('You must enter a positive integer for the elasticsearch facet limit.'));
-    }
+    $values = array_values($values);
+    $values['facet_limit'] = $facet_limit;
+    $this->options = $values;
   }
 
   /**
@@ -119,10 +344,11 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    */
   public function supportsFeature($feature) {
     $supported = drupal_map_assoc(array(
-      'search_api_facets',
-      'search_api_facets_operator_or',
-      //'search_api_mlt',
-    ));
+          'search_api_facets',
+          'search_api_facets_operator_or',
+           'search_api_autocomplete',
+            //'search_api_mlt',
+        ));
     return isset($supported[$feature]);
   }
 
@@ -130,6 +356,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Overrides postCreate().
    */
   public function postCreate() {
+
   }
 
   /**
@@ -143,6 +370,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Overrides preDelete().
    */
   public function preDelete() {
+
   }
 
   /**
@@ -151,11 +379,18 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function viewSettings() {
     $output = array();
 
-    $status = !empty($this->elasticaClient) ? $this->elasticaClient->getStatus()->getServerStatus() : NULL;
+    try {
+      $status = !empty($this->elasticaClient) ? $this->elasticaClient->getStatus()->getServerStatus() : NULL;
+    }
+    catch (Exception $e) {
+      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      drupal_set_message(check_plain($e->getMessage()), 'error');
+      drupal_set_message(t('No connection to the Elasticsearch server.'), 'error');
+    }
     $output['status'] = array(
       '#type' => 'item',
       '#title' => t('Elasticsearch daemon status'),
-      '#markup' => '<div class="elasticsearch-daemon-status"><em>' . (!empty($status['ok']) ? 'running' : 'not running') . '</em></div>',
+      '#markup' => '<div class="elasticsearch-daemon-status"><em>' . (!empty($status['ok']) ? 'running' : 'One or more nodes not running') . '</em></div>',
     );
 
     // Display settings.
@@ -243,13 +478,14 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function addIndex(SearchApiIndex $index) {
     $elastica_index = $this->getElasticaIndex($index);
     if (!empty($elastica_index)) {
-      // TODO: handle index options.
-      // TODO: handle response.
-      $response = $elastica_index->create(array(
-        'number_of_shards' => 1,
-        'number_of_replicas' => 1,
-
-      ), true);
+      try {
+        $response = $elastica_index->create($index->options, TRUE);
+      }
+      catch (Exception $e) {
+        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        drupal_set_message(check_plain($e->getMessage()), 'error');
+        return FALSE;
+      }
 
       // Update mapping.
       $this->fieldsUpdated($index);
@@ -262,27 +498,32 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function fieldsUpdated(SearchApiIndex $index) {
     $elastica_index = $this->getElasticaIndex($index);
     if (!empty($elastica_index)) {
-      $elastica_type =  $elastica_index->getType($index->machine_name);
+      $elastica_type = $elastica_index->getType($index->machine_name);
 
       // Create a new mapping.
       // TODO: check if we need to delete the previous mapping first.
       // TODO: shall we delete the items from the index?
       $mapping = new Elastica_Type_Mapping();
       $mapping->setType($elastica_type);
-
       $properties = array(
         'id' => array('type' => 'integer', 'include_in_all' => FALSE),
       );
+      try {
+        // Map index fields.
+        foreach ($index->getFields() as $field_id => $field_data) {
+          $properties[$field_id] = $this->getFieldMapping($field_data);
+        }
 
-      // Map index fields.
-      foreach ($index->getFields() as $field_id => $field_data) {
-        $properties[$field_id] = $this->getFieldMapping($field_data);
+        $mapping->setProperties($properties);
+
+        $mapping->send();
       }
-
-      $mapping->setProperties($properties);
-
-      // TODO: handle error.
-      $mapping->send();
+      catch (Exception $e) {
+        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        drupal_set_message(check_plain($e->getMessage()), 'error');
+        drupal_set_message(t('Fields are not re-index'), 'error');
+        return FALSE;
+      }
     }
 
     // Flag for re-indexing.
@@ -294,9 +535,17 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    */
   public function removeIndex($index) {
     $elastica_index = $this->getElasticaIndex($index);
-    if (!empty($elastica_index)) {
-      // TODO - handle errors.
-      $response = $elastica_index->delete();
+    // PATCH - Only delete the index's data if the index isn't read-only.
+    if (!empty($elastica_index) && $index->read_only != 1) {
+      try {
+        $response = $elastica_index->delete();
+        return $response;
+      }
+      catch (Exception $e) {
+        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        drupal_set_message(check_plain($e->getMessage()), 'error');
+        return FALSE;
+      }
     }
   }
 
@@ -316,11 +565,16 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       foreach ($fields as $field_id => $field_data) {
         $data[$field_id] = $field_data['value'];
       }
-      // TODO: error handling.
+
       $documents[] = new Elastica_Document($id, $data);
     }
-
-    $elastica_type->addDocuments($documents);
+    try {
+      $elastica_type->addDocuments($documents);
+    }
+    catch (Exception $e) {
+      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      drupal_set_message(check_plain($e->getMessage()), 'error');
+    }
     $elastica_type->getIndex()->refresh();
 
     return array_keys($items);
@@ -352,11 +606,14 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Overrides search().
    */
   public function search(SearchApiQueryInterface $query) {
+
     // Results.
     $search_result = array('result count' => 0);
 
+    // Get index
     $index = $query->getIndex();
 
+    // Get index type
     $elastica_type = $this->getElasticaType($index);
 
     // Check elasticsearch index.
@@ -364,262 +621,18 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       return $search_result;
     }
 
-    // Indexed fields.
-    $index_fields = $index->getFields();
+    // Build Elastica query.
+    $elastica_query = $this->buildSearchQuery($query);
 
-    // Query options.
-    $query_options = $query->getOptions();
-
-    // Range.
-    $query_offset = empty($query_options['offset']) ? 0 : $query_options['offset'];
-    $query_limit = empty($query_options['limit']) ? 10 : $query_options['limit'];
-
-    // Query string.
-    $query_search_string = NULL;
-
-    // Query filter.
-    $query_search_filter = NULL;
-
-    // Full text search.
-    $keys = $query->getKeys();
-    if (!empty($keys)) {
-      if (is_string($keys)) {
-        $keys = array($keys);
-      }
-
-      // Full text fields in which to perform the search.
-      $query_full_text_fields = $query->getFields();
-
-      // Query string
-      $search_string = $this->flattenKeys($keys, $query_options['parse mode']);
-
-      if (!empty($search_string)) {
-        $query_search_string = new Elastica_Query_QueryString($search_string);
-      }
-    }
-
-    // Filters.
-    $parsed_query_filters = $this->parseFilter($query->getFilter(), $index_fields);
-    if (!empty($parsed_query_filters)) {
-      $query_search_filter = $parsed_query_filters[0];
-    }
-
-    // Main query.
-    $elastica_query = new Elastica_Query();
-    $elastica_query->setFrom($query_offset);
-    $elastica_query->setSize($query_limit);
-
-    // Build the query.
-    if (!empty($query_search_string) && !empty($query_search_filter)) {
-      $elastica_query->setQuery(new Elastica_Query_Filtered($query_search_string, $query_search_filter));
-    }
-    elseif (!empty($query_search_string)) {
-      $elastica_query->setQuery($query_search_string);
-    }
-    elseif (!empty($query_search_filter)) {
-      $elastica_query->setFilter($query_search_filter);
-    }
-
-    // Sort.
-    $sort = array();
-    foreach ($query->getSort() as $field_id => $direction) {
-      $direction = drupal_strtolower($direction);
-      if ($field_id === 'search_api_relevance') {
-        $sort['_score'] = $direction;
-      }
-      elseif (isset($index_fields[$field_id])) {
-        $sort[$field_id] = $direction;
-      }
-      else {
-        // TODO: handle error.
-      }
-    }
-    if (!empty($sort)) {
-      $elastica_query->setSort($sort);
-    }
-
-
-    // SEARCH API FACETS.
-    $facets = $query->getOption('search_api_facets');
-    if (!empty($facets)) {
-      // Active search corresponding to this index.
-      $searcher = key(facetapi_get_active_searchers());
-      // Get the FacetApiAdpater for this searcher.
-      $adapter = isset($searcher) ? facetapi_adapter_load($searcher) : NULL;
-
-      // Date gaps.
-      $gap_weight = array('YEAR' => 2, 'MONTH' => 1, 'DAY' => 0);
-
-      // Loop trough facets.
-      foreach ($facets as $facet_id => $facet_info) {
-        $facet = NULL;
-        $field_id = $facet_info['field'];
-
-        // Skip if not recognized as a known field.
-        if (!isset($index_fields[$field_id])) {
-          continue;
-        }
-
-        // If no limit (-1) is selected, use the server facet limit option.
-        $facet_limit = !empty($facet_info['limit']) ? $facet_info['limit'] : -1;
-        if ($facet_limit < 0) {
-          $facet_limit = $this->getOption('facet_limit', 10);
-        }
-        $facet_missing = $facet_info['missing'];
-
-        $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
-
-        // TODO: handle different types (GeoDistance and so on).
-        if ($field_type === 'date') {
-          $gaps = array();
-          $date_gap = 'YEAR';
-
-          // Get the date granularity.
-          if (isset($adapter)) {
-            // Get the current date gap from the active date filters.
-            $active_items = $adapter->getActiveItems(array('name' => $facet_id));
-            if (!empty($active_items)) {
-              foreach ($active_items as $active_item) {
-                $value = $active_item['value'];
-                if (strpos($value, ' TO ') > 0) {
-                  list($date_min, $date_max) = explode(' TO ', str_replace(array('[', ']'), '', $value), 2);
-                  $gap = self::getDateGap($date_min, $date_max, FALSE);
-                  if (isset($gap_weight[$gap])) {
-                    $gaps[] = $gap_weight[$gap];
-                  }
-                }
-              }
-              if (!empty($gaps)) {
-                // Minimum gap.
-                $date_gap = array_search(min($gaps), $gap_weight);
-              }
-            }
-          }
-
-          switch ($date_gap) {
-            // Already a selected YEAR, we want the months.
-            case 'YEAR':
-              $date_interval = 'month';
-              break;
-
-            // Already a selected MONTH, we want the days.
-            case 'MONTH':
-              $date_interval = 'day';
-              break;
-
-            // Already a selected DAY, we want the hours and so on.
-            case 'DAY':
-              $date_interval = 'hour';
-              break;
-
-            // By default we return result counts by year.
-            default:
-              $date_interval = 'year';
-          }
-
-          $facet = new Elastica_Facet_DateHistogram($facet_id);
-          $facet->setInterval($date_interval);
-          // Maybe get php timezone?
-          $facet->setTimezone('UTC');
-          // Use factor 1000 as we store dates as seconds from epoch
-          // not milliseconds.
-          $facet->setParam('factor', 1000);
-        }
-        else {
-          $facet = new Elastica_Facet_Terms($facet_id);
-          // We may want missing facets.
-          $facet->setAllTerms($facet_missing);
-        }
-
-        // Add the facet.
-        if (!empty($facet)) {
-          // Set the field.
-          $facet->setField($field_id);
-
-
-          // OR facet. We remove filters affecting the assiociated field.
-          // TODO: distinguish between normal filters and facet filters.
-          // See http://drupal.org/node/1390598.
-          if (isset($facet_info['operator']) && drupal_strtolower($facet_info['operator']) == 'or') {
-            $facet_search_filter = $this->parseFilter($query->getFilter(), $index_fields, $field_id);
-            if (!empty($facet_search_filter)) {
-              $facet_search_filter = $facet_search_filter[0];
-            }
-          }
-          // Normal facet, we just use the main query filters.
-          else {
-            $facet_search_filter = $query_search_filter;
-          }
-
-          // Filter the facet.
-          if (!empty($facet_search_filter)) {
-            $facet->setFilter($facet_search_filter);
-          }
-
-          // Limit the number of returned entries.
-          if ($facet_limit > 0 && method_exists($facet, 'setSize')) {
-            $facet->setSize($facet_limit);
-          }
-
-          $elastica_query->addFacet($facet);
-        }
-      }
-    }
+    // Add facets.
+    $this->addSearchFacets($elastica_query, $query);
 
     // Perform search.
     $response = $elastica_type->search($elastica_query);
 
     // Parse response.
     if (!empty($response)) {
-      $search_result['result count'] = $response->getTotalHits();
-
-      // Parse results.
-      foreach ($response->getResults() as $result) {
-        $id = $result->getId();
-
-        $search_result['results'][$id] = array(
-          'id' => $id,
-          'score' => $result->getScore(),
-          'fields' => $result->getSource(),
-        );
-      }
-
-      // Parse facets.
-      if (!empty($facets) && $response->hasFacets()) {
-        foreach ($response->getFacets() as $facet_id => $facet_data) {
-          if (isset($facets[$facet_id])) {
-            $facet_info = $facets[$facet_id];
-            $facet_min_count = $facet_info['min_count'];
-
-            $field_id = $facet_info['field'];
-            $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
-
-            // TODO: handle different types (GeoDistance and so on).
-            if ($field_type === 'date') {
-              foreach ($facet_data['entries'] as $entry) {
-                if ($entry['count'] >= $facet_min_count) {
-                  // Divide time by 1000 as we want seconds from epoch
-                  // not milliseconds.
-                  $search_result['search_api_facets'][$facet_id][] = array(
-                    'count' => $entry['count'],
-                    'filter' => '"' . ($entry['time'] / 1000) . '"',
-                  );
-                }
-              }
-            }
-            else {
-              foreach ($facet_data['terms'] as $term) {
-                if ($term['count'] >= $facet_min_count) {
-                  $search_result['search_api_facets'][$facet_id][] = array(
-                    'count' => $term['count'],
-                    'filter' => '"' . $term['term'] . '"',
-                  );
-                }
-              }
-            }
-          }
-        }
-      }
+      $search_result = $this->parseSearchResponse($response, $query);
     }
 
     return $search_result;
@@ -629,6 +642,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    * Recursively parse Search API filters.
    */
   protected function parseFilter(SearchApiQueryFilter $query_filter, $index_fields, $ignored_field_id = '') {
+
     if (empty($query_filter)) {
       return NULL;
     }
@@ -637,136 +651,180 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
       $filters = array();
 
-      foreach ($query_filter->getFilters() as $filter_info) {
-        $filter = NULL;
+      try {
+        foreach ($query_filter->getFilters() as $filter_info) {
+          $filter = NULL;
 
-        // Simple filter [field_id, value, operator].
-        if (is_array($filter_info)) {
-          $field_id = $filter_info[0];
-          $filter_value = $filter_info[1];
-          $filter_operator = str_replace('!=', '<>', $filter_info[2]);
+          // Simple filter [field_id, value, operator].
+          if (is_array($filter_info)) {
+            $filter_assoc = $this->getAssociativeFilter($filter_info);
+            $this->correctFilter($filter_assoc, $index_fields, $ignored_field_id);
+            // Check field.
+            $filter = $this->getFilter($filter_assoc);
 
-          // Check field.
-          if (!isset($index_fields[$field_id])) {
-            // TODO: handle error.
-            return NULL;
-          }
-
-          // Check operator.
-          if (empty($filter_operator)) {
-            // TODO: handle error.
-            return NULL;
-          }
-
-          // If field should be ignored, we skip.
-          if ($field_id === $ignored_field_id) {
-            continue;
-          }
-
-          // Handles "empty", "not empty" operators.
-          if (!isset($filter_value)) {
-            switch ($filter_operator) {
-              case '<>':
-                $filter = new Elastica_Filter_Exists($field_id);
-                break;
-
-              case '=':
-                $filter = new Elastica_Filter_Not(new Elastica_Filter_Exists($field_id));
-                break;
-
-              default:
-                // TODO: handle error.
-                return NULL;
+            if (!empty($filter)) {
+              $filters[] = $filter;
             }
           }
-          // Normal filters.
-          else {
-            switch ($filter_operator) {
-              case '=':
-                $filter = new Elastica_Filter_Term(array($field_id => $filter_value));
-                break;
-
-              case '<>':
-                $filter = new Elastica_Filter_Not(new Elastica_Filter_Term(array($field_id => $filter_value)));
-                break;
-
-              case '>':
-                $filter = new Elastica_Filter_Range($field_id, array(
-                  'from' => $filter_value,
-                  'to' => NULL,
-                  'include_lower' => FALSE,
-                  'include_upper' => FALSE,
-                ));
-                break;
-
-              case '>=':
-                $filter = new Elastica_Filter_Range($field_id, array(
-                  'from' => $filter_value,
-                  'to' => NULL,
-                  'include_lower' => TRUE,
-                  'include_upper' => FALSE,
-                ));
-                break;
-
-              case '<':
-                $filter = new Elastica_Filter_Range($field_id, array(
-                  'from' => NULL,
-                  'to' => $filter_value,
-                  'include_lower' => FALSE,
-                  'include_upper' => FALSE,
-                ));
-                break;
-
-              case '<=':
-                $filter = new Elastica_Filter_Range($field_id, array(
-                  'from' => NULL,
-                  'to' => $filter_value,
-                  'include_lower' => FALSE,
-                  'include_upper' => TRUE,
-                ));
-                break;
-
-              default:
-                // TODO: handle error.
-                return NULL;
+          // Nested filters.
+          elseif ($filter_info instanceof SearchApiQueryFilter) {
+            $nested_filters = $this->parseFilter($filter_info, $index_fields, $ignored_field_id);
+            // TODO: handle error. - here is unnecessary cause in if we thow exceptions and this is still in try{}  .
+            if (!empty($nested_filters)) {
+              $filters = array_merge($filters, $nested_filters);
             }
           }
-
-          if (!empty($filter)) {
-            $filters[] = $filter;
-          }
         }
-        // Nested filters.
-        elseif ($filter_info instanceof SearchApiQueryFilter) {
-          $nested_filters = $this->parseFilter($filter_info, $index_fields, $ignored_field_id);
-          // TODO: handle error.
-          if (!empty($nested_filters)) {
-            $filters = array_merge($filters, $nested_filters);
-          }
-        }
+        $filters = $this->setFiltersConjunction($filters, $conjunction);
       }
-
-      if (count($filters) > 1) {
-        if ($conjunction === 'OR') {
-          $filter = new Elastica_Filter_Or();
-          $filter->setFilters($filters);
-          $filters = array($filter);
-        }
-        elseif ($conjunction === 'AND') {
-          $filter = new Elastica_Filter_And();
-          $filter->setFilters($filters);
-          $filters = array($filter);
-        }
-        else {
-          // TODO: handle error.
-          return NULL;
-        }
+      catch (Exception $e) {
+        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        drupal_set_message(check_plain($e->getMessage()), 'error');
       }
 
       return $filters;
     }
   }
 
+  /**
+   * Get filter by associative array/
+   */
+  protected function getFilter(array $filter_assoc) {
+    // Handles "empty", "not empty" operators.
+    if (!isset($filter_assoc['filter_value'])) {
+      switch ($filter_assoc['filter_operator']) {
+        case '<>':
+          $filter = new Elastica_Filter_Exists($field_id);
+          break;
+
+        case '=':
+          $filter = new Elastica_Filter_Not(new Elastica_Filter_Exists($filter_assoc['field_id']));
+          break;
+
+        default:
+          throw new Exception(t('Value is empty for :field_id! Incorrect filter criteria is using for searching!', array(':field_id' => $filter_assoc['field_id'])));
+      }
+    }
+    // Normal filters.
+    else {
+      switch ($filter_assoc['filter_operator']) {
+        case '=':
+          $filter = new Elastica_Filter_Term(array($filter_assoc['field_id'] => $filter_assoc['filter_value']));
+          break;
+
+        case '<>':
+          $filter = new Elastica_Filter_Not(new Elastica_Filter_Term(array($filter_assoc['field_id'] => $filter_assoc['filter_value'])));
+          break;
+
+        case '>':
+          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+                'from' => $filter_assoc['filter_value'],
+                'to' => NULL,
+                'include_lower' => FALSE,
+                'include_upper' => FALSE,
+              ));
+          break;
+
+        case '>=':
+          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+                'from' => $filter_assoc['filter_value'],
+                'to' => NULL,
+                'include_lower' => TRUE,
+                'include_upper' => FALSE,
+              ));
+          break;
+
+        case '<':
+          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+                'from' => NULL,
+                'to' => $filter_assoc['filter_value'],
+                'include_lower' => FALSE,
+                'include_upper' => FALSE,
+              ));
+          break;
+
+        case '<=':
+          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+                'from' => NULL,
+                'to' => $filter_assoc['filter_value'],
+                'include_lower' => FALSE,
+                'include_upper' => TRUE,
+              ));
+          break;
+
+        default:
+          throw new Exception(t('Undefined operator :field_operator for :field_id field! Incorrect filter criteria is using for searching!',
+                  array(':field_operator' => $filter_assoc['filter_operator'], ':field_id' => $filter_assoc['field_id'])));
+      }
+    }
+
+    return $filter;
+  }
+
+  /**
+   * Helper function that return associative array  of filters info.
+   */
+  public function getAssociativeFilter(array $filter_info) {
+
+    $filter_operator = str_replace('!=', '<>', $filter_info[2]);
+    return array(
+      'field_id' => $filter_info[0],
+      'filter_value' => $filter_info[1],
+      'filter_operator' => $filter_operator,
+    );
+  }
+
+  /**
+   * Helper function thaht set filters conjunction
+   */
+  protected function setFiltersConjunction(&$filters, $conjunction) {
+
+    if (count($filters) > 1) {
+      if ($conjunction === 'OR') {
+        $filter = new Elastica_Filter_Or();
+        $filter->setFilters($filters);
+        $filters = array($filter);
+      }
+      elseif ($conjunction === 'AND') {
+        $filter = new Elastica_Filter_And();
+        $filter->setFilters($filters);
+        $filters = array($filter);
+      }
+      else {
+        throw new Exception(t('Undefined conjunction :conjunction! Available values are :avail_conjunction! Incorrect filter criteria is using for searching!',
+                array(':conjunction!' => $conjunction, ':avail_conjunction' => $conjunction)));
+        return NULL;
+      }
+    }
+    return $filters;
+  }
+
+  /**
+   * Helper function that check if filter is set correct.
+   */
+  protected function correctFilter($filter_assoc, $index_fields, $ignored_field_id = '') {
+    if (!isset($filter_assoc['field_id']) || !isset($filter_assoc['filter_value'])
+        || !isset($filter_assoc['filter_operator'])) {
+      throw new Exception(t('Incorrect filter criteria is using for searching!'));
+    }
+
+    $field_id = $filter_assoc['field_id'];
+    if (!isset($index_fields[$field_id])) {
+      throw new Exception(t(':field_id Undefined field ! Incorrect filter criteria is using for searching!', array(':field_id' => $field_id)));
+    }
+
+    // Check operator.
+    if (empty($filter_assoc['filter_operator'])) {
+      throw new Exception(t('Empty filter operator for :field_id field! Incorrect filter criteria is using for searching!', array(':field_id' => $field_id)));
+    }
+
+    // If field should be ignored, we skip.
+    if ($field_id === $ignored_field_id) {
+      return TRUE;
+    }
+
+    return TRUE;
+  }
 
   /**
    * Return a full text search query.
@@ -833,8 +891,14 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function getElasticaIndex(SearchApiIndex $index) {
     if (!empty($index) && !empty($this->elasticaClient)) {
       $index_name = $this->getIndexName($index);
-      // TODO: catch exception.
-      return $this->elasticaClient->getIndex($index_name);
+      try {
+        $elastica_index = $this->elasticaClient->getIndex($index_name);
+        return $elastica_index;
+      }
+      catch (Exception $e) {
+        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        drupal_set_message(check_plain($e->getMessage()), 'error');
+      }
     }
     return NULL;
   }
@@ -844,7 +908,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    */
   public function getElasticaType(SearchApiIndex $index) {
     $elastica_index = $this->getElasticaIndex($index);
-    return !empty($elastica_index) ? $elastica_index->getType($index->machine_name) : NULL;
+    return!empty($elastica_index) ? $elastica_index->getType($index->machine_name) : NULL;
   }
 
   /**
@@ -940,6 +1004,537 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function getOption($option, $default = NULL) {
     $options = $this->getOptions();
     return isset($options[$option]) ? $options[$option] : $default;
+  }
+
+  /**
+   * Helper function. Return index fields.
+   */
+  public function getIndexFields(SearchApiQueryInterface $query) {
+    $index = $query->getIndex();
+    $index_fields = $index->getFields();
+    return $index_fields;
+  }
+
+  /**
+   * Helper function build search query().
+   */
+  protected function buildSearchQuery(SearchApiQueryInterface $query) {
+    // Query options.
+    $query_options = $this->getSearchQueryOptions($query);
+
+    // Main query.
+    $elastica_query = new Elastica_Query();
+    $elastica_query->setFrom($query_options['query_offset']);
+    $elastica_query->setSize($query_options['query_limit']);
+
+    // Build the query.
+    if (!empty($query_options['query_search_string']) && !empty($query_options['query_search_filter'])) {
+      $elastica_query->setQuery(new Elastica_Query_Filtered($query_options['query_search_string'], $query_options['query_search_filter']));
+    }
+    elseif (!empty($query_options['query_search_string'])) {
+      $elastica_query->setQuery($query_options['query_search_string']);
+    }
+    elseif (!empty($query_options['query_search_filter'])) {
+      $elastica_query->setFilter($query_options['query_search_filter']);
+    }
+
+    // Sort
+    if (!empty($query_options['sort'])) {
+      $elastica_query->setSort($sort);
+    }
+
+    return $elastica_query;
+  }
+
+  /**
+   * Helper function return associative array with query options.
+   */
+  protected function getSearchQueryOptions(SearchApiQueryInterface $query) {
+
+    // Query options.
+    $query_options = $query->getOptions();
+
+    //Index fields
+    $index_fields = $this->getIndexFields($query);
+
+    // Range.
+    $query_offset = empty($query_options['offset']) ? 0 : $query_options['offset'];
+    $query_limit = empty($query_options['limit']) ? 10 : $query_options['limit'];
+
+    // Query string.
+    $query_search_string = NULL;
+
+    // Query filter.
+    $query_search_filter = NULL;
+
+    // Full text search.
+    $keys = $query->getKeys();
+    if (!empty($keys)) {
+      if (is_string($keys)) {
+        $keys = array($keys);
+      }
+
+      // Full text fields in which to perform the search.
+      $query_full_text_fields = $query->getFields();
+
+      // Query string
+      $search_string = $this->flattenKeys($keys, $query_options['parse mode']);
+
+      if (!empty($search_string)) {
+        $query_search_string = new Elastica_Query_QueryString($search_string);
+      }
+    }
+
+    // Sort.
+    try {
+      $sort = $this->getSortSearchQuery($query);
+    }
+    catch (Exception $e) {
+      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      drupal_set_message($e->getMessage(), 'error');
+    }
+
+    // Filters.
+    $parsed_query_filters = $this->parseFilter($query->getFilter(), $index_fields);
+    if (!empty($parsed_query_filters)) {
+      $query_search_filter = $parsed_query_filters[0];
+    }
+
+    return array(
+      'query_offset' => $query_offset,
+      'query_limit' => $query_limit,
+      'query_search_string' => $query_search_string,
+      'query_search_filter' => $query_search_filter,
+      'sort' => $sort,
+    );
+  }
+
+  /**
+   * Helper function that return Sort for query in search.
+   */
+  protected function getSortSearchQuery(SearchApiQueryInterface $query) {
+
+    $index_fields = $this->getIndexFields($query);
+    $sort = array();
+    foreach ($query->getSort() as $field_id => $direction) {
+      $direction = drupal_strtolower($direction);
+
+      if ($field_id === 'search_api_relevance') {
+        $sort['_score'] = $direction;
+      }
+      elseif (isset($index_fields[$field_id])) {
+        $sort[$field_id] = $direction;
+      }
+      else {
+        throw new Exception(t('Incorrect sorting!.'));
+      }
+    }
+    return $sort;
+  }
+
+  /**
+   * Helper function build facets in search.
+   */
+  protected function addSearchFacets(Elastica_Query $elastica_query, SearchApiQueryInterface $query) {
+
+    // SEARCH API FACETS.
+    $facets = $query->getOption('search_api_facets');
+    $index_fields = $this->getIndexFields($query);
+
+    if (!empty($facets)) {
+      // Loop trough facets.
+      foreach ($facets as $facet_id => $facet_info) {
+        $facet = NULL;
+        $field_id = $facet_info['field'];
+
+        // Skip if not recognized as a known field.
+        if (!isset($index_fields[$field_id])) {
+          continue;
+        }
+
+        $facet_missing = $facet_info['missing'];
+
+        $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
+
+        // TODO: handle different types (GeoDistance and so on).
+        if ($field_type === 'date') {
+          $facet = $this->createDateFieldFacet($facet_id);
+        }
+        else {
+          $facet = new Elastica_Facet_Terms($facet_id);
+          // We may want missing facets.
+          $facet->setAllTerms($facet_missing);
+        }
+
+        // Add the facet.
+        if (!empty($facet)) {
+          // Add facet options
+          $facet = $this->addFacetOptions($facet, $query, $facet_info, $elastica_query);
+          $elastica_query->addFacet($facet);
+        }
+      }
+    }
+  }
+
+  /**
+   * Helper function that add options and return facet
+   */
+  protected function addFacetOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica_Query $elastica_query) {
+
+    $facet_limit = $this->getFacetLimit($facet_info);
+    $facet_search_filter = $this->getFacetSearchFilter($query, $facet_info);
+    // Set the field.
+    $facet->setField($facet_info['field']);
+
+    // OR facet. We remove filters affecting the assiociated field.
+    // TODO: distinguish between normal filters and facet filters.
+    // See http://drupal.org/node/1390598.
+
+    // Filter the facet.
+    if (!empty($facet_search_filter)) {
+      $facet->setFilter($facet_search_filter);
+    }
+
+    // Limit the number of returned entries.
+    if ($facet_limit > 0 && method_exists($facet, 'setSize')) {
+      $facet->setSize($facet_limit);
+    }
+
+    return $facet;
+  }
+
+  /**
+   * Helper function return Facet filter.
+   */
+  protected function getFacetSearchFilter(SearchApiQueryInterface $query, $facet_info ) {
+    $index_fields = $this->getIndexFields($query);
+    $facet_search_filter = '';
+
+    if (isset($facet_info['operator']) && drupal_strtolower($facet_info['operator']) == 'or') {
+      $facet_search_filter = $this->parseFilter($query->getFilter(), $index_fields, $facet_info['field']);
+      if (!empty($facet_search_filter)) {
+        $facet_search_filter = $facet_search_filter[0];
+      }
+    }
+    // Normal facet, we just use the main query filters.
+    else {
+      $facet_search_filter = $this->parseFilter($query->getFilter(), $index_fields);
+      if (!empty($facet_search_filter)) {
+        $facet_search_filter = $facet_search_filter[0];
+      }
+    }
+
+    return $facet_search_filter;
+  }
+
+  /**
+   * Helper function create Facet for date field type.
+   */
+  protected function createDateFieldFacet($facet_id) {
+
+    $date_interval = $this->getDateFacetInterval($facet_id);
+
+    $facet = new Elastica_Facet_DateHistogram($facet_id);
+
+    $facet->setInterval($date_interval);
+
+    // Maybe get php timezone?
+    $facet->setTimezone('UTC');
+
+    // Use factor 1000 as we store dates as seconds from epoch
+    // not milliseconds.
+    $facet->setParam('factor', 1000);
+
+    return $facet;
+  }
+
+  /**
+   * Helper function that return facet limits
+   */
+  protected function getFacetLimit(array $facet_info) {
+
+// If no limit (-1) is selected, use the server facet limit option.
+    $facet_limit = !empty($facet_info['limit']) ? $facet_info['limit'] : -1;
+    if ($facet_limit < 0) {
+      $facet_limit = $this->getOption('facet_limit', 10);
+    }
+    return $facet_limit;
+  }
+
+  /**
+   * Helper function which add params to date facets.
+   */
+  protected function getDateFacetInterval($facet_id) {
+    // Active search corresponding to this index.
+    $searcher = key(facetapi_get_active_searchers());
+
+    // Get the FacetApiAdpater for this searcher.
+    $adapter = isset($searcher) ? facetapi_adapter_load($searcher) : NULL;
+
+    // Get the date granularity.
+    $date_gap = $this->getDateGranularity($adapter, $facet_id);
+
+    switch ($date_gap) {
+      // Already a selected YEAR, we want the months.
+      case 'YEAR':
+        $date_interval = 'month';
+        break;
+
+      // Already a selected MONTH, we want the days.
+      case 'MONTH':
+        $date_interval = 'day';
+        break;
+
+      // Already a selected DAY, we want the hours and so on.
+      case 'DAY':
+        $date_interval = 'hour';
+        break;
+
+      // By default we return result counts by year.
+      default:
+        $date_interval = 'year';
+    }
+
+    return $date_interval;
+  }
+
+  /**
+   * Helper function to return date gap.
+   */
+  public function getDateGranularity($adapter, $facet_id) {
+    // Date gaps.
+    $gap_weight = array('YEAR' => 2, 'MONTH' => 1, 'DAY' => 0);
+    $gaps = array();
+    $date_gap = 'YEAR';
+
+    // Get the date granularity.
+    if (isset($adapter)) {
+      // Get the current date gap from the active date filters.
+      $active_items = $adapter->getActiveItems(array('name' => $facet_id));
+      if (!empty($active_items)) {
+        foreach ($active_items as $active_item) {
+          $value = $active_item['value'];
+          if (strpos($value, ' TO ') > 0) {
+            list($date_min, $date_max) = explode(' TO ', str_replace(array('[', ']'), '', $value), 2);
+            $gap = self::getDateGap($date_min, $date_max, FALSE);
+            if (isset($gap_weight[$gap])) {
+              $gaps[] = $gap_weight[$gap];
+            }
+          }
+        }
+        if (!empty($gaps)) {
+          // Minimum gap.
+          $date_gap = array_search(min($gaps), $gap_weight);
+        }
+      }
+    }
+
+    return $date_gap;
+  }
+
+  /**
+   * Helper function which parse facets in search().
+   */
+  public function parseSearchResponse($response, SearchApiQueryInterface $query) {
+
+    $search_result = array();
+
+    $search_result['result count'] = $response->getTotalHits();
+
+    // Parse results.
+    foreach ($response->getResults() as $result) {
+      $id = $result->getId();
+
+      $search_result['results'][$id] = array(
+        'id' => $id,
+        'score' => $result->getScore(),
+        'fields' => $result->getSource(),
+      );
+    }
+
+    // Parse facets.
+    $search_result['search_api_facets'] = $this->parseSearchFacets($response, $query);
+
+    return $search_result;
+  }
+
+  /**
+   *  Helper function that parse facets.
+   */
+  protected function parseSearchFacets($response, SearchApiQueryInterface $query) {
+
+    $result = array();
+    $index_fields = $this->getIndexFields($query);
+    $facets = $query->getOption('search_api_facets');
+
+    if (!empty($facets) && $response->hasFacets()) {
+      foreach ($response->getFacets() as $facet_id => $facet_data) {
+        if (isset($facets[$facet_id])) {
+          $facet_info = $facets[$facet_id];
+          $facet_min_count = $facet_info['min_count'];
+
+          $field_id = $facet_info['field'];
+          $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
+
+          // TODO: handle different types (GeoDistance and so on).
+          if ($field_type === 'date') {
+            foreach ($facet_data['entries'] as $entry) {
+              if ($entry['count'] >= $facet_min_count) {
+                // Divide time by 1000 as we want seconds from epoch
+                // not milliseconds.
+                $result[$facet_id][] = array(
+                  'count' => $entry['count'],
+                  'filter' => '"' . ($entry['time'] / 1000) . '"',
+                );
+              }
+            }
+          }
+          else {
+            foreach ($facet_data['terms'] as $term) {
+              if ($term['count'] >= $facet_min_count) {
+                $result[$facet_id][] = array(
+                  'count' => $term['count'],
+                  'filter' => '"' . $term['term'] . '"',
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * Helper function. Return the path in the correct format.
+   */
+  public function setPath($path) {
+    if (isset($path) && !empty($path)) {
+      $trimmed_path = trim($path, '/');
+      $path = $trimmed_path . '/';
+    }
+
+    return $path;
+  }
+
+  /**
+   * Helper function. Get Autocomplete suggestions.
+   *
+   * @param SearchApiQueryInterface $query
+   * @param SearchApiAutocompleteSearch $search
+   * @param string $incomplete_key
+   * @param string $user_input
+   */
+  public function getAutocompleteSuggestions(SearchApiQueryInterface $query, SearchApiAutocompleteSearch $search, $incomplete_key, $user_input) {
+    $suggestions = array();
+    // Turn inputs to lower case, otherwise we get case sensivity problems.
+    $incomp = drupal_strtolower($incomplete_key);
+
+    $index = $query->getIndex();
+    $index_fields = $this->getIndexFields($query);
+
+    $complete = $query->getOriginalKeys();
+    $query->keys($user_input);
+
+    try {
+      $response = $this->search($query);
+    }
+    catch (Exception $e) {
+      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      return array();
+    }
+
+    $matches = array();
+    if (isset($response['results'])) {
+      $items = $index->loadItems(array_keys($response['results']));
+      foreach ($items as $id => $item) {
+        $node_title = $index->datasource()->getItemLabel($item);
+        $matches[$node_title] = $node_title;
+      }
+
+      if ($matches) {
+        // Eliminate suggestions that are too short or already in the query.
+        foreach ($matches as $name => $node_title) {
+          if (drupal_strlen($name) < 3 || isset($keys_array[$name])) {
+            unset($matches[$name]);
+          }
+        }
+
+        // The $count in this array is actually a score. We want the
+        // highest ones first.
+        arsort($matches);
+
+        // Shorten the array to the right ones.
+        $additional_matches = array_slice($matches, $limit - count($suggestions), NULL, TRUE);
+        $matches = array_slice($matches, 0, $limit, TRUE);
+
+        foreach ($matches as $node => $name) {
+          $suggestions[] = $name;
+        }
+      }
+      $keys = trim($keys . ' ' . $incomplete_key);
+      return $suggestions;
+    }
+  }
+
+  /**
+   * Update settings.
+   */
+  public function updateSettings(SearchApiIndex $index, $data) {
+    try {
+      $elastica_index = $this->getElasticaIndex($index);
+      $elastica_index->getSettings()->set($data);
+    }
+    catch (Exception $e) {
+      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      drupal_set_message(check_plain($e->getMessage()), 'error');
+      return FALSE;
+    }
+  }
+
+  /**
+   * Get settings.
+   */
+  public function getSettings(SearchApiIndex $index) {
+    try {
+      $elastica_index = $this->getElasticaIndex($index);
+
+      if ($elastica_index) {
+        $settings = $elastica_index->getSettings()->get();
+        if (!empty($settings)) {
+          $settings = $this->filterSettings($settings);
+
+          return $settings;
+        }
+      }
+    }
+    catch (Exception $e) {
+      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      drupal_set_message(check_plain($e->getMessage()), 'error');
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Get settings.
+   */
+  public function filterSettings($settings) {
+    $new_settings = array();
+
+    foreach ($settings as $setting => $value) {
+      $filtered_setting = str_replace('index.', '', $setting);
+      $new_settings[$filtered_setting] = $value;
+    }
+
+    foreach ($new_settings as $new_setting => $new_settings_value) {
+      if (in_array($new_setting, array('number_of_shards', 'number_of_replicas'))) {
+        unset($new_settings[$new_setting]);
+      }
+    }
+
+    return $new_settings;
   }
 
 }

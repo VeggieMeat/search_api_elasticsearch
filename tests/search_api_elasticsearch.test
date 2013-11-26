@@ -1,0 +1,305 @@
+<?php
+
+/**
+ * @file
+ */
+
+/**
+ * Due to severe limitations for "real" unit tests, this still has to be a
+ * subclass of DrupalWebTestCase.
+ *
+ * @see DrupalUnitTestCase
+ */
+class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
+
+  protected $server;
+
+  protected $_client;
+
+  protected $index;
+
+  protected $items;
+
+  protected $field;
+
+  /**
+   * Override assertText().
+   *
+   * @see DrupalWebTestCase::assertText()
+   */
+  protected function assertText($text, $message = '', $group = 'Other') {
+    return parent::assertText($text, $message ? $message : $text, $group);
+  }
+
+  /**
+   * Override drupalGet().
+   *
+   * @see DrupalWebTestCase::drupalGet()
+   */
+  protected function drupalGet($path, array $options = array(), array $headers = array()) {
+    $ret = parent::drupalGet($path, $options, $headers);
+    $this->assertResponse(200, t('HTTP code 200 returned.'));
+    return $ret;
+  }
+
+  /**
+   * Override drupalPost().
+   * @see DrupalWebTestCase::drupalPost()
+   */
+  protected function drupalPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
+    $ret = parent::drupalPost($path, $edit, $submit, $options, $headers, $form_html_id, $extra_post);
+    $this->assertResponse(200, t('HTTP code 200 returned.'));
+    return $ret;
+  }
+
+  /**
+   * @return multitype:string
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Search API Elasticsearch unit tests',
+      'description' => 'Tests that the SearchApiElasticsearchService class methods are working properly.',
+      'group' => 'Search API Elasticsearch',
+    );
+  }
+
+  /**
+   * Override setUp().
+   *
+   * @see DrupalWebTestCase::setUp()
+   */
+  function setUp() {
+    drupal_load('module', 'search_api_elasticsearch');
+    module_load_include('inc', 'search_api_elasticsearch', 'service');
+    module_load_include('inc', 'search_api', 'includes/service');
+    $this->server = entity_create('search_api_server', array(
+      'id' => 1,
+      'name' => 'server test',
+      'machine_name' => 'server_test',
+      'class' => 'search_api_elasticsearch_service',
+      'options' => array(array('host' => '127.0.0.1', 'port' => '9200')),
+      'enabled' => 1,
+      'status' => 1,
+    ));
+
+    $this->index = entity_create('search_api_index', array(
+      'id' => 100,
+      'name' => 'test',
+      'enabled' => 1,
+      'machine_name' => 'test_index',
+      'item_type' => 'user',
+      'options' => array(
+        'fields' => array(
+          'name' => array(
+            'type' => 'text',
+          ),
+          'mail' => array(
+            'type' => 'string',
+          ),
+          'search_api_language' => array(
+            'type' => 'string',
+          ),
+        ),
+      ),
+    ));
+
+    $this->items = array(
+      array(
+        'nid' => array(
+          'type' => 'string',
+          'value' => '1',
+          'original_type' => 'integer'
+        ),
+        'title' => array(
+          'type' => 'text',
+          'value' => 'Test title',
+          'original_type' => 'text'
+        )
+      ),
+      array(
+        'nid' => array(
+          'type' => 'string',
+          'value' => '2',
+          'original_type' => 'integer'
+        ),
+        'title' => array(
+          'type' => 'text',
+          'value' => 'Test title 2',
+          'original_type' => 'text'
+        )
+      ),
+      array(
+        'nid' => array(
+          'type' => 'string',
+          'value' => '3',
+          'original_type' => 'integer'
+        ),
+        'title' => array(
+          'type' => 'text',
+          'value' => 'Test title 3',
+          'original_type' => 'text'
+        )
+      ),
+    );
+
+    $this->field = array(
+      'type' => 'string',
+      'name' => 'Node ID',
+      'description' => 'Test node id field',
+      'boost' => '1.0',
+      'indexed' => TRUE,
+    );
+
+    parent::setUp('entity', 'search_api');
+  }
+
+  /**
+   * Call different methods from the SearchApiElasticsearchService class.
+   */
+  public function testRunTestSet() {
+    $this->searchApiElasticsearchServiceConstruct($this->server);
+    $this->searchApiElasticsearchServicesupportsFeature($this->_client, array(
+      'search_api_facets',
+      'search_api_facets_operator_or',
+      'search_api_autocomplete',
+      'search_api_test_fail')
+    );
+    $this->searchApiElasticsearchServicepostUpdate($this->_client);
+    $this->searchApiElasticsearchServicefieldsUpdated($this->_client, $this->index);
+    $this->searchApiElasticsearchServicegetIndexName($this->_client, $this->index); // problem
+    $this->searchApiElasticsearchServiceindexItems($this->_client, $this->index, $this->items);
+    $this->searchApiElasticsearchServicegetElasticaIndex($this->_client, $this->index);
+    $this->searchApiElasticsearchServicegetElasticaType($this->_client, $this->index);
+    $this->searchApiElasticsearchServicegetFieldMapping($this->_client, $this->field);
+    $this->searchApiElasticsearchServicegetOptions($this->_client);
+    $this->searchApiElasticsearchServiceremoveIndex($this->_client, $this->index);
+  }
+
+  /**
+   * Test case for construct.
+   */
+  protected function searchApiElasticsearchServiceConstruct($server) {
+    $class = new SearchApiElasticsearchService($server);
+
+    if ($class !== FALSE) {
+      $this->_client = $class;
+    }
+    $this->assertTrue($class, t('The constructor returned :result.', array(':result' => drupal_strtoupper(var_export((bool)$class, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method supportsFeature().
+   *
+   * @param stdClass $client
+   * @param string $features
+   */
+  public function searchApiElasticsearchServicesupportsFeature($client, $features) {
+    foreach ($features as $feature) {
+      $result = $client->supportsFeature($feature);
+      if ($feature == 'search_api_test_fail') {
+        $this->assertFalse($result, t('The feature :feature returned :result.', array(':feature' => $feature, ':result' => drupal_strtoupper(var_export($result, TRUE)))));
+      }
+      else {
+        $this->assertTrue($result, t('The feature :feature returned :result.', array(':feature' => $feature, ':result' => drupal_strtoupper(var_export($result, TRUE)))));
+      }
+    }
+  }
+
+  /**
+   * Unit test function. Tests method postUpdate().
+   *
+   * @param stdClass $client
+   */
+  public function searchApiElasticsearchServicepostUpdate($client) {
+    $result = $client->postUpdate();
+    $this->assertFalse($result, t('Method postUpdate() returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method fieldsUpdated().
+   *
+   * @param stdClass $client
+   * @param SearchApiIndex $index
+   */
+  public function searchApiElasticsearchServicefieldsUpdated($client, SearchApiIndex $index) {
+    $result = $client->fieldsUpdated($index);
+  }
+
+  /**
+   * Unit test function. Tests method removeIndex().
+   *
+   * @param stdClass $client
+   * @param SearchApiIndex $index
+   */
+  public function searchApiElasticsearchServiceremoveIndex($client, SearchApiIndex $index) {
+    $result = $client->removeIndex($index);
+    $this->assertTrue($result, t('The removeIndex() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method indexItems().
+   *
+   * @param stdClass $client
+   * @param SearchApiIndex $index
+   * @param array $items
+   */
+  public function searchApiElasticsearchServiceindexItems($client, SearchApiIndex $index, array $items) {
+    $result = $client->indexItems($index, $items);
+    $this->assertTrue($result, t('The indexItems() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method getElasticaIndex().
+   *
+   * @param stdClass $client
+   * @param SearchApiIndex $index
+   */
+  public function searchApiElasticsearchServicegetIndexName($client, SearchApiIndex $index) {
+    $result = $client->getIndexName($index);
+    $this->assertTrue($result, t('The getIndexName() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method getElasticaIndex().
+   *
+   * @param stdClass $client
+   * @param SearchApiIndex $index
+   */
+  public function searchApiElasticsearchServicegetElasticaIndex($client, SearchApiIndex $index) {
+    $result = $client->getElasticaIndex($index);
+    $this->assertTrue($result, t('The getElasticaIndex() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method getElasticaType().
+   *
+   * @param stdClass $client
+   * @param SearchApiIndex $index
+   */
+  public function searchApiElasticsearchServicegetElasticaType($client, SearchApiIndex $index) {
+    $result = $client->getElasticaType($index);
+    $this->assertTrue($result, t('The getElasticaType() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method getFieldMapping().
+   *
+   * @param stdClass $client
+   * @param array $field
+   */
+  public function searchApiElasticsearchServicegetFieldMapping($client, $field) {
+    $result = $client->getFieldMapping($field);
+    $this->assertTrue($result, t('The getFieldMapping() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+  /**
+   * Unit test function. Tests method getOptions().
+   *
+   * @param stdClass $client
+   */
+  public function searchApiElasticsearchServicegetOptions($client) {
+    $result = $client->getOptions();
+    $this->assertTrue($result, t('The getOptions() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
+  }
+
+}
