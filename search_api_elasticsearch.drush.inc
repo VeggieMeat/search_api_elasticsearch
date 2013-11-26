@@ -29,7 +29,7 @@ function drush_download_elastica() {
 
   // Check if the library is already installed.
   try {
-    class_exists('Elastica_Client');
+    class_exists('Elastica\Client');
     drush_log(dt('Elastica library already present. No download required.'), 'ok');
   }
   catch (Exception $exception) {
@@ -56,7 +56,7 @@ function drush_download_elastica() {
       if (is_dir(_search_api_elasticsearch_elastica_path(TRUE))) {
         drush_log(dt('Elastica directory present.'), 'ok');
       }
-      if (class_exists('Elastica_Client')) {
+      if (class_exists('Elastica\Client')) {
         drush_log(dt('Elastica library has been properly installed.'), 'ok');
       }
     }

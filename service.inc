@@ -21,7 +21,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function __construct(SearchApiServer $server) {
     parent::__construct($server);
 
-    if (class_exists('Elastica_Client')) {
+    if (class_exists('Elastica\Client')) {
       $config = array();
       $count_options = array();
 
@@ -39,7 +39,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           }
 
           try {
-            $this->elasticaClient = new Elastica_Client(array('servers' => $config));
+            $this->elasticaClient = new Elastica\Client(array('servers' => $config));
           }
           catch (Exception $e) {
             watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
@@ -55,7 +55,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
             }
           }
           try {
-            $this->elasticaClient = new Elastica_Client($config);
+            $this->elasticaClient = new Elastica\Client($config);
           }
           catch (Exception $e) {
             watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
@@ -503,7 +503,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       // Create a new mapping.
       // TODO: check if we need to delete the previous mapping first.
       // TODO: shall we delete the items from the index?
-      $mapping = new Elastica_Type_Mapping();
+      $mapping = new Elastica\Type\Mapping();
       $mapping->setType($elastica_type);
       $properties = array(
         'id' => array('type' => 'integer', 'include_in_all' => FALSE),
@@ -566,7 +566,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
         $data[$field_id] = $field_data['value'];
       }
 
-      $documents[] = new Elastica_Document($id, $data);
+      $documents[] = new Elastica\Document($id, $data);
     }
     try {
       $elastica_type->addDocuments($documents);
@@ -694,11 +694,11 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     if (!isset($filter_assoc['filter_value'])) {
       switch ($filter_assoc['filter_operator']) {
         case '<>':
-          $filter = new Elastica_Filter_Exists($field_id);
+          $filter = new Elastica\Filter\Exists($field_id);
           break;
 
         case '=':
-          $filter = new Elastica_Filter_Not(new Elastica_Filter_Exists($filter_assoc['field_id']));
+          $filter = new Elastica\Filter\BoolNot(new Elastica\Filter\Exists($filter_assoc['field_id']));
           break;
 
         default:
@@ -709,15 +709,15 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     else {
       switch ($filter_assoc['filter_operator']) {
         case '=':
-          $filter = new Elastica_Filter_Term(array($filter_assoc['field_id'] => $filter_assoc['filter_value']));
+          $filter = new Elastica\Filter\Term(array($filter_assoc['field_id'] => $filter_assoc['filter_value']));
           break;
 
         case '<>':
-          $filter = new Elastica_Filter_Not(new Elastica_Filter_Term(array($filter_assoc['field_id'] => $filter_assoc['filter_value'])));
+          $filter = new Elastica\Filter\BoolNot(new Elastica\Filter\Term(array($filter_assoc['field_id'] => $filter_assoc['filter_value'])));
           break;
 
         case '>':
-          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+          $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
                 'from' => $filter_assoc['filter_value'],
                 'to' => NULL,
                 'include_lower' => FALSE,
@@ -726,7 +726,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           break;
 
         case '>=':
-          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+          $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
                 'from' => $filter_assoc['filter_value'],
                 'to' => NULL,
                 'include_lower' => TRUE,
@@ -735,7 +735,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           break;
 
         case '<':
-          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+          $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
                 'from' => NULL,
                 'to' => $filter_assoc['filter_value'],
                 'include_lower' => FALSE,
@@ -744,7 +744,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           break;
 
         case '<=':
-          $filter = new Elastica_Filter_Range($filter_assoc['field_id'], array(
+          $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
                 'from' => NULL,
                 'to' => $filter_assoc['filter_value'],
                 'include_lower' => FALSE,
@@ -781,12 +781,12 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
     if (count($filters) > 1) {
       if ($conjunction === 'OR') {
-        $filter = new Elastica_Filter_Or();
+        $filter = new Elastica\Filter\BoolOr();
         $filter->setFilters($filters);
         $filters = array($filter);
       }
       elseif ($conjunction === 'AND') {
-        $filter = new Elastica_Filter_And();
+        $filter = new Elastica\Filter\BoolAnd();
         $filter->setFilters($filters);
         $filters = array($filter);
       }
@@ -1023,13 +1023,13 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     $query_options = $this->getSearchQueryOptions($query);
 
     // Main query.
-    $elastica_query = new Elastica_Query();
+    $elastica_query = new Elastica\Query();
     $elastica_query->setFrom($query_options['query_offset']);
     $elastica_query->setSize($query_options['query_limit']);
 
     // Build the query.
     if (!empty($query_options['query_search_string']) && !empty($query_options['query_search_filter'])) {
-      $elastica_query->setQuery(new Elastica_Query_Filtered($query_options['query_search_string'], $query_options['query_search_filter']));
+      $elastica_query->setQuery(new Elastica\Query\Filtered($query_options['query_search_string'], $query_options['query_search_filter']));
     }
     elseif (!empty($query_options['query_search_string'])) {
       $elastica_query->setQuery($query_options['query_search_string']);
@@ -1081,7 +1081,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       $search_string = $this->flattenKeys($keys, $query_options['parse mode']);
 
       if (!empty($search_string)) {
-        $query_search_string = new Elastica_Query_QueryString($search_string);
+        $query_search_string = new Elastica\Query\QueryString($search_string);
       }
     }
 
@@ -1135,7 +1135,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   /**
    * Helper function build facets in search.
    */
-  protected function addSearchFacets(Elastica_Query $elastica_query, SearchApiQueryInterface $query) {
+  protected function addSearchFacets(Elastica\Query $elastica_query, SearchApiQueryInterface $query) {
 
     // SEARCH API FACETS.
     $facets = $query->getOption('search_api_facets');
@@ -1161,7 +1161,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           $facet = $this->createDateFieldFacet($facet_id);
         }
         else {
-          $facet = new Elastica_Facet_Terms($facet_id);
+          $facet = new Elastica\Facet\Terms($facet_id);
           // We may want missing facets.
           $facet->setAllTerms($facet_missing);
         }
@@ -1179,7 +1179,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   /**
    * Helper function that add options and return facet
    */
-  protected function addFacetOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica_Query $elastica_query) {
+  protected function addFacetOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica\Query $elastica_query) {
 
     $facet_limit = $this->getFacetLimit($facet_info);
     $facet_search_filter = $this->getFacetSearchFilter($query, $facet_info);
@@ -1234,7 +1234,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
     $date_interval = $this->getDateFacetInterval($facet_id);
 
-    $facet = new Elastica_Facet_DateHistogram($facet_id);
+    $facet = new Elastica\Facet\DateHistogram($facet_id);
 
     $facet->setInterval($date_interval);
 

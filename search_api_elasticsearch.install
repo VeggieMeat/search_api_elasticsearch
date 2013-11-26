@@ -17,7 +17,7 @@ function search_api_elasticsearch_requirements($phase) {
     $t = get_t();
     module_load_include('module', 'search_api_elasticsearch');
     spl_autoload_register('_search_api_elasticsearch_autoload');
-    if (class_exists('Elastica_Client')) {
+    if (class_exists('Elastica\Client')) {
       return array(
         'search_api_elasticsearch' => array(
           'title' => $t('Elastica PHP library'),

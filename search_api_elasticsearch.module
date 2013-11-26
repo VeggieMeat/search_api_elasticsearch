@@ -90,7 +90,7 @@ function _search_api_elasticsearch_autoload($name) {
   }
   elseif (drupal_substr($name, 0, 8) == 'Elastica') {
     $path = _search_api_elasticsearch_elastica_path();
-    if (file_exists($file_path = $path . '/' . str_replace('_', '/', $name) . '.php')) {
+    if (file_exists($file_path = $path . '/' . str_replace('\\', '/', $name) . '.php')) {
       require_once $file_path;
       $lookup_cache[$name] = TRUE;
       return TRUE;
