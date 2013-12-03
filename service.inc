@@ -1040,7 +1040,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
     // Sort
     if (!empty($query_options['sort'])) {
-      $elastica_query->setSort($sort);
+      $elastica_query->setSort($query_options['sort']);
     }
 
     return $elastica_query;
