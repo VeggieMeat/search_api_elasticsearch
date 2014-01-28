@@ -505,6 +505,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       // TODO: shall we delete the items from the index?
       $mapping = new Elastica\Type\Mapping();
       $mapping->setType($elastica_type);
+      $mapping->setParam('_all', array('enabled' => FALSE));
       $properties = array(
         'id' => array('type' => 'integer', 'include_in_all' => FALSE),
       );
@@ -1082,6 +1083,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
       if (!empty($search_string)) {
         $query_search_string = new Elastica\Query\QueryString($search_string);
+        $query_search_string->setFields($query_full_text_fields);
       }
     }
 
