@@ -29,7 +29,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
       if (isset($options) && !empty($options)) {
         $count_options = $options;
-        if (module_exists('search_api_facetapi')) {
+        if (!module_exists('search_api_facetapi')) {
           unset($count_options['facet_limit']);
         }
 
