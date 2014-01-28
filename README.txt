@@ -24,16 +24,9 @@ Install Notes
 Notes
 -----
 
-- Currently Only one host and port are supported (no cluster).
-  It will be changed soon to be in the server options.
-
-- Currently no options to set up the number of shards and
-  replicas for the indices. To be changed.
+Elasticsearch handles much of what the Search API preprocessors handle, so in
+most cases you should leave Search API preprocessors disabled.
 
 TODO
 ----
-
-- Error handling.
-- Server and index options.
-- Improve facet handling.
 - Add additional search API features support.
