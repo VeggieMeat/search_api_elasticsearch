@@ -564,7 +564,17 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     foreach ($items as $id => $fields) {
       $data = array('id' => $id);
       foreach ($fields as $field_id => $field_data) {
-        $data[$field_id] = $field_data['value'];
+        if (is_array($field_data['value'])) {
+          $data[$field_id] = array();
+          foreach ($field_data['value'] as $token) {
+            if (isset($token['value'])) {
+              $data[$field_id][] = $token['value'];
+            }
+          }
+        }
+        else {
+          $data[$field_id] = $field_data['value'];
+        }
       }
 
       $documents[] = new Elastica\Document($id, $data);
