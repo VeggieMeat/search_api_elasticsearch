@@ -31,7 +31,7 @@ function search_api_elasticsearch_requirements($phase) {
         'search_api_elasticsearch' => array(
           'title' => $t('Elastica PHP library'),
           'description' => $t('The library was not correctly installed. Please see INSTALL.txt for instructions.'),
-          'severity' => REQUIREMENT_ERROR,
+          'severity' => REQUIREMENT_WARNING,
         ),
       );
     }

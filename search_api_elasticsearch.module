@@ -72,10 +72,6 @@ function _search_api_elasticsearch_elastica_path($reset = FALSE) {
     }
   }
 
-  if ($path === FALSE) {
-    throw new Exception('Elastica library not found! Please follow the instructions in search_api_elasticsearch/INSTALL.txt for installing the library.');
-  }
-
   return $path;
 }
 
