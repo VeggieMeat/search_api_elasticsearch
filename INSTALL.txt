@@ -2,7 +2,7 @@ Prerequisite
 ------------
 
 - Java 6 or higher
-- Elasticsearch 0.19.8 or higher
+- Elasticsearch 0.90.4 or higher
 
 
 Steps
