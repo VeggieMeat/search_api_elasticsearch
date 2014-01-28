@@ -1,0 +1,16 @@
+{
+  "name":"drupal/search_api_elasticsearch",
+  "type":"drupal-module",
+  "description":"Provides an Elasticsearch backend for the Search API module.",
+  "license":"GPL-2.0+",
+  "authors": [
+    {
+      "name":"Brian Altenhofel",
+      "email":"brian.altenhofel@vmdoh.com",
+      "homepage":"http://www.vmdoh.com"
+    }
+  ],
+  "require": {
+    "ruflin/Elastica": "v0.90.7.0"
+  }
+}
