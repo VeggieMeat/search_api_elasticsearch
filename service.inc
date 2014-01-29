@@ -1093,7 +1093,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
       if (!empty($search_string)) {
         $query_search_string = new Elastica\Query\QueryString($search_string);
-        $query_search_string->setFields($query_full_text_fields);
+        $query_search_string->setFields(array_values($query_full_text_fields));
       }
     }
 
