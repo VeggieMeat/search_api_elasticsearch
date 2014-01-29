@@ -642,11 +642,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     $response = $elastica_type->search($elastica_query);
 
     // Parse response.
-    if (!empty($response)) {
-      $search_result = $this->parseSearchResponse($response, $query);
-    }
-
-    return $search_result;
+    return $this->parseSearchResponse($response, $query);
   }
 
   /**
@@ -1349,7 +1345,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    */
   public function parseSearchResponse($response, SearchApiQueryInterface $query) {
 
-    $search_result = array();
+    $search_result = array('results' => array());
 
     $search_result['result count'] = $response->getTotalHits();
 
