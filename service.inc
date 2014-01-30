@@ -346,8 +346,8 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     $supported = drupal_map_assoc(array(
           'search_api_facets',
           'search_api_facets_operator_or',
-           'search_api_autocomplete',
-            //'search_api_mlt',
+          'search_api_autocomplete',
+          'search_api_mlt',
         ));
     return isset($supported[$feature]);
   }
@@ -1034,6 +1034,20 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     $elastica_query->setFrom($query_options['query_offset']);
     $elastica_query->setSize($query_options['query_limit']);
 
+    // More Like This
+    if (!empty($query_options['mlt'])) {
+      $mlt_query = new Elastica\Query\MoreLikeThis();
+      $mlt_query->setLikeText($query_options['mlt']['id']);
+      $mlt_query->setFields(array_values($query_options['mlt']['fields']));
+      // @TODO Expose the below settings.
+      $mlt_query->setMaxQueryTerms(1);
+      $mlt_query->setMinDocFrequency(1);
+      $mlt_query->setMinTermFrequency(1);
+
+      $elastica_query->setFields(array_values($query_options['mlt']['fields']));
+      $elastica_query->setQuery($mlt_query);
+    }
+
     // Build the query.
     if (!empty($query_options['query_search_string']) && !empty($query_options['query_search_filter'])) {
       $elastica_query->setQuery(new Elastica\Query\Filtered($query_options['query_search_string'], $query_options['query_search_filter']));
@@ -1112,12 +1126,19 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       $query_search_filter = $parsed_query_filters[0];
     }
 
+    // More Like This
+    $mlt = array();
+    if (isset($query_options['search_api_mlt'])) {
+      $mlt = $query_options['search_api_mlt'];
+    }
+
     return array(
       'query_offset' => $query_offset,
       'query_limit' => $query_limit,
       'query_search_string' => $query_search_string,
       'query_search_filter' => $query_search_filter,
       'sort' => $sort,
+      'mlt' => $mlt,
     );
   }
 
