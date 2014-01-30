@@ -9,6 +9,20 @@
  */
 
 /**
+ * The current version of Elastica.
+ *
+ * @var string
+ */
+const SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION = '0.90.7.0';
+
+/**
+ * The URL of the Elastica Github Tarball.
+ *
+ * @var string
+ */
+define('SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL','https://github.com/ruflin/Elastica/archive/v' . SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION . '.tar.gz');
+
+/**
  * Implements hook_drush_command().
  */
 function search_api_elasticsearch_drush_command() {
@@ -28,41 +42,78 @@ function drush_download_elastica() {
   spl_autoload_register('_search_api_elasticsearch_autoload');
 
   // Check if the library is already installed.
-  try {
-    class_exists('Elastica\Client');
+  if (class_exists('Elastica\Client')) {
     drush_log(dt('Elastica library already present. No download required.'), 'ok');
+    return;
   }
-  catch (Exception $exception) {
-    $path = DRUPAL_ROOT . '/sites/all/libraries';
 
-    // Create the libraries path if it does not exist.
-    if (!is_dir($path)) {
-      drush_op('mkdir', $path);
+  if (!drush_shell_exec('type tar')) {
+    return drush_set_error(dt('Missing dependency: tar. Install it before using this command.'));
+  }
 
-      if (is_dir($path)) {
-        drush_log(dt('Libraries directory @path was created', array('@path' => $path)), 'notice');
-      }
-      else {
-        drush_log(dt('Drush was unable to create the libraries directory @path.', array('@path' => $path)), 'error');
-        return;
-      }
-    }
-
-    // Clone the Elastica library.
-    if (drush_shell_cd_and_exec($path, 'git clone https://github.com/ruflin/Elastica.git')) {
-      drush_log(dt('Elastica has been cloned via git to @path.', array('@path' => $path)), 'success');
-
-      // Verify installation.
-      if (is_dir(_search_api_elasticsearch_elastica_path(TRUE))) {
-        drush_log(dt('Elastica directory present.'), 'ok');
-      }
-      if (class_exists('Elastica\Client')) {
-        drush_log(dt('Elastica library has been properly installed.'), 'ok');
-      }
+  $args = func_get_args();
+  if (isset($args[0])) {
+    $path = $args[0];
+  }
+  else {
+    $path = drush_get_context('DRUSH_DRUPAL_ROOT');
+    // If the library exists, get its directory.
+    if (module_exists('libraries') && $library_path = dirname(libraries_get_path('Elastica'))) {
+      $path .= '/' . $library_path;
     }
     else {
-      drush_log(dt('Drush was unable to clone Elastica to @path.', array('@path' => $path)), 'error');
+      $path .= '/sites/all/libraries';
     }
+  }
+
+  // Create the path if it does not exist.
+  if (!is_dir($path)) {
+    drush_op('mkdir -p ', $path);
+    drush_log(dt('Directory @path was created', array('@path' => $path)), 'notice');
+  }
+
+  // Keep the old directory for later.
+  $olddir = getcwd();
+  // Set the directory to the download location.
+  chdir($path);
+
+  // Download the tar.
+  _search_api_elasticsearch_fetch_tar(SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL);
+
+  // Set working directory back to the previous working directory.
+  chdir($olddir);
+
+  if (is_dir($path . '/Elastica')) {
+    drush_log(dt('Elastica has been downloaded to @path', array('@path' => $path)), 'success');
+  }
+  else {
+    drush_log(dt('Drush was unable to download Elastica to @path', array('@path' => $path)), 'error');
+  }
+}
+
+/**
+ * Downloads and extracts a tarball.
+ */
+function _search_api_elasticsearch_fetch_tar($url) {
+  $filename = basename($url);
+
+  // Remove any existing files.
+  if (is_file($filename)) {
+    drush_op('unlink', $filename);
+  }
+
+  if (!drush_shell_exec('wget ' . $url)) {
+    drush_shell_exec('curl -O ' . $url);
+  }
+
+  if (is_file($filename)) {
+    print $filename;
+    // Extract the archive.
+    drush_shell_exec('tar xf '. $filename);
+    // Remove the file.
+    drush_op('unlink', $filename);
+    // Move the directory.
+    drush_shell_exec('mv Elastica-' . SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION . ' Elastica');
   }
 }
 
