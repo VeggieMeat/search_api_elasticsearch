@@ -1090,6 +1090,10 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       if (!empty($search_string)) {
         $query_search_string = new Elastica\Query\QueryString($search_string);
         $query_search_string->setFields(array_values($query_full_text_fields));
+        // This is just a stopgap until we can determine the right(TM) way to
+        // expose the ability to choose analyzers. Snowball is a decent
+        // default.
+        $query_search_string->setParam('analyzer', 'snowball');
       }
     }
 
