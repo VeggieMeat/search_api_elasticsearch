@@ -627,6 +627,9 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     // Get index type
     $elastica_type = $this->getElasticaType($index);
 
+    // Get query options
+    $query_options = $this->getSearchQueryOptions($query);
+
     // Check elasticsearch index.
     if (empty($elastica_type)) {
       return $search_result;
@@ -638,8 +641,16 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     // Add facets.
     $this->addSearchFacets($elastica_query, $query);
 
-    // Perform search.
-    $response = $elastica_type->search($elastica_query);
+    // More Like This
+    if (!empty($query_options['mlt'])) {
+      $mlt_document = $elastica_type->getDocument($query_options['mlt']['id']);
+      // @TODO Expose min_term_freq and min_doc_freq
+      $response = $elastica_type->moreLikeThis($mlt_document, array('min_term_freq' => '1', 'min_doc_freq' => '1'), $elastica_query);
+    }
+    else {
+      // Perform search.
+      $response = $elastica_type->search($elastica_query);
+    }
 
     // Parse response.
     return $this->parseSearchResponse($response, $query);
@@ -1033,20 +1044,6 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     $elastica_query = new Elastica\Query();
     $elastica_query->setFrom($query_options['query_offset']);
     $elastica_query->setSize($query_options['query_limit']);
-
-    // More Like This
-    if (!empty($query_options['mlt'])) {
-      $mlt_query = new Elastica\Query\MoreLikeThis();
-      $mlt_query->setLikeText($query_options['mlt']['id']);
-      $mlt_query->setFields(array_values($query_options['mlt']['fields']));
-      // @TODO Expose the below settings.
-      $mlt_query->setMaxQueryTerms(1);
-      $mlt_query->setMinDocFrequency(1);
-      $mlt_query->setMinTermFrequency(1);
-
-      $elastica_query->setFields(array_values($query_options['mlt']['fields']));
-      $elastica_query->setQuery($mlt_query);
-    }
 
     // Build the query.
     if (!empty($query_options['query_search_string']) && !empty($query_options['query_search_filter'])) {
