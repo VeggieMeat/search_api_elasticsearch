@@ -42,7 +42,7 @@ function search_api_elasticsearch_loaded() {
       $loaded = class_exists('\Elastica\Client');
     }
     if (!class_exists('\Elastica\Client')) {
-      _search_api_elasticsearch_autoload();
+      spl_autoload_register('_search_api_elasticsearch_autoload');
       $loaded = class_exists('\Elastica\Client');
     }
   }
