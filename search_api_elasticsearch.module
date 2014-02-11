@@ -28,12 +28,26 @@ function search_api_elasticsearch_search_api_service_info() {
 }
 
 /**
- * Implements hook_init().
+ * Check if the Elastica library is loaded.
  *
- * Register the autoload function for the Elastica classes.
+ * @return bool
+ *   Returns TRUE if loaded.
  */
-function search_api_elasticsearch_init() {
-  spl_autoload_register('_search_api_elasticsearch_autoload');
+function search_api_elasticsearch_loaded() {
+  $loaded = &drupal_static(__FUNCTION__);
+
+  if (!isset($loaded)) {
+    if (!class_exists('\Elastica\Client') && module_exists('composer_manager')) {
+      composer_manager_register_autoloader();
+      $loaded = class_exists('\Elastica\Client');
+    }
+    if (!class_exists('\Elastica\Client')) {
+      _search_api_elasticsearch_autoload();
+      $loaded = class_exists('\Elastica\Client');
+    }
+  }
+
+  return $loaded;
 }
 
 /**
