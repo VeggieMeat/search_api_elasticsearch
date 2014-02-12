@@ -12,7 +12,7 @@ Steps
 - Set up elasticsearch
 
 
-Install Elastica library
+Install Elastica library (with Libraries API)
 ------------------------
 
 Elastica is an external php library used to communicate with elasticsearch
@@ -46,6 +46,27 @@ drush will attempt to download Elastica for you if not already present.
 If you uninstall search_api_elasticsearch, you will have to remove the
 Elastica library manually.
 
+Install Elastica library (with Composer Manager)
+------------------------------------------------
+
+Search API Elasticsearch supports Composer Manager. To use this module with
+Composer Manager, you will first need to download and install Composer Manager.
+
+After installing Composer Manager, you will need to rebuild your dependencies
+at the following path:
+
+  admin/config/system/composer-manager
+
+If you already have Composer installed, you can then go to sites/default/files/composer
+and run the following command:
+
+  composer install
+
+If you don't already have Composer installed, you will need to install it first.
+The easiest way is to run the following:
+
+  curl -sS https://getcomposer.org/installer | php
+  php composer.phar install
 
 Set up elasticsearch
 --------------------
