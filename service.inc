@@ -652,6 +652,13 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       $response = $elastica_type->search($elastica_query);
     }
 
+    // Show ElasticSearch query string from Elastica
+    // as json output when views debug output is enabled.
+    if (function_exists('vpr') &&
+        $elastica_param_query = $elastica_query->getParam('query')) {
+      vpr(drupal_json_encode($elastica_param_query));
+    }
+
     // Parse response.
     return $this->parseSearchResponse($response, $query);
   }
