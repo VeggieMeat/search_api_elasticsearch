@@ -30,7 +30,7 @@ any other valid path reachable by the Drupal libraries module.
 
 > git clone git://github.com/ruflin/Elastica.git
 
-[1] https://github.com/ruflin/Elastica
+[1] https://github.com/ruflin/Elastica/archive/v1.0.0.0.tar.gz
 
 
 Alternatively, you can use drush to download Elastica in "sites/all/libraries".

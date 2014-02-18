@@ -6,7 +6,7 @@ Requirements
 
 - Drupal 7
 - Search API module (http://drupal.org/project/search_api)
-- Elasticsearch 0.90.4+ (http://www.elasticsearch.org)
+- Elasticsearch 1.0.0.0+ (http://www.elasticsearch.org)
 - Elastica (elasticsearch PHP Client) (https://github.com/ruflin/Elastica)
 
 
@@ -15,6 +15,7 @@ Supported features
 
 - Search API facets
 - Search API facets OR
+- More Like This
 
 Install Notes
 -------------
