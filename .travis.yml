@@ -1,0 +1,26 @@
+language: php
+
+php:
+  - 5.3
+  - 5.4
+  - 5.5
+
+matrix:
+  allow-failures:
+    - php: 5.5
+
+env:
+  global:
+    - ES_VER=1.0.1
+    - ES_MAPPER_ATTACHMENTS_VER=2.0.0.RC1
+    - ES_TRANSPORT_THRIFT_VER=2.0.0.RC1
+    - ES_GEOCLUSTER_FACET_VER=0.0.10
+    - ES_WAIT_ON_MAPPING_CHANGE=true
+  matrix:
+    - ES_REQUIRE=dev
+    - ES_REQUIRE=no-dev
+
+before_script:
+  - composer self-update
+  - composer --${ES_REQUIRE} --prefer-source install
+  - ./test/bin/run_elasticsearch.sh
