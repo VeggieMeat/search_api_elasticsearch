@@ -1,6 +1,5 @@
 name = Search API elasticsearch
 description = "Offers an implementation of the Search API that uses elasticsearch as backend."
-dependencies[] = libraries
 dependencies[] = search_api
 core = 7.x
 package = Search
