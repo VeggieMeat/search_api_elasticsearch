@@ -47,47 +47,52 @@ function drush_download_elastica() {
     return;
   }
 
-  if (!drush_shell_exec('type tar')) {
-    return drush_set_error(dt('Missing dependency: tar. Install it before using this command.'));
-  }
-
-  $args = func_get_args();
-  if (isset($args[0])) {
-    $path = $args[0];
+  if (module_exists('composer_manager')) {
+    drush_shell_exec('drush composer-manager install');
   }
   else {
-    $path = drush_get_context('DRUSH_DRUPAL_ROOT');
-    // If the library exists, get its directory.
-    if (module_exists('libraries') && $library_path = dirname(libraries_get_path('Elastica'))) {
-      $path .= '/' . $library_path;
+    if (!drush_shell_exec('type tar')) {
+      return drush_set_error(dt('Missing dependency: tar. Install it before using this command.'));
+    }
+
+    $args = func_get_args();
+    if (isset($args[0])) {
+      $path = $args[0];
     }
     else {
-      $path .= '/sites/all/libraries';
+      $path = drush_get_context('DRUSH_DRUPAL_ROOT');
+      // If the library exists, get its directory.
+      if (module_exists('libraries') && $library_path = dirname(libraries_get_path('Elastica'))) {
+        $path .= '/' . $library_path;
+      }
+      else {
+        $path .= '/sites/all/libraries';
+      }
     }
-  }
 
-  // Create the path if it does not exist.
-  if (!is_dir($path)) {
-    drush_op('mkdir -p ', $path);
-    drush_log(dt('Directory @path was created', array('@path' => $path)), 'notice');
-  }
+    // Create the path if it does not exist.
+    if (!is_dir($path)) {
+      drush_shell_exec('mkdir -p ', $path);
+      drush_log(dt('Directory @path was created', array('@path' => $path)), 'notice');
+    }
 
-  // Keep the old directory for later.
-  $olddir = getcwd();
-  // Set the directory to the download location.
-  chdir($path);
+    // Keep the old directory for later.
+    $olddir = getcwd();
+    // Set the directory to the download location.
+    chdir($path);
 
-  // Download the tar.
-  _search_api_elasticsearch_fetch_tar(SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL);
+    // Download the tar.
+    _search_api_elasticsearch_fetch_tar(SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL);
 
-  // Set working directory back to the previous working directory.
-  chdir($olddir);
+    // Set working directory back to the previous working directory.
+    chdir($olddir);
 
-  if (is_dir($path . '/Elastica')) {
-    drush_log(dt('Elastica has been downloaded to @path', array('@path' => $path)), 'success');
-  }
-  else {
-    drush_log(dt('Drush was unable to download Elastica to @path', array('@path' => $path)), 'error');
+    if (is_dir($path . '/Elastica')) {
+      drush_log(dt('Elastica has been downloaded to @path', array('@path' => $path)), 'success');
+    }
+    else {
+      drush_log(dt('Drush was unable to download Elastica to @path', array('@path' => $path)), 'error');
+    }
   }
 }
 
