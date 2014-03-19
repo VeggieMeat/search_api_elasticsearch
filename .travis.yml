@@ -16,11 +16,30 @@ env:
     - ES_TRANSPORT_THRIFT_VER=2.0.0.RC1
     - ES_GEOCLUSTER_FACET_VER=0.0.10
     - ES_WAIT_ON_MAPPING_CHANGE=true
+    - DATABASE='drupal'
+    - DB_USERNAME='root'
+    - DB_ENCODE='utf8'
   matrix:
     - ES_REQUIRE=dev
     - ES_REQUIRE=no-dev
 
-before_script:
+mysql:
+  database: $DATABASE
+  username: $DB_USERNAME
+  encoding: $DB_ENCODE
+
+before_install:
   - composer self-update
-  - composer --${ES_REQUIRE} --prefer-source install
+  - pear channel-discover pear.drush.org
+
+install:
+  - pear install drush/drush
+  - phpenv rehash
   - ./tests/bin/run_elasticsearch.sh
+
+before_script:
+  - drush --yes make tests/includes/search_api_elasticsearch.make build
+  - drush --yes site-install minimal --db-url="mysql:$DB_USERNAME@127.0.0.1/$DATABASE"
+  - drush --yes dis search
+  - drush --yes en composer_manager
+  - drush --yes en search_api_elasticsearch
