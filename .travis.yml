@@ -20,9 +20,10 @@ env:
     - DB_USERNAME='root'
     - DB_ENCODE='utf8'
     - MODULE_PATH='build/sites/all/modules'
+    - ES_REQUIRE='no-dev'
   matrix:
-    - ES_REQUIRE=dev
-    - ES_REQUIRE=no-dev
+    - DRUPAL_3RD_PARTY='composer_manager'
+    - DRUPAL_3RD_PARTY='libraries'
 
 mysql:
   database: $DATABASE
@@ -45,5 +46,5 @@ before_script:
   - cd build
   - drush --yes site-install minimal --db-url="mysql://$DB_USERNAME@127.0.0.1/$DATABASE"
   - drush --yes dis search
-  - drush --yes en composer_manager
+  - drush --yes en $DRUPAL_3RD_PARTY
   - drush --yes en search_api_elasticsearch
