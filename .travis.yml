@@ -23,4 +23,4 @@ env:
 before_script:
   - composer self-update
   - composer --${ES_REQUIRE} --prefer-source install
-  - ./test/bin/run_elasticsearch.sh
+  - ./tests/bin/run_elasticsearch.sh
