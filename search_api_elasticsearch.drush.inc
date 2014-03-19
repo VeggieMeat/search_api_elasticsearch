@@ -72,7 +72,7 @@ function drush_download_elastica() {
 
     // Create the path if it does not exist.
     if (!is_dir($path)) {
-      drush_shell_exec('mkdir -p ', $path);
+      drush_op('mkdir', $path);
       drush_log(dt('Directory @path was created', array('@path' => $path)), 'notice');
     }
 
