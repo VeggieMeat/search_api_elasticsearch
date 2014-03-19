@@ -19,6 +19,7 @@ env:
     - DATABASE='drupal'
     - DB_USERNAME='root'
     - DB_ENCODE='utf8'
+    - MODULE_PATH='build/sites/all/modules'
   matrix:
     - ES_REQUIRE=dev
     - ES_REQUIRE=no-dev
@@ -39,6 +40,8 @@ install:
 
 before_script:
   - drush --yes make tests/includes/search_api_elasticsearch.make build
+  - mkdir -p $MODULE_PATH
+  - git archive $(git rev-parse --abbrev-ref HEAD) | tar -x -C $MODULE_PATH
   - cd build
   - drush --yes site-install minimal --db-url="mysql://$DB_USERNAME@127.0.0.1/$DATABASE"
   - drush --yes dis search
