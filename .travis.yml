@@ -39,6 +39,7 @@ install:
 
 before_script:
   - drush --yes make tests/includes/search_api_elasticsearch.make build
+  - cd build
   - drush --yes site-install minimal --db-url="mysql://$DB_USERNAME@127.0.0.1/$DATABASE"
   - drush --yes dis search
   - drush --yes en composer_manager
