@@ -50,4 +50,4 @@ do
     echo "Server #$i is up"
 done
 
-echo "three elasticsearch nodes are up"
+echo "three elasticsearch nodes should be up"
