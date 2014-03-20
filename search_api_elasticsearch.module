@@ -39,12 +39,12 @@ function search_api_elasticsearch_loaded() {
   if (!isset($loaded)) {
     if (!class_exists('\Elastica\Client') && module_exists('composer_manager')) {
       composer_manager_register_autoloader();
-      $loaded = class_exists('\Elastica\Client');
     }
-    if (!class_exists('\Elastica\Client')) {
+    elseif (!class_exists('\Elastica\Client')) {
       spl_autoload_register('_search_api_elasticsearch_autoload');
-      $loaded = class_exists('\Elastica\Client');
     }
+
+    $loaded = class_exists('\Elastica\Client');
   }
 
   return $loaded;
