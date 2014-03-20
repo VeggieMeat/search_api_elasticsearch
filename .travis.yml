@@ -49,4 +49,6 @@ before_script:
   - drush --yes en $DRUPAL_3RD_PARTY
   - drush --yes en search_api_elasticsearch
   - drush --yes en simpletest
+
+script:
   - drush --yes test-run SearchApiElasticsearchUnitTest
