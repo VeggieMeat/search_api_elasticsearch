@@ -51,4 +51,4 @@ before_script:
   - drush --yes en simpletest
 
 script:
-  - php scripts/run-tests.sh --color 'Search API Elasticsearch'
+  - $(which php) scripts/run-tests.sh --color 'Search API Elasticsearch'
