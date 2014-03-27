@@ -314,7 +314,7 @@ class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
   /**
    * Implements getInfo().
    */
-  public function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Search API Elasticsearch Administration'),
       'description' => t('Test administration forms for Search API Elasticsearch.'),
