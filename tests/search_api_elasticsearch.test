@@ -2,6 +2,8 @@
 
 /**
  * @file
+ *
+ * Contains basic functionality tests for Search API Elasticsearch/
  */
 
 /**
@@ -302,4 +304,53 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
     $this->assertTrue($result, t('The getOptions() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
 
+}
+
+/**
+ * Test administration interface for Search API Elasticsearch.
+ */
+class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  public function getInfo() {
+    return array(
+      'name' => t('Search API Elasticsearch Administration'),
+      'description' => t('Test administration forms for Search API Elasticsearch.'),
+      'group' => t('Search API Elasticsearch'),
+    );
+  }
+
+  /**
+   * Implements setUp().
+   */
+  public function setUp() {
+    $this->privileged_user = $this->drupalCreateUser(array('administer search api'));
+    $this->unprivileged_user = $this->drupalCreateUser();
+    parent::setUp('search_api_elasticsearch');
+  }
+
+  /**
+   * Test creation of an Elasticsearch server cluster in Search API.
+   */
+  public function testCreateElasticsearchCluster {
+    $this->drupalLogin($this->privileged_user);
+    $this->drupalGet('admin/config/search/search_api/add_server');
+
+    $values = array();
+    $values['name'] = 'Test Elasticsearch Cluster';
+    $values['class'] = 'search_api_elasticsearch_service';
+    for ($i = 0; $i < 3; $i++) {
+      $values[$i]["options[form][{$i}][host]"] = "127.0.0.{$i}";
+      $values[$i]["options[form][{$i}][port]"] = 9200;
+      $values[$i]["options[form][{$i}][path]"] = '';
+      $values[$i]["options[form][{$i}][url]"] = '';
+      $values[$i]["options[form][{$i}][transport]"] = 'Http';
+      $values[$i]["options[form][{$i}][persistent]"] = 0;
+      $values[$i]["options[form][{$i}][timeout]"] = 300;
+      $values[$i]["options[form][{$i}][retryOnConflict]"] = 0;
+    }
+    $this->drupalPost('admin/config/search/search_api/add_server', $values, t('Create server'));
+  }
 }
