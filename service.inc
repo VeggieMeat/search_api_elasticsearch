@@ -564,7 +564,6 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
     foreach ($items as $id => $fields) {
       $data = array('id' => $id);
       foreach ($fields as $field_id => $field_data) {
-        dpm($field_data);
         if (isset($field_data['value']) && is_array($field_data['value'])) {
           $data[$field_id] = array();
           foreach ($field_data['value'] as $token) {
