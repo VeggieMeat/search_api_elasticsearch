@@ -334,7 +334,7 @@ class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
   /**
    * Test creation of an Elasticsearch server cluster in Search API.
    */
-  public function testCreateElasticsearchCluster {
+  public function testCreateElasticsearchCluster() {
     $this->drupalLogin($this->privileged_user);
     $this->drupalGet('admin/config/search/search_api/add_server');
 
