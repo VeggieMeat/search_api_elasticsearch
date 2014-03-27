@@ -1,0 +1,7 @@
+<phpunit>
+    <testsuites>
+        <testsuite name="Search API Elasticsearch">
+            <directory>tests/phpunit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
