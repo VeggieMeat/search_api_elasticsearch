@@ -326,7 +326,7 @@ class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
    * Implements setUp().
    */
   public function setUp() {
-    $this->privileged_user = $this->drupalCreateUser(array('administer search api'));
+    $this->privileged_user = $this->drupalCreateUser(array('administer search_api'));
     $this->unprivileged_user = $this->drupalCreateUser();
     parent::setUp('search_api_elasticsearch');
   }
