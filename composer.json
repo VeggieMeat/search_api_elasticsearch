@@ -9,8 +9,5 @@
       "email":"brian.altenhofel@vmdoh.com",
       "homepage":"http://www.vmdoh.com"
     }
-  ],
-  "require": {
-    "ruflin/elastica": ">=v1.0.0.0"
-  }
+  ]
 }
