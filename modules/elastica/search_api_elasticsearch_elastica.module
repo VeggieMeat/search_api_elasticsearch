@@ -227,10 +227,10 @@ function search_api_elasticsearch_elastica_return_form_options(&$form, &$form_st
   );
 
   if ($flag == 'edit') {
-    $form['#submit'][] = 'search_api_elasticsearch_elastica_edit_index_submit';
+    $form['#submit'][] = 'search_api_elasticsearch_edit_index_submit';
   }
   else {
-    array_unshift($form['#submit'], 'search_api_elasticsearch_elastica_index_submit');
+    array_unshift($form['#submit'], 'search_api_elasticsearch_index_submit');
   }
 }
 
