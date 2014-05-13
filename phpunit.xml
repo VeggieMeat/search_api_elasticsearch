@@ -1,4 +1,4 @@
-<phpunit bootstrap="bootstrap.php">
+<phpunit bootstrap="tests/includes/bootstrap.php">
     <testsuites>
         <testsuite name="Search API Elasticsearch">
             <directory>tests/phpunit</directory>
