@@ -1,0 +1,112 @@
+<?php
+
+/**
+ * @file
+ * Provides an elasticsearch-based service class for the Search API.
+ */
+
+/**
+ * Implements hook_search_api_service_info().
+ */
+function search_api_elasticsearch_elastica_search_api_service_info() {
+  $services['search_api_elasticsearch_elastica_service'] = array(
+    'name' => t('Elasticsearch (via Elastica)'),
+    'description' => t('
+    <p>Index items using a !url_elasticsearch search server.</p>
+    <ul>
+    <li>All field types are supported.</li>
+    <li>Search API facets are supported.</li>
+    <li>More Like This searches are supported.</li>
+    <li>Will use internal elasticsearch preprocessors, so Search API preprocessors should for the most part be deactivated.</li>
+    <li>See the README.txt file provided with this module for details.</li>
+    </ul>',
+    array(
+      '!url_elasticsearch' => l(t('Elasticsearch'), 'http://www.elasticsearch.org/'),
+    )),
+    'class' => 'SearchApiElasticsearchElastica',
+  );
+  return $services;
+}
+
+/**
+ * Check if the Elastica library is loaded.
+ *
+ * @return bool
+ *   Returns TRUE if loaded.
+ */
+function search_api_elasticsearch_elastica_loaded() {
+  $loaded = &drupal_static(__FUNCTION__);
+
+  if (!isset($loaded)) {
+    if (!class_exists('\Elastica\Client') && module_exists('composer_manager')) {
+      composer_manager_register_autoloader();
+    }
+    elseif (!class_exists('\Elastica\Client')) {
+      spl_autoload_register('_search_api_elasticsearch_elastica_autoload');
+    }
+
+    $loaded = class_exists('\Elastica\Client');
+  }
+
+  return $loaded;
+}
+
+/**
+ * Return path to Elastica library path, or FALSE if not found.
+ */
+function _search_api_elasticsearch_elastica_path($reset = FALSE) {
+  static $path = NULL;
+
+  if ($reset === TRUE) {
+    $path = NULL;
+  }
+
+  if (!isset($path)) {
+    $path = FALSE;
+    // If Libraries API is installed, we first use that to try and find the
+    // library. Otherwise we manually check a few locations.
+    $search_dirs = array();
+    if (function_exists('libraries_get_path')) {
+      $dir = libraries_get_path('Elastica');
+      // Confusingly, Libraries API 1.x will return sites/all/libraries/NAME on
+      // failure, while Libraries API 2.x returns FALSE in that case.
+      if (!empty($dir)) {
+        $search_dirs[] = $dir;
+      }
+    }
+    else {
+      $search_dirs[] = 'sites/all/libraries/Elastica';
+    }
+    $search_dirs[] = drupal_get_path('module', 'search_api_elasticsearch') . '/Elastica';
+    foreach ($search_dirs as $dir) {
+      $dir = DRUPAL_ROOT . '/' . $dir . '/lib';
+      if (is_dir($dir)) {
+        $path = $dir;
+        break;
+      }
+    }
+  }
+
+  return $path;
+}
+
+/**
+ * Autoloader for the Elastica classes.
+ */
+function _search_api_elasticsearch_elastica_autoload($name) {
+  static $lookup_cache = array();
+
+  if (isset($lookup_cache[$name])) {
+    return $lookup_cache[$name];
+  }
+  elseif (drupal_substr($name, 0, 8) == 'Elastica') {
+    $path = _search_api_elasticsearch_elastica_path();
+    if (file_exists($file_path = $path . '/' . str_replace('\\', '/', $name) . '.php')) {
+      require_once $file_path;
+      $lookup_cache[$name] = TRUE;
+      return TRUE;
+    }
+  }
+  $lookup_cache[$name] = FALSE;
+  return FALSE;
+}
