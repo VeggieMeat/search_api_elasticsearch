@@ -1,10 +1,7 @@
 <?php
 /**
  * @file
- * Install/unstall tasks for the Search API elasticsearch module.
- *
- * Part of the code is borrowed from Thomas Seidl (drunken monkey)'s
- * Search Api Solr search module.
+ * Install/Uninstall tasks for the Search API Elasticsearch Elastica module.
  */
 
 /**
@@ -12,14 +9,14 @@
  *
  * Check Elastica installation.
  */
-function search_api_elasticsearch_requirements($phase) {
+function search_api_elasticsearch_elastica_requirements($phase) {
   if ($phase === 'install') {
     $t = get_t();
-    module_load_include('module', 'search_api_elasticsearch');
-    spl_autoload_register('_search_api_elasticsearch_autoload');
+    module_load_include('module', 'search_api_elasticsearch_elastica');
+    spl_autoload_register('_search_api_elasticsearch__elastica_autoload');
     if (class_exists('Elastica\Client')) {
       return array(
-        'search_api_elasticsearch' => array(
+        'search_api_elasticsearch_elastica' => array(
           'title' => $t('Elastica PHP library'),
           'description' => $t('The library was correctly installed.'),
           'severity' => REQUIREMENT_OK,
@@ -28,7 +25,7 @@ function search_api_elasticsearch_requirements($phase) {
     }
     else {
       return array(
-        'search_api_elasticsearch' => array(
+        'search_api_elasticsearch_elastica' => array(
           'title' => $t('Elastica PHP library'),
           'description' => $t('The library was not correctly installed. Please see INSTALL.txt for instructions.'),
           'severity' => REQUIREMENT_WARNING,
@@ -41,12 +38,12 @@ function search_api_elasticsearch_requirements($phase) {
 /**
  * Implements hook_disable().
  *
- * Disable Search Api elasticsearch servers and associated indexes.
+ * Disable Search API servers and associated indexes using the Elastica client.
  */
-function search_api_elasticsearch_disable() {
+function search_api_elasticsearch_elastica_disable() {
   if (module_exists('search_api')) {
     module_load_include('module', 'search_api');
-    foreach (search_api_server_load_multiple(FALSE, array('class' => 'search_api_elasticsearch_service'), TRUE) as $server) {
+    foreach (search_api_server_load_multiple(FALSE, array('class' => 'search_api_elasticsearch_elastica_service'), TRUE) as $server) {
       $server->update(array('enabled' => 0));
     }
   }
@@ -55,12 +52,12 @@ function search_api_elasticsearch_disable() {
 /**
  * Implements hook_uninstall().
  *
- * Delete Search Api elasticsearch servers.
+ * Delete Search API servers using the Elastica client.
  */
 function search_api_elasticsearch_uninstall() {
   if (module_exists('search_api')) {
     db_delete('search_api_server')
-      ->condition('class', 'search_api_elasticsearch_service')
+      ->condition('class', 'search_api_elasticsearch_elastica_service')
       ->execute();
   }
 }
