@@ -53,6 +53,7 @@ before_script:
 
 script:
   - drush test-run 'Search API Elasticsearch' --debug
+  - phpunit
 
 notifications:
   irc: irc.freenode.org#vmdoh

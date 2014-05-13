@@ -13,7 +13,7 @@ class SearchApiElasticsearchServiceTest extends PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->object = new SearchApiElasticsearchService;
+        $this->_object = $this->getMockForAbstractClass('SearchApiElasticsearchService');
     }
 
     /**
