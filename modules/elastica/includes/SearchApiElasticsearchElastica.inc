@@ -529,15 +529,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchService {
   }
 
   /**
-   * Helper function. Escape a field or index name.
-   *
-   * Force names to be strictly alphanumeric-plus-underscore.
-   */
-  public static function escapeName($name) {
-    return preg_replace('/[^A-Za-z0-9_]+/', '', $name);
-  }
-
-  /**
    * Helper function. Get an Elastica index.
    */
   public function getElasticaIndex(SearchApiIndex $index) {

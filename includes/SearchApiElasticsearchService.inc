@@ -625,6 +625,15 @@ abstract class SearchApiElasticsearchService extends SearchApiAbstractService {
   }
 
   /**
+   * Helper function. Escape a field or index name.
+   *
+   * Force names to be strictly alphanumeric-plus-underscore.
+   */
+  protected static function escapeName($name) {
+    return preg_replace('/[^A-Za-z0-9_]+/', '', $name);
+  }
+
+  /**
    * Helper function. Get Autocomplete suggestions.
    *
    * @param SearchApiQueryInterface $query
