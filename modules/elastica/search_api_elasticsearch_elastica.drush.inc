@@ -25,7 +25,7 @@ define('SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL','https://github.com/ruflin/El
 /**
  * Implements hook_drush_command().
  */
-function search_api_elasticsearch_drush_command() {
+function search_api_elasticsearch_elastica_drush_command() {
   $items['download-elastica'] = array(
     'description' => dt("Downloads the Elastica PHP Library."),
     'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_FULL,
@@ -38,8 +38,8 @@ function search_api_elasticsearch_drush_command() {
  * Command to download the Elastica PHP Library.
  */
 function drush_download_elastica() {
-  module_load_include('module', 'search_api_elasticsearch');
-  spl_autoload_register('_search_api_elasticsearch_autoload');
+  module_load_include('module', 'search_api_elasticsearch_elastica');
+  spl_autoload_register('_search_api_elasticsearch_elastica_autoload');
 
   // Check if the library is already installed.
   if (class_exists('Elastica\Client')) {
@@ -82,7 +82,7 @@ function drush_download_elastica() {
     chdir($path);
 
     // Download the tar.
-    _search_api_elasticsearch_fetch_tar(SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL);
+    _search_api_elasticsearch_elastica_fetch_tar(SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL);
 
     // Set working directory back to the previous working directory.
     chdir($olddir);
@@ -99,7 +99,7 @@ function drush_download_elastica() {
 /**
  * Downloads and extracts a tarball.
  */
-function _search_api_elasticsearch_fetch_tar($url) {
+function _search_api_elasticsearch_elastica_fetch_tar($url) {
   $filename = basename($url);
 
   // Remove any existing files.
@@ -127,9 +127,9 @@ function _search_api_elasticsearch_fetch_tar($url) {
  *
  * Attempt to download the Elastica library if not already there.
  */
-function drush_search_api_elasticsearch_pre_pm_enable() {
+function drush_search_api_elasticsearch_elastica_pre_pm_enable() {
   $modules = func_get_args();
-  if (in_array('search_api_elasticsearch', $modules)) {
+  if (in_array('search_api_elasticsearch_elastica', $modules)) {
     drush_download_elastica();
   }
 }
