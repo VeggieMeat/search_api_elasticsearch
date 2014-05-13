@@ -49,6 +49,7 @@ before_script:
   - drush --yes dis search
   - drush --yes en $DRUPAL_3RD_PARTY
   - drush --yes en search_api_elasticsearch
+  - drush --yes en search_api_elasticsearch_elastica
   - drush --yes en simpletest
 
 script:
