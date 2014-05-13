@@ -110,3 +110,149 @@ function _search_api_elasticsearch_elastica_autoload($name) {
   $lookup_cache[$name] = FALSE;
   return FALSE;
 }
+
+/**
+ * Ajax callback for adding more nodes.
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_elastica_configuration_form_ajax($form, &$form_state) {
+  unset($form['options']['form']['add_more']);
+  if (module_exists('search_api_facetapi')) {
+    unset($form['options']['form']['facet_settings']);
+  }
+
+  return $form['options']['form'];
+}
+
+/**
+ * Ajax callback for remove nodes.
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_elastica_configuration_form_remove_ajax($form, &$form_state) {
+  unset($form['options']['form']['add_more']);
+  if (module_exists('search_api_facetapi')) {
+    unset($form['options']['form']['facet_settings']);
+  }
+
+  return $form['options']['form'];
+}
+
+/**
+ * Submit Handler for the configuration form.
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_elastica_configuration_form_submit_custom($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Submit handler on removing elements
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_elastica_configuration_form_remove_custom($form, &$form_state) {
+  $form_state['values']['remove_delta'] == 'none';
+
+  if (isset($form_state['triggering_element']['#remove_delta'])) {
+    $form_state['values']['remove_delta'] = $form_state['triggering_element']['#remove_delta'];
+  }
+
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function search_api_elasticsearch_elastica_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'search_api_admin_add_index') {
+    search_api_elasticsearch_attach_ajax_callback($form);
+    if (isset($form_state['values']) && !empty($form_state['values'])) {
+      $add_options = search_api_elasticsearch_elastica_add_options($form_state['values']['server']);
+      if ($add_options != FALSE) {
+        search_api_elasticsearch_elastica_return_form_options($form, $form_state, array(), 'add');
+      }
+    }
+  }
+  elseif ($form_id == 'search_api_admin_index_edit') {
+    $default_values = $form_state['index']->options;
+    search_api_elasticsearch_attach_ajax_callback($form);
+    if (!isset($form_state['values'])) {
+      if (isset($form_state['build_info']['args']) && !empty($form_state['build_info']['args'])) {
+        $index_obj = reset($form_state['build_info']['args']);
+        $add_options = search_api_elasticsearch_elastica_add_options($index_obj->server);
+        if ($add_options != FALSE) {
+          search_api_elasticsearch_elastica_return_form_options($form, $form_state, $default_values, 'edit');
+        }
+      }
+    }
+    else {
+      $add_options = search_api_elasticsearch_elastica_add_options($form_state['values']['server']);
+      if ($add_options != FALSE) {
+        search_api_elasticsearch_elastica_return_form_options($form, $form_state, $default_values, 'edit');
+      }
+    }
+  }
+}
+
+/**
+ * The form options for add/edit index.
+ *
+ * @param array $form
+ * @param array $default_values
+ */
+function search_api_elasticsearch_elastica_return_form_options(&$form, &$form_state, $default_values = array(), $flag) {
+  $default_options = $default_values + array(
+    'number_of_shards' => 1,
+    'number_of_replicas' => 0,
+  );
+
+  $form['options']['number_of_shards'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $default_options['number_of_shards'],
+    '#size' => 4,
+    '#title' => t('Number of shards'),
+  );
+
+  $form['options']['number_of_replicas'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $default_options['number_of_replicas'],
+    '#size' => 4,
+    '#title' => t('Number of replicas'),
+  );
+
+  if ($flag == 'edit') {
+    $form['#submit'][] = 'search_api_elasticsearch_elastica_edit_index_submit';
+  }
+  else {
+    array_unshift($form['#submit'], 'search_api_elasticsearch_elastica_index_submit');
+  }
+}
+
+/**
+ * Add options common function.
+ *
+ * @param integer $server_machine_name
+ */
+function search_api_elasticsearch_elastica_add_options($server_machine_name) {
+  if (isset($server_machine_name) && !empty($server_machine_name)) {
+    $server_id = search_api_elasticsearch_get_server_id_by_name($server_machine_name);
+    if ($server_id != FALSE) {
+      $server_obj = search_api_server_load($server_id);
+      if (isset($server_obj) && !empty($server_obj)) {
+        if ($server_obj->class == 'search_api_elasticsearch_elastica_service') {
+          return TRUE;
+        }
+      }
+    }
+  }
+
+  return FALSE;
+}
+
+
