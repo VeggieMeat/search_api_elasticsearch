@@ -5,4 +5,3 @@ core = 7.x
 package = Search
 
 files[] = includes/SearchApiElasticsearchService.inc
-files[] = tests/search_api_elasticsearch.test

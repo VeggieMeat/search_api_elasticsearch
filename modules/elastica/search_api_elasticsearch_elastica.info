@@ -4,3 +4,4 @@ dependencies[] = search_api_elasticsearch
 core = 7.x
 package = Search
 files[] = includes/SearchApiElasticsearchElastica.inc
+files[] = tests/functional/search_api_elasticsearch_elastica.test
