@@ -3,3 +3,4 @@ description = "Provides Elastica client for Search API Elasticsearch"
 dependencies[] = search_api_elasticsearch
 core = 7.x
 package = Search
+files[] = includes/SearchApiElasticsearchElastica.inc
