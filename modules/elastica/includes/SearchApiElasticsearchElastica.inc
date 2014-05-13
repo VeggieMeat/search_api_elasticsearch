@@ -21,7 +21,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchService {
   public function __construct(SearchApiServer $server) {
     parent::__construct($server);
 
-    if (search_api_elasticsearch_loaded()) {
+    if (search_api_elasticsearch_elastica_loaded()) {
       $config = array();
       $count_options = array();
 
