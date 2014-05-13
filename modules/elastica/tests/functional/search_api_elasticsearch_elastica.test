@@ -59,8 +59,8 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => 'Search API Elasticsearch unit tests',
-      'description' => 'Tests that the SearchApiElasticsearchService class methods are working properly.',
+      'name' => 'Search API Elasticsearch Elastica',
+      'description' => 'Tests that the SearchApiElasticsearchElastica class methods are working properly.',
       'group' => 'Search API Elasticsearch',
     );
   }
@@ -71,14 +71,15 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @see DrupalWebTestCase::setUp()
    */
   function setUp() {
-    drupal_load('module', 'search_api_elasticsearch');
-    module_load_include('inc', 'search_api_elasticsearch', 'service');
+    drupal_load('module', 'search_api_elasticsearch_elastica');
+    module_load_include('inc', 'search_api_elasticsearch_elastica', 'includes/SearchApiElasticsearchElastica.php');
+    module_load_include('inc', 'search_api_elasticsearch', 'includes/SearchApiElasticsearchService.php');
     module_load_include('inc', 'search_api', 'includes/service');
     $this->server = entity_create('search_api_server', array(
       'id' => 1,
       'name' => 'server test',
       'machine_name' => 'server_test',
-      'class' => 'search_api_elasticsearch_service',
+      'class' => 'search_api_elasticsearch_elastica_service',
       'options' => array(array('host' => '127.0.0.1', 'port' => '9200')),
       'enabled' => 1,
       'status' => 1,
@@ -156,32 +157,32 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
   }
 
   /**
-   * Call different methods from the SearchApiElasticsearchService class.
+   * Call different methods from the SearchApiElasticsearchElastica class.
    */
   public function testRunTestSet() {
-    $this->searchApiElasticsearchServiceConstruct($this->server);
-    $this->searchApiElasticsearchServicesupportsFeature($this->_client, array(
+    $this->searchApiElasticsearchElasticaConstruct($this->server);
+    $this->searchApiElasticsearchElasticasupportsFeature($this->_client, array(
       'search_api_facets',
       'search_api_facets_operator_or',
       'search_api_autocomplete',
       'search_api_test_fail')
     );
-    $this->searchApiElasticsearchServicepostUpdate($this->_client);
-    $this->searchApiElasticsearchServicefieldsUpdated($this->_client, $this->index);
-    $this->searchApiElasticsearchServicegetIndexName($this->_client, $this->index); // problem
-    $this->searchApiElasticsearchServiceindexItems($this->_client, $this->index, $this->items);
-    $this->searchApiElasticsearchServicegetElasticaIndex($this->_client, $this->index);
-    $this->searchApiElasticsearchServicegetElasticaType($this->_client, $this->index);
-    $this->searchApiElasticsearchServicegetFieldMapping($this->_client, $this->field);
-    $this->searchApiElasticsearchServicegetOptions($this->_client);
-    $this->searchApiElasticsearchServiceremoveIndex($this->_client, $this->index);
+    $this->searchApiElasticsearchElasticapostUpdate($this->_client);
+    $this->searchApiElasticsearchElasticafieldsUpdated($this->_client, $this->index);
+    $this->searchApiElasticsearchElasticagetIndexName($this->_client, $this->index); // problem
+    $this->searchApiElasticsearchElasticaindexItems($this->_client, $this->index, $this->items);
+    $this->searchApiElasticsearchElasticagetElasticaIndex($this->_client, $this->index);
+    $this->searchApiElasticsearchElasticagetElasticaType($this->_client, $this->index);
+    $this->searchApiElasticsearchElasticagetFieldMapping($this->_client, $this->field);
+    $this->searchApiElasticsearchElasticagetOptions($this->_client);
+    $this->searchApiElasticsearchElasticaremoveIndex($this->_client, $this->index);
   }
 
   /**
    * Test case for construct.
    */
-  protected function searchApiElasticsearchServiceConstruct($server) {
-    $class = new SearchApiElasticsearchService($server);
+  protected function searchApiElasticsearchElasticaConstruct($server) {
+    $class = new SearchApiElasticsearchElastica($server);
 
     if ($class !== FALSE) {
       $this->_client = $class;
@@ -195,7 +196,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param stdClass $client
    * @param string $features
    */
-  public function searchApiElasticsearchServicesupportsFeature($client, $features) {
+  public function searchApiElasticsearchElasticasupportsFeature($client, $features) {
     foreach ($features as $feature) {
       $result = $client->supportsFeature($feature);
       if ($feature == 'search_api_test_fail') {
@@ -212,7 +213,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    *
    * @param stdClass $client
    */
-  public function searchApiElasticsearchServicepostUpdate($client) {
+  public function searchApiElasticsearchElasticapostUpdate($client) {
     $result = $client->postUpdate();
     $this->assertFalse($result, t('Method postUpdate() returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -223,7 +224,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param stdClass $client
    * @param SearchApiIndex $index
    */
-  public function searchApiElasticsearchServicefieldsUpdated($client, SearchApiIndex $index) {
+  public function searchApiElasticsearchElasticafieldsUpdated($client, SearchApiIndex $index) {
     $result = $client->fieldsUpdated($index);
   }
 
@@ -233,7 +234,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param stdClass $client
    * @param SearchApiIndex $index
    */
-  public function searchApiElasticsearchServiceremoveIndex($client, SearchApiIndex $index) {
+  public function searchApiElasticsearchElasticaremoveIndex($client, SearchApiIndex $index) {
     $result = $client->removeIndex($index);
     $this->assertTrue($result, t('The removeIndex() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -245,7 +246,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param SearchApiIndex $index
    * @param array $items
    */
-  public function searchApiElasticsearchServiceindexItems($client, SearchApiIndex $index, array $items) {
+  public function searchApiElasticsearchElasticaindexItems($client, SearchApiIndex $index, array $items) {
     $result = $client->indexItems($index, $items);
     $this->assertTrue($result, t('The indexItems() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -256,7 +257,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param stdClass $client
    * @param SearchApiIndex $index
    */
-  public function searchApiElasticsearchServicegetIndexName($client, SearchApiIndex $index) {
+  public function searchApiElasticsearchElasticagetIndexName($client, SearchApiIndex $index) {
     $result = $client->getIndexName($index);
     $this->assertTrue($result, t('The getIndexName() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -267,7 +268,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param stdClass $client
    * @param SearchApiIndex $index
    */
-  public function searchApiElasticsearchServicegetElasticaIndex($client, SearchApiIndex $index) {
+  public function searchApiElasticsearchElasticagetElasticaIndex($client, SearchApiIndex $index) {
     $result = $client->getElasticaIndex($index);
     $this->assertTrue($result, t('The getElasticaIndex() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -278,7 +279,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param stdClass $client
    * @param SearchApiIndex $index
    */
-  public function searchApiElasticsearchServicegetElasticaType($client, SearchApiIndex $index) {
+  public function searchApiElasticsearchElasticagetElasticaType($client, SearchApiIndex $index) {
     $result = $client->getElasticaType($index);
     $this->assertTrue($result, t('The getElasticaType() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -289,7 +290,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    * @param stdClass $client
    * @param array $field
    */
-  public function searchApiElasticsearchServicegetFieldMapping($client, $field) {
+  public function searchApiElasticsearchElasticagetFieldMapping($client, $field) {
     $result = $client->getFieldMapping($field);
     $this->assertTrue($result, t('The getFieldMapping() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -299,7 +300,7 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    *
    * @param stdClass $client
    */
-  public function searchApiElasticsearchServicegetOptions($client) {
+  public function searchApiElasticsearchElasticagetOptions($client) {
     $result = $client->getOptions();
     $this->assertTrue($result, t('The getOptions() method returned :result.', array(':result' => drupal_strtoupper(var_export($result, TRUE)))));
   }
@@ -316,8 +317,8 @@ class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('Search API Elasticsearch Administration'),
-      'description' => t('Test administration forms for Search API Elasticsearch.'),
+      'name' => t('Search API Elasticsearch Elastica Administration'),
+      'description' => t('Test administration forms for Search API Elasticsearch Elastica.'),
       'group' => t('Search API Elasticsearch'),
     );
   }
@@ -326,7 +327,7 @@ class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
    * Implements setUp().
    */
   public function setUp() {
-    parent::setUp('search_api_elasticsearch');
+    parent::setUp('search_api_elasticsearch_elastica');
     $this->privileged_user = $this->drupalCreateUser(array('administer search_api'));
     $this->unprivileged_user = $this->drupalCreateUser();
   }
