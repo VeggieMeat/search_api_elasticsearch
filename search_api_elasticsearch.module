@@ -6,6 +6,18 @@
  */
 
 /**
+ *  * Implements hook_search_api_service_info().
+ *   */
+function search_api_elasticsearch_search_api_service_info() {
+  $services['search_api_elasticsearch_service'] = array(
+    'name' => t('Elasticsearch service'),
+    'description' => t('DEPRECATED. WILL BE REMOVED BEFORE BETA'),
+    'class' => 'SearchApiElasticsearchService',
+  );
+  return $services;
+}
+
+/**
  * Get server ID by name.
  *
  * @param integer $server_machine_name
