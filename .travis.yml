@@ -53,7 +53,7 @@ before_script:
   - drush --yes en simpletest
 
 script:
-  - drush test-run 'Search API Elasticsearch' --debug
+  - drush test-run 'Search API Elasticsearch Elastica' --debug
   - phpunit
 
 notifications:
