@@ -72,8 +72,8 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
    */
   function setUp() {
     drupal_load('module', 'search_api_elasticsearch_elastica');
-    module_load_include('inc', 'search_api_elasticsearch_elastica', 'includes/SearchApiElasticsearchElastica.php');
-    module_load_include('inc', 'search_api_elasticsearch', 'includes/SearchApiElasticsearchService.php');
+    module_load_include('inc', 'search_api_elasticsearch_elastica', 'includes/SearchApiElasticsearchElastica');
+    module_load_include('inc', 'search_api_elasticsearch', 'includes/SearchApiElasticsearchAbstractService');
     module_load_include('inc', 'search_api', 'includes/service');
     $this->server = entity_create('search_api_server', array(
       'id' => 1,
@@ -169,12 +169,9 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
     );
     $this->searchApiElasticsearchElasticapostUpdate($this->_client);
     $this->searchApiElasticsearchElasticafieldsUpdated($this->_client, $this->index);
-    $this->searchApiElasticsearchElasticagetIndexName($this->_client, $this->index); // problem
     $this->searchApiElasticsearchElasticaindexItems($this->_client, $this->index, $this->items);
     $this->searchApiElasticsearchElasticagetElasticaIndex($this->_client, $this->index);
     $this->searchApiElasticsearchElasticagetElasticaType($this->_client, $this->index);
-    $this->searchApiElasticsearchElasticagetFieldMapping($this->_client, $this->field);
-    $this->searchApiElasticsearchElasticagetOptions($this->_client);
     $this->searchApiElasticsearchElasticaremoveIndex($this->_client, $this->index);
   }
 
