@@ -745,7 +745,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchService {
   /**
    * Get settings.
    */
-  protected function filterSettings($settings) {
+  public function filterSettings($settings) {
     $new_settings = array();
 
     foreach ($settings as $setting => $value) {
