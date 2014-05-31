@@ -305,9 +305,9 @@ class SearchApiElasticsearchUnitTest extends DrupalWebTestCase {
 }
 
 /**
- * Test administration interface for Search API Elasticsearch.
+ * Test administration interface for Search API Elasticsearch Elastica.
  */
-class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
+class SearchApiElasticsearchElasticaAdministrationTest extends DrupalWebTestCase {
 
   /**
    * Implements getInfo().
@@ -339,7 +339,7 @@ class SearchApiElasticsearchAdministrationTest extends DrupalWebTestCase {
     $values = array(
       'name' => 'Test Elasticsearch Cluster',
       'machine_name' => 'test_es_cluster',
-      'class' => 'search_api_elasticsearch_service',
+      'class' => 'search_api_elasticsearch_elastica_service',
     );
     $this->drupalPostAJAX(NULL, $values, 'class');
 
