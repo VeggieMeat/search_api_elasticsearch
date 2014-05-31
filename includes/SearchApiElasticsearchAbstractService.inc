@@ -8,7 +8,7 @@
 /**
  * Elasticsearch service abstract class.
  */
-abstract class SearchApiElasticsearchService extends SearchApiAbstractService {
+abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractService {
 
   /**
    * Overrides configurationForm().

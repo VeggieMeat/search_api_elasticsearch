@@ -4,5 +4,5 @@ dependencies[] = search_api
 core = 7.x
 package = Search
 
-files[] = includes/SearchApiElasticsearchService.inc
+files[] = includes/SearchApiElasticsearchAbstractService.inc
 files[] = service.inc

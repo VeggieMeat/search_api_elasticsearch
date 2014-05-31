@@ -8,7 +8,7 @@
 /**
  * Search API Elasticsearch Elastica service class.
  */
-class SearchApiElasticsearchElastica extends SearchApiElasticsearchService {
+class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractService {
 
   /**
    * Elasticsearch Connection.
