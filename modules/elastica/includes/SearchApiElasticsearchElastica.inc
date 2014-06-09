@@ -271,7 +271,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function deleteItems($ids = 'all', SearchApiIndex $index = NULL) {
     if (empty($index)) {
-      foreach ($this->getIndexes() as $index) {
+      $indexes = search_api_index_load_multiple(FALSE, array('server' => $this->server->machine_name));
+      foreach ($indexes as $index) {
         $this->deleteItems('all', $index);
       }
     }
