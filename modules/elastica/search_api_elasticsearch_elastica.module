@@ -21,7 +21,7 @@ function search_api_elasticsearch_elastica_search_api_service_info() {
     <li>See the README.txt file provided with this module for details.</li>
     </ul>',
     array(
-      '!url_elasticsearch' => l(t('Elasticsearch'), 'http://www.elasticsearch.org/'),
+      '!url_elasticsearch' => '<a href="http://www.elasticsearch.org/">' . t('Elasticsearch') . '</a>',
     )),
     'class' => 'SearchApiElasticsearchElastica',
   );
