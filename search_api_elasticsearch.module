@@ -33,7 +33,7 @@ function search_api_elasticsearch_get_server_id_by_name($server_machine_name) {
     $result = $query->execute()->fetchAssoc();
   }
   catch (Exception $e) {
-    watchdog('Elastic Search', $e->getMessage(), array(), WATCHDOG_ERROR);
+    watchdog('Elasticsearch', $e->getMessage(), array(), WATCHDOG_ERROR);
     return FALSE;
   }
 

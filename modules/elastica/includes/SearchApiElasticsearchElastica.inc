@@ -42,7 +42,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
             $this->elasticaClient = new Elastica\Client(array('servers' => $config));
           }
           catch (Exception $e) {
-            watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+            watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
             drupal_set_message(check_plain($e->getMessage()), 'error');
             return FALSE;
           }
@@ -58,7 +58,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
             $this->elasticaClient = new Elastica\Client($config);
           }
           catch (Exception $e) {
-            watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+            watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
             drupal_set_message(check_plain($e->getMessage()), 'error');
             return FALSE;
           }
@@ -120,7 +120,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $status = !empty($this->elasticaClient) ? $this->elasticaClient->getStatus()->getServerStatus() : NULL;
     }
     catch (Exception $e) {
-      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
       drupal_set_message(t('No connection to the Elasticsearch server.'), 'error');
     }
@@ -166,7 +166,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
         $response = $elastica_index->create($index->options, TRUE);
       }
       catch (Exception $e) {
-        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
         return FALSE;
       }
@@ -197,7 +197,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
         $mapping->send();
       }
       catch (Exception $e) {
-        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
         drupal_set_message(t('Fields are not re-index'), 'error');
         return FALSE;
@@ -220,7 +220,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
         return $response;
       }
       catch (Exception $e) {
-        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
         return FALSE;
       }
@@ -263,7 +263,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $elastica_type->addDocuments($documents);
     }
     catch (Exception $e) {
-      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
     }
     $elastica_type->getIndex()->refresh();
@@ -335,7 +335,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $response = $elastica_type->search($elastica_query);
     }
 
-    // Show ElasticSearch query string from Elastica
+    // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.
     if (function_exists('vpr') &&
         $elastica_param_query = $elastica_query->getParam('query')) {
@@ -386,7 +386,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
         $filters = $this->setFiltersConjunction($filters, $conjunction);
       }
       catch (Exception $e) {
-        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
       }
 
@@ -545,7 +545,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
         return $elastica_index;
       }
       catch (Exception $e) {
-        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
       }
     }
@@ -718,7 +718,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $elastica_index->getSettings()->set($data);
     }
     catch (Exception $e) {
-      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
       return FALSE;
     }
@@ -741,7 +741,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       }
     }
     catch (Exception $e) {
-      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
     }
 
@@ -817,7 +817,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $sort = $this->getSortSearchQuery($query);
     }
     catch (Exception $e) {
-      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message($e->getMessage(), 'error');
     }
 

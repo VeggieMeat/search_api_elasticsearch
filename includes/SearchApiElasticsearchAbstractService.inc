@@ -104,8 +104,8 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
         // Elasticsearch daemon path.
         $form['daemon_settings']['fieldset'][$c]['path'] = array(
           '#type' => 'textfield',
-          '#title' => t('ElasticSearch path prefix'),
-          '#description' => t('Normally empty. Use when you have remapped the ElasticSearch server API path.'),
+          '#title' => t('Elasticsearch path prefix'),
+          '#description' => t('Normally empty. Use when you have remapped the Elasticsearch server API path.'),
           '#required' => FALSE,
           '#default_value' => ($options[$c]['path']) ? $options[$c]['path'] : $options['path'],
           '#parents' => array('options', 'form', $c, 'path'),
@@ -114,8 +114,8 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
         // Elasticsearch daemon URL.
         $form['daemon_settings']['fieldset'][$c]['url'] = array(
           '#type' => 'textfield',
-          '#title' => t('ElasticSearch url'),
-          '#description' => t('Normally empty. Use instead of host/port when you have remapped the ElasticSearch server API url.'),
+          '#title' => t('Elasticsearch url'),
+          '#description' => t('Normally empty. Use instead of host/port when you have remapped the Elasticsearch server API url.'),
           '#required' => FALSE,
           '#default_value' => ($options[$c]['url']) ? $options[$c]['url'] : $options['url'],
           '#parents' => array('options', 'form', $c, 'url'),
@@ -661,7 +661,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
       $response = $this->search($query);
     }
     catch (Exception $e) {
-      watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+      watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       return array();
     }
 
@@ -738,7 +738,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
         $filters = $this->setFiltersConjunction($filters, $conjunction);
       }
       catch (Exception $e) {
-        watchdog('Elastic Search', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
+        watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
       }
 
