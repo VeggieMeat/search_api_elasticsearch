@@ -63,6 +63,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
             return FALSE;
           }
         }
+        if (module_exists('psr3_watchdog')) {
+          $logger = new Psr3Watchdog();
+          $logger->setType('Elastica');
+          $this->elasticaClient->setLogger($logger);
+        }
       }
     }
     else {
