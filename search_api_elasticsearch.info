@@ -6,3 +6,6 @@ package = Search
 
 files[] = includes/SearchApiElasticsearchAbstractService.inc
 files[] = service.inc
+
+; Views handlers/plugins
+files[] = includes/views/SearchApiElasticsearchViewsHandlerFilterFulltext.inc
