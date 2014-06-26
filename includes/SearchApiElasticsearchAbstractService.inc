@@ -382,6 +382,12 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           'format' => 'date_time',
         );
 
+      case 'location':
+        return array(
+          'type' => 'geo_point',
+          'lat_lon' => TRUE,
+        );
+
       default:
         return NULL;
     }
