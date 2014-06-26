@@ -282,9 +282,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       }
     }
     elseif ($ids === 'all') {
-      // Faster to delete the index and recreate it.
-      $this->removeIndex($index);
-      $this->addIndex($index);
+      $elastica_type = $this->getElasticaType($index);
+      if (!empty($elastica_type)) {
+        $match_all = new Elastica\Query\MatchAll();
+        $elastica_type->deleteByQuery($match_all);
+      }
     }
     else {
       $elastica_type = $this->getElasticaType($index);
