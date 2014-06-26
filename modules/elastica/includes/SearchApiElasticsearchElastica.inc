@@ -791,6 +791,9 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Query filter.
     $query_search_filter = NULL;
 
+    // Query analyzer.
+    $analyzer = isset($query_options['analyzer']) ? $query_options['analyzer'] : '';
+
     // Full text search.
     $keys = $query->getKeys();
     if (!empty($keys)) {
@@ -807,10 +810,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       if (!empty($search_string)) {
         $query_search_string = new Elastica\Query\QueryString($search_string);
         $query_search_string->setFields(array_values($query_full_text_fields));
-        // This is just a stopgap until we can determine the right(TM) way to
-        // expose the ability to choose analyzers. Snowball is a decent
-        // default.
-        $query_search_string->setParam('analyzer', 'snowball');
+        $query_search_string->setParam('analyzer', $query_options['analyzer']);
       }
     }
 
@@ -842,6 +842,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       'query_search_filter' => $query_search_filter,
       'sort' => $sort,
       'mlt' => $mlt,
+      'analyzer' => $query_options['analyzer'],
     );
   }
 }
