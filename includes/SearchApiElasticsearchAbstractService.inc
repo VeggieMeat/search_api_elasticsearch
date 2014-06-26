@@ -88,7 +88,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
             '%default' => $options['host'],
           )),
           '#required' => TRUE,
-          '#default_value' => ($options[$c]['host']) ? $options[$c]['host'] : $options['host'],
+          '#default_value' => isset($options[$c]['host']) ? $options[$c]['host'] : $options['host'],
           '#parents' => array('options', 'form', $c, 'host'),
         );
 
@@ -100,7 +100,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
             '%default' => $options['port'],
           )),
           '#required' => TRUE,
-          '#default_value' => ($options[$c]['port']) ? $options[$c]['port'] : $options['port'],
+          '#default_value' => isset($options[$c]['port']) ? $options[$c]['port'] : $options['port'],
           '#parents' => array('options', 'form', $c, 'port'),
         );
 
@@ -110,7 +110,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#title' => t('Elasticsearch path prefix'),
           '#description' => t('Normally empty. Use when you have remapped the Elasticsearch server API path.'),
           '#required' => FALSE,
-          '#default_value' => ($options[$c]['path']) ? $options[$c]['path'] : $options['path'],
+          '#default_value' => isset($options[$c]['path']) ? $options[$c]['path'] : $options['path'],
           '#parents' => array('options', 'form', $c, 'path'),
         );
 
@@ -120,7 +120,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#title' => t('Elasticsearch url'),
           '#description' => t('Normally empty. Use instead of host/port when you have remapped the Elasticsearch server API url.'),
           '#required' => FALSE,
-          '#default_value' => ($options[$c]['url']) ? $options[$c]['url'] : $options['url'],
+          '#default_value' => isset($options[$c]['url']) ? $options[$c]['url'] : $options['url'],
           '#parents' => array('options', 'form', $c, 'url'),
         );
 
@@ -135,7 +135,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
             'Memcache' => 'Memcache',
             'Null' => 'NULL',
           ),
-          '#default_value' => ($options[$c]['transport']) ? $options[$c]['transport'] : $options['transport'],
+          '#default_value' => isset($options[$c]['transport']) ? $options[$c]['transport'] : $options['transport'],
           '#parents' => array('options', 'form', $c, 'transport'),
         );
 
@@ -144,7 +144,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#type' => 'checkbox',
           '#title' => t('Persistent connection'),
           '#description' => t('Use persistent connection when connecting to this node.'),
-          '#default_value' => (isset($options[$c]['persistent'])) ? $options[$c]['persistent'] : $options['persistent'],
+          '#default_value' => isset($options[$c]['persistent']) ? $options[$c]['persistent'] : $options['persistent'],
           '#parents' => array('options', 'form', $c, 'persistent'),
         );
 
@@ -153,7 +153,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#type' => 'textfield',
           '#title' => t('Timeout in ms'),
           '#description' => t('Timeout in ms for waiting this elastic server to respond'),
-          '#default_value' => ($options[$c]['timeout']) ? $options[$c]['timeout'] : $options['timeout'],
+          '#default_value' => isset($options[$c]['timeout']) ? $options[$c]['timeout'] : $options['timeout'],
           '#parents' => array('options', 'form', $c, 'timeout'),
         );
 
@@ -162,7 +162,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#type' => 'checkbox',
           '#title' => t('Log'),
           '#description' => t('Log this elasticsearch server queries to the default log.'),
-          '#default_value' => ($options[$c]['log']) ? $options[$c]['log'] : $options['log'],
+          '#default_value' => isset($options[$c]['log']) ? $options[$c]['log'] : $options['log'],
           '#parents' => array('options', 'form', $c, 'log'),
         );
 
@@ -176,7 +176,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#type' => 'textfield',
           '#title' => t('retryOnConflict'),
           '#description' => t('Sets the number of retries of a version conflict occurs because the document was updated between getting it and updating it.'),
-          '#default_value' => ($options[$c]['retryOnConflict']) ? $options[$c]['retryOnConflict'] : $options['retryOnConflict'],
+          '#default_value' => isset($options[$c]['retryOnConflict']) ? $options[$c]['retryOnConflict'] : $options['retryOnConflict'],
           '#parents' => array('options', 'form', $c, 'retryOnConflict'),
         );
 
