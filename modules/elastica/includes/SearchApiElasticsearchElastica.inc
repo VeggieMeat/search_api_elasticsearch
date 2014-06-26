@@ -792,7 +792,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     $query_search_filter = NULL;
 
     // Query analyzer.
-    $analyzer = isset($query_options['analyzer']) ? $query_options['analyzer'] : '';
+    $analyzer = isset($query_options['analyzer']) ? $query_options['analyzer'] : NULL;
 
     // Full text search.
     $keys = $query->getKeys();
@@ -810,7 +810,9 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       if (!empty($search_string)) {
         $query_search_string = new Elastica\Query\QueryString($search_string);
         $query_search_string->setFields(array_values($query_full_text_fields));
-        $query_search_string->setParam('analyzer', $query_options['analyzer']);
+        if ($analyzer) {
+          $query_search_string->setParam('analyzer', $analyzer);
+        }
       }
     }
 
@@ -842,7 +844,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       'query_search_filter' => $query_search_filter,
       'sort' => $sort,
       'mlt' => $mlt,
-      'analyzer' => $query_options['analyzer'],
+      'analyzer' => $analyzer,
     );
   }
 }
