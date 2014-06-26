@@ -213,7 +213,6 @@ function search_api_elasticsearch_analysis_form_validate($form, &$form_state) {
  */
 function search_api_elasticsearch_analysis_form_submit($form, &$form_state) {
   $data = array();
-  dpm($form_state['values']);
   foreach ($form_state['values']['analyzer'] as $analyzer => $settings) {
     if ($settings['enabled'] == TRUE) {
       unset($settings['enabled']);
@@ -221,7 +220,6 @@ function search_api_elasticsearch_analysis_form_submit($form, &$form_state) {
       $data['analysis']['analyzer'][$analyzer] = $settings;
     }
   }
-  dpm($data);
   $form['#SearchApiElasticsearchClient']->updateSettings($form['#SearchApiIndex'], $data);
 }
 
