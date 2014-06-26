@@ -6,8 +6,26 @@
  */
 
 /**
- *  * Implements hook_search_api_service_info().
- *   */
+ * Implements hook_menu().
+ */
+function search_api_elasticsearch_menu() {
+  $items['admin/config/search/search_api/index/%search_api_index/analysis'] = array(
+    'title' => 'Analysis',
+    'description' => 'Configure Elasticsearch analysis',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('search_api_elasticsearch_analysis_form', 5),
+    'access arguments' => array('administer search_api'),
+    'file' => 'includes/search_api_elasticsearch.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_INLINE | MENU_CONTEXT_PAGE,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_search_api_service_info().
+ */
 function search_api_elasticsearch_search_api_service_info() {
   $services['search_api_elasticsearch_service'] = array(
     'name' => t('Elasticsearch service'),
@@ -15,6 +33,15 @@ function search_api_elasticsearch_search_api_service_info() {
     'class' => 'SearchApiElasticsearchService',
   );
   return $services;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function search_api_elasticsearch_views_api() {
+  return array(
+    'api' => '3.0',
+  );
 }
 
 /**

@@ -10,6 +10,9 @@
  */
 abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractService {
 
+  abstract protected function getSettings(SearchApiIndex $index);
+  abstract protected function updateSettings(SearchApiIndex $index, $data);
+
   /**
    * Overrides configurationForm().
    */
@@ -857,5 +860,19 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
 
     // Allow other modules to alter properties.
     drupal_alter('search_api_elasticsearch_fields_updated', $index, $this->fieldsUpdatedProperties);
+  }
+
+  /**
+   * Get analyzers for an Elasticsearch index.
+   *
+   * @param SearchApiIndex $index
+   *   A Search API index object.
+   *
+   * @return array | bool
+   *   An array of available analyzers. FALSE if none.
+   */
+  public function getAnalysisSettings(SearchApiIndex $index) {
+    $settings = $this->getSettings($index);
+    return isset($settings['analysis']) ? $settings['analysis'] : FALSE;
   }
 }

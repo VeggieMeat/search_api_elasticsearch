@@ -715,7 +715,9 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   public function updateSettings(SearchApiIndex $index, $data) {
     try {
       $elastica_index = $this->getElasticaIndex($index);
-      $elastica_index->getSettings()->set($data);
+      $elastica_index->close();
+      $elastica_index->setSettings($data);
+      $elastica_index->open();
     }
     catch (Exception $e) {
       watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
@@ -842,5 +844,4 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       'mlt' => $mlt,
     );
   }
-
 }
