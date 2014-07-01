@@ -651,7 +651,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
    * @param string $incomplete_key
    * @param string $user_input
    */
-  protected function getAutocompleteSuggestions(SearchApiQueryInterface $query, SearchApiAutocompleteSearch $search, $incomplete_key, $user_input) {
+  public function getAutocompleteSuggestions(SearchApiQueryInterface $query, SearchApiAutocompleteSearch $search, $incomplete_key, $user_input) {
     $suggestions = array();
     // Turn inputs to lower case, otherwise we get case sensivity problems.
     $incomp = drupal_strtolower($incomplete_key);
