@@ -10,9 +10,18 @@
  */
 abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractService {
 
+  abstract protected function getClusterHealth();
+  abstract protected function getClusterState();
   abstract protected function getTransportOptions();
   abstract protected function getSettings(SearchApiIndex $index);
   abstract protected function updateSettings(SearchApiIndex $index, $data);
+
+  /**
+   * {@inheritdoc}
+   */
+  public function supportsFeature($feature) {
+    $this->_supportedFeatures = drupal_map_assoc(array('search_api_service_extra'));
+  }
 
   /**
    * Overrides configurationForm().
@@ -876,5 +885,52 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   public function getAnalysisSettings(SearchApiIndex $index) {
     $settings = $this->getSettings($index);
     return isset($settings['analysis']) ? $settings['analysis'] : FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExtraInformation() {
+    $info = array();
+
+    $cluster_health = $this->getClusterHealth();
+    $info[] = array(
+      'label' => t('Cluster Name'),
+      'info' => $cluster_health['cluster_name'],
+    );
+    $info[] = array(
+      'label' => t('Cluster Status'),
+      'info' => $cluster_health['status'],
+    );
+    $info[] = array(
+      'label' => t('Number of Nodes'),
+      'info' => $cluster_health['number_of_nodes'],
+    );
+    $info[] = array(
+      'label' => t('Number of Data Nodes'),
+      'info' => $cluster_health['number_of_data_nodes'],
+    );
+    $info[] = array(
+      'label' => t('Active Primary Shards'),
+      'info' => $cluster_health['active_primary_shards'],
+    );
+    $info[] = array(
+      'label' =>t('Active Shards'),
+      'info' => $cluster_health['active_shards'],
+    );
+    $info[] = array(
+      'label' => t('Relocating Shards'),
+      'info' => $cluster_health['relocating_shards'],
+    );
+    $info[] = array(
+      'label' => t('Initializing Shards'),
+      'info' => $cluster_health['initializing_shards'],
+    );
+    $info[] = array(
+      'label' => t('Unassigned Shards'),
+      'info' => $cluster_health['unassigned_shards'],
+    );
+
+    return $info;
   }
 }

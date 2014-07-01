@@ -80,14 +80,15 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    * Overrides supportsFeature().
    */
   public function supportsFeature($feature) {
-    $supported = drupal_map_assoc(array(
+    parent::supportsFeature($feature);
+    $this->_supportedFeatures += drupal_map_assoc(array(
           'search_api_facets',
           'search_api_facets_operator_or',
           'search_api_autocomplete',
           'search_api_mlt',
           'search_api_data_type_location',
         ));
-    return isset($supported[$feature]);
+    return isset($this->_supportedFeatures[$feature]);
   }
 
   /**
@@ -118,7 +119,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     $output = array();
 
     try {
-      $status = !empty($this->elasticaClient) ? $this->elasticaClient->getStatus()->getServerStatus() : NULL;
+      $health = !empty($this->elasticaClient) ? $this->getClusterHealth() : NULL;
     }
     catch (Exception $e) {
       watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
@@ -128,7 +129,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     $output['status'] = array(
       '#type' => 'item',
       '#title' => t('Elasticsearch daemon status'),
-      '#markup' => '<div class="elasticsearch-daemon-status"><em>' . (!empty($status['ok']) ? 'running' : 'One or more nodes not running') . '</em></div>',
+      '#markup' => '<div class="elasticsearch-daemon-status"><em>' . (!empty($health['status']) ? 'running' : 'One or more nodes not running') . '</em></div>',
     );
 
     // Display settings.
@@ -902,5 +903,19 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     }
 
     return $options;
+  }
+
+  /**
+   * Get Cluster health.
+   */
+  protected function getClusterHealth() {
+    return $this->elasticaClient->getCluster()->getHealth()->getData();
+  }
+
+  /**
+   * Get Cluster state.
+   */
+  protected function getClusterState() {
+    return $this->elasticaClient->getCluster()->getState();
   }
 }
