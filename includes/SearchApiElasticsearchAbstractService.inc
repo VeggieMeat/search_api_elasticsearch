@@ -10,6 +10,7 @@
  */
 abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractService {
 
+  abstract protected function getTransportOptions();
   abstract protected function getSettings(SearchApiIndex $index);
   abstract protected function updateSettings(SearchApiIndex $index, $data);
 
@@ -129,12 +130,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#type' => 'select',
           '#title' => t('Select transport'),
           '#description' => t('Transport to connect to this elasticsearch server.'),
-          '#options' => array(
-            'Http' => 'HTTP',
-            'Https' => 'HTTPS',
-            'Memcache' => 'Memcache',
-            'Null' => 'NULL',
-          ),
+          '#options' => $this->getTransportOptions(),
           '#default_value' => isset($options[$c]['transport']) ? $options[$c]['transport'] : $options['transport'],
           '#parents' => array('options', 'form', $c, 'transport'),
         );

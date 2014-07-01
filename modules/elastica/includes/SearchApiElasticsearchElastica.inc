@@ -876,4 +876,31 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       'spatials' => $spatials,
     );
   }
+
+  /**
+   * Transport options supported by this library.
+   *
+   * @return array
+   *   An array of available transport options.
+   *   Key: Transport name used by library.
+   *   Value: Display name.
+   */
+  protected function getTransportOptions() {
+    $options = array(
+      'Http' => 'HTTP',
+      'Https' => 'HTTPS',
+      'Memcache' => 'Memcache',
+      'Null' => 'Null',
+    );
+
+    if (class_exists('\GuzzleHttp\Client')) {
+      $options['Guzzle'] = 'Guzzle';
+    }
+
+    if (class_exists('\Elasticsearch\RestClient')) {
+      $options['Thrift'] = 'Thrift';
+    }
+
+    return $options;
+  }
 }
