@@ -230,7 +230,7 @@ function search_api_elasticsearch_analysis_form_submit($form, &$form_state) {
       'analyzer' => '',
     ),
   );
-  $form['#SearchApiElasticsearchClient']->updateSettings([$form['#SearchApiIndex'], $data]);
+  $form['#SearchApiElasticsearchClient']->updateSettings($form['#SearchApiIndex'], $reset_settings);
 
   $data = array();
   foreach ($form_state['values']['analyzer'] as $analyzer => $settings) {
