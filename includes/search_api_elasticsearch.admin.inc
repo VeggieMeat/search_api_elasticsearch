@@ -224,14 +224,6 @@ function search_api_elasticsearch_analysis_form_validate($form, &$form_state) {
  * @ingroup forms
  */
 function search_api_elasticsearch_analysis_form_submit($form, &$form_state) {
-  // @TODO The following is a workaround for Issue #2300053.
-  $reset_settings = array(
-    'analysis' => array(
-      'analyzer' => '',
-    ),
-  );
-  $form['#SearchApiElasticsearchClient']->updateSettings($form['#SearchApiIndex'], $reset_settings);
-
   $data = array();
   foreach ($form_state['values']['analyzer'] as $analyzer => $settings) {
     if ($settings['enabled'] == TRUE) {
