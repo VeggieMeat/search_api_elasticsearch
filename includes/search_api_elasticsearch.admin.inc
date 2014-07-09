@@ -50,12 +50,14 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
       '#title' => t('Stopwords'),
       '#type' => 'textarea',
       '#description' => t('A list of stopwords to initialize the stop filter with. Defaults to an empty stopword list.'),
+      '#default_value' => !empty($analysis_settings['analyzer']['standard']['stopwords']) ? $analysis_settings['analyzer']['standard']['stopwords'] : '',
     );
 
     $form['analyzer']['standard']['max_token_length'] = array(
       '#title' => t('Maximum Token Length'),
       '#type' => 'textfield',
       '#description' => t('The maximum token length. If a token is seen that exceeds this length then it is discarded. Defaults to 255.'),
+      '#default_value' => !empty($analysis_settings['analyzer']['standard']['max_token_length']) ? $analysis_settings['analyzer']['standard']['max_token_length'] : '',
     );
 
     $form['analyzer']['simple'] = array(
@@ -85,6 +87,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     $form['analyzer']['whitespace']['enabled'] = array(
       '#title' => t('Enabled'),
       '#type' => 'checkbox',
+      '#default_value' => isset($analysis_settings['analyzer']['whitespace']) ? 1 : 0,
     );
 
     $form['analyzer']['stop'] = array(
@@ -99,12 +102,14 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     $form['analyzer']['stop']['enabled'] = array(
       '#title' => t('Enabled'),
       '#type' => 'checkbox',
+      '#default_value' => isset($analysis_settings['analyzer']['stop']) ? 1 : 0,
     );
 
     $form['analyzer']['stop']['stopwords'] = array(
       '#title' => t('Stopwords'),
       '#type' => 'textarea',
       '#description' => t('A list of stopwords to initialize the stop filter with. Defaults to the English stopwords.'),
+      '#default_value' => !empty($analysis_settings['analyzer']['stop']['stopwords']) ? $analysis_settings['analyzer']['stop']['stopwords'] : '',
     );
 
     $form['analyzer']['keyword'] = array(
@@ -119,6 +124,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     $form['analyzer']['keyword']['enabled'] = array(
       '#title' => t('Enabled'),
       '#type' => 'checkbox',
+      '#default_value' => isset($analysis_settings['analyzer']['keyword']) ? 1 : 0,
     );
 
     $form['analyzer']['pattern'] = array(
@@ -133,29 +139,34 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     $form['analyzer']['pattern']['enabled'] = array(
       '#title' => t('Enabled'),
       '#type' => 'checkbox',
+      '#default_value' => isset($analysis_settings['analyzer']['pattern']) ? 1 : 0,
     );
 
     $form['analyzer']['pattern']['lowercase'] = array(
       '#title' => t('Lowercase'),
       '#type' => 'checkbox',
+      '#default_value' => !empty($analysis_settings['analyzer']['pattern']['lowercase']) ? 1 : 0,
     );
 
     $form['analyzer']['pattern']['pattern'] = array(
       '#title' => t('Pattern'),
       '#type' => 'textarea',
       '#description' => t('The regular expression pattern. The regular expression should match the token separators, not the tokens themselves. Defaults to \W+.'),
+      '#default_value' => !empty($analysis_settings['analyzer']['pattern']['pattern']) ? $analysis_settings['analyzer']['pattern']['pattern'] : '',
     );
 
     $form['analyzer']['pattern']['flags'] = array(
       '#title' => t('Flags'),
       '#type' => 'textfield',
       '#description' => t('The regular expression flags. Flags should be pipe-separated, eg "CASE_INSENSITIVE|COMMENTS". Check Java Pattern API for more details about flags options.'),
+      '#default_value' => !empty($analysis_settings['analyzer']['pattern']['flags']) ? $analysis_settings['analyzer']['pattern']['flags'] : '',
     );
 
     $form['analyzer']['pattern']['stopwords'] = array(
       '#title' => t('Stopwords'),
       '#type' => 'textarea',
       '#description' => t('A list of stopwords to initialize the stop filter with. Defaults to an empty stopwords list.'),
+      '#default_value' => !empty($analysis_settings['analyzer']['pattern']['stopwords']) ? $analysis_settings['analyzer']['pattern']['stopwords'] : '',
     );
 
     // @TODO Determine proper way to implement language analyzers.
@@ -180,6 +191,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     $form['analyzer']['snowball']['enabled'] = array(
       '#title' => t('Enabled'),
       '#type' => 'checkbox',
+      '#default_value' => isset($analysis_settings['analyzer']['snowball']) ? 1 : 0,
     );
 
     $form['submit'] = array(
