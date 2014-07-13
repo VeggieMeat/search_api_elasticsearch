@@ -45,6 +45,7 @@ before_script:
   - mkdir -p $MODULE_PATH
   - git archive $(git rev-parse --abbrev-ref HEAD) | tar -x -C $MODULE_PATH
   - cd build
+  - drush runserver 127.0.0.1:8080 & until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
   - drush --yes site-install minimal --db-url="mysql://$DB_USERNAME@127.0.0.1/$DATABASE"
   - drush --yes dis search
   - drush --yes en $DRUPAL_3RD_PARTY
