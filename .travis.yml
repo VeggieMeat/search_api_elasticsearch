@@ -31,10 +31,12 @@ mysql:
   encoding: $DB_ENCODE
 
 before_install:
+  - sudo apt-get update > /dev/null
   - composer self-update
   - pear channel-discover pear.drush.org
 
 install:
+  - sudo apt-get install -y --force-yes php5-cgi php5-mysql
   - pear install drush/drush
   - phpenv rehash
   - ./tests/bin/run_elasticsearch.sh
