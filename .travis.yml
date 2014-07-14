@@ -36,7 +36,7 @@ before_install:
   - pear channel-discover pear.drush.org
 
 install:
-  - sudo apt-get install -y --force-yes php5-cgi php5-mysql
+  - sudo apt-get install -y --force-yes php5-cgi php5-mysql php5-curl
   - pear install drush/drush
   - phpenv rehash
   - ./tests/bin/run_elasticsearch.sh
