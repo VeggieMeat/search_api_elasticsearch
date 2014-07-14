@@ -71,7 +71,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       }
     }
     else {
-      watchdog('Elastica Search', 'Elastica Client does not exist', array(), WATCHDOG_ERROR);
+      watchdog('Elasticsearch', 'Elastica Client does not exist', array(), WATCHDOG_ERROR);
       return FALSE;
     }
   }
