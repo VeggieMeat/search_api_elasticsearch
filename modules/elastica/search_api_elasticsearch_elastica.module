@@ -38,7 +38,8 @@ function search_api_elasticsearch_elastica_loaded() {
   $loaded = &drupal_static(__FUNCTION__);
 
   if (!isset($loaded)) {
-    if (!class_exists('\Elastica\Client') && drupal_load('module', 'composer_manager')) {
+    if (!class_exists('\Elastica\Client') && module_exists('composer_manager')) {
+      drupal_load('module', 'composer_manager');
       composer_manager_register_autoloader();
     }
     elseif (!class_exists('\Elastica\Client')) {
