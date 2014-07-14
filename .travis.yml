@@ -54,7 +54,7 @@ before_script:
   - drush --yes en simpletest
 
 script:
-  - drush test-run --uri=http://localhost 'Search API Elasticsearch' --debug
+  - drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
   - phpunit
 
 notifications:
