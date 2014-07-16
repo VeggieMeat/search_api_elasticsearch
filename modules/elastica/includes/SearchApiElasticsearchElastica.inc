@@ -165,6 +165,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     $elastica_index = $this->getElasticaIndex($index);
     if (!empty($elastica_index)) {
       try {
+        drupal_alter('search_api_elasticsearch_elastica_add_index', $index->options);
         $response = $elastica_index->create($index->options, TRUE);
       }
       catch (Exception $e) {

@@ -8,6 +8,16 @@
  */
 
 /**
+ * Allows modules to alter index configuration during creation.
+ *
+ * @param array $options
+ *   An array of index options.
+ */
+function hook_search_api_elasticsearch_elastica_add_index_alter(array $options) {
+
+}
+
+/**
  * Allows modules to alter Elastica query.
  *
  * @param \Elastica\Query $elastica_query
