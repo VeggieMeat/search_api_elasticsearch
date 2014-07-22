@@ -247,7 +247,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
         if (isset($field_data['value']) && is_array($field_data['value'])) {
           $data[$field_id] = array();
           foreach ($field_data['value'] as $token) {
-            if (isset($token['value'])) {
+            if (is_array($token) && isset($token['value'])) {
               $data[$field_id][] = $token['value'];
             }
             else {

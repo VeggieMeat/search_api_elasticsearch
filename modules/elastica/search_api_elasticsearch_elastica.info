@@ -2,6 +2,7 @@ name = Search API Elasticsearch (Elastica Client)
 description = "Provides Elastica client for Search API Elasticsearch"
 dependencies[] = search_api_elasticsearch
 core = 7.x
+php = 5.3.3
 package = Search
 files[] = includes/SearchApiElasticsearchElastica.inc
 files[] = tests/functional/search_api_elasticsearch_elastica.test
