@@ -20,11 +20,17 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->assertInstanceOf('SearchApiAbstractService', $class);
   }
 
+  /**
+   * @covers SearchApiElasticsearchElastica::addIndex
+   */
   public function testAddIndex() {
     $this->_client->addIndex($this->_index);
     $this->assertSame('elasticsearch_index_drupal_elastica_test_index', $this->_client->getElasticaIndex($this->_index)->getName(), 'Expected "elasticsearch_index_drupal_elastica_test_index". Found ' . $this->_client->getElasticaIndex($this->_index)->getName());
   }
 
+  /**
+   * @covers SearchApiElasticsearchElastica::supportsFeature
+   */
   public function testSupportsFeature() {
     $features = array(
       'search_api_autocomplete',
@@ -43,6 +49,28 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
         $this->assertTrue($this->_client->supportsFeature($feature));
       }
     }
+  }
+
+  /**
+   * @covers SearchApiElasticsearchElastica::removeIndex
+   */
+  public function testRemoveIndex() {
+    $response = $this->_client->removeIndex($this->_index);
+    $this->assertTrue($reponse->isOK());
+  }
+
+  /**
+   * @covers SearchApiElasticsearchElastica::fieldsUpdated
+   */
+  public function testFieldsUpdated() {
+    $this->assertTrue($this->_client->fieldsUpdated($this->_index));
+  }
+
+  /**
+   * @covers SearchApiElasticsearchElastica::postUpdate
+   */
+  public function testPostUpdate() {
+    $this->assertFalse($this->_client->postUpdate());
   }
 
 }
