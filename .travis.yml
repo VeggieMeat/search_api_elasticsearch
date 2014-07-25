@@ -56,12 +56,14 @@ before_script:
   - drush --yes en search_api_elasticsearch_elastica
   - drush --yes en simpletest
   - cd sites/all/modules/search_api_elasticsearch
+  - mkdir -p $TRAVIS_BUILD_DIR/build/logs
 
 script:
-  - phpunit
+  - phpunit --coverage-clover $TRAVIS_BUILD_DIR/build/logs/clover.xml
   - drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
 
 after_script:
+  - cd $TRAVIS_BUILD_DIR
   - php $TRAVIS_BUILD_DIR/vendor/bin/coveralls -v
 
 notifications:
