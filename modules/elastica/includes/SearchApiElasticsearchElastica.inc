@@ -923,4 +923,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   protected function getClusterState() {
     return $this->elasticaClient->getCluster()->getState();
   }
+
+  /**
+   * Return Elastica Client.
+   */
+  public function getElasticaClient() {
+    return $this->elasticaClient;
+  }
 }
