@@ -47,10 +47,10 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
 
   public function testRemoveIndex() {
     $status = new \Elastica\Status($this->_client->getElasticaClient());
-    $this->assertTrue($status->indexExists($this->_index->machine_name));
+    $this->assertTrue($status->indexExists($this->_client->getElasticaIndex($this->_index)->getName()));
     $this->_client->removeIndex($this->_index);
     $status->refresh();
-    $this->assertFalse($status->indexExists($this->_index->machine_name));
+    $this->assertFalse($status->indexExists($this->_client->getElasticaIndex($this->_index)->getName()));
   }
 
   public function testFieldsUpdated() {
