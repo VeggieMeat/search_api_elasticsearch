@@ -5,7 +5,7 @@
    * Contains tests for SearchApiElasticsearchElastica.
    */
 
-class SearchApiElasticsearchElastica extends SearchApiElasticsearchBaseTest {
+class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest {
 
   public function setUp() {
     $this->_server = $this->_createServer('elastica_test', 'search_api_elasticsearch_elastica_service', array(array('host' => '127.0.0.1', 'port' => '9200')));
