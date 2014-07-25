@@ -4,7 +4,7 @@
    * Contains base test class for Search API Elasticsearch.
    */
 
-class SearchApiElasticsearchTestBase extends \PHPUnit_Framework_TestCase {
+abstract class SearchApiElasticsearchBaseTest extends \PHPUnit_Framework_TestCase {
 
   /**
    * Create Search API server.
