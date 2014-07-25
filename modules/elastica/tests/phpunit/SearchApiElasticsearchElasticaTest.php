@@ -22,7 +22,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
 
   public function testAddIndex() {
     $this->_client->addIndex($this->_index);
-    $this->assertTrue('elasticsearch_index_drupal_elastica_test_index', $this->_client->getElasticaIndex($this->_index)->getName(), 'Expected "elasticsearch_index_drupal_elastica_test_index". Found ' . $this->_client->getElasticaIndex($this->_index)->getName());
+    $this->assertSame('elasticsearch_index_drupal_elastica_test_index', $this->_client->getElasticaIndex($this->_index)->getName(), 'Expected "elasticsearch_index_drupal_elastica_test_index". Found ' . $this->_client->getElasticaIndex($this->_index)->getName());
   }
 
 }
