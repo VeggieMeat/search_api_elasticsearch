@@ -8,7 +8,6 @@ class SearchApiElasticsearchAbstractServiceTest extends PHPUnit_Framework_TestCa
   protected $_sut;
 
   protected function setUp() {
-    $this->_sut = $this->getMockForAbstractClass('SearchApiElasticsearchAbstractService');
   }
 
   protected function tearDown() {
