@@ -22,7 +22,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
 
   public function testAddIndex() {
     $this->_client->addIndex($this->_index);
-    $this->assertTrue($this->_index->name, $this->_client->getElasticaIndex($this->_index)->getName());
+    $this->assertTrue($this->_client->getIndexName($this->_index), $this->_client->getElasticaIndex($this->_index)->getName());
   }
 
 }
