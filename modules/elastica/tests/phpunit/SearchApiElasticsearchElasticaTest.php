@@ -47,7 +47,6 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
 
   public function testRemoveIndex() {
     $response = $this->_client->removeIndex($this->_index);
-    $this->assertTrue($reponse->isOK());
   }
 
   public function testFieldsUpdated() {
