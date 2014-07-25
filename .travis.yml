@@ -34,6 +34,7 @@ before_install:
   - sudo apt-get update > /dev/null
   - composer self-update
   - pear channel-discover pear.drush.org
+  - composer install --prefer-source
 
 install:
   - sudo apt-get install -y --force-yes php5-cgi php5-mysql php5-curl
@@ -61,7 +62,7 @@ script:
   - drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
 
 after_script:
-  - php vendor/bin/coveralls -v
+  - php ../../../../vendor/bin/coveralls -v
 
 notifications:
   irc: irc.freenode.org#vmdoh
