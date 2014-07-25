@@ -5,4 +5,7 @@
             <directory>modules/elastica/tests/phpunit</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <server name="REMOTE_ADDR" value="127.0.0.1" />
+    </php>
 </phpunit>
