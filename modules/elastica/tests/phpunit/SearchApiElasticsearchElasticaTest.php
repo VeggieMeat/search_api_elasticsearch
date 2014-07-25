@@ -61,4 +61,33 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->assertFalse($this->_client->postUpdate());
   }
 
+  public function testIndexItems() {
+    $items = array(
+      1 => array(
+        'title' => 'batman',
+        'nemesis' => array(
+          'value' => 'joker',
+        ),
+      ),
+      2 => array(
+        'title' => 'robin',
+      ),
+      3 => array(
+        'title' => 'catwoman',
+        'cohorts' => array(
+          'riddler',
+          'penguin',
+        ),
+      ),
+    );
+    $this->indexItems($this->_index, $items);
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
+    $this->assertEquals(1, $resultSet->count());
+    $count = $this->_client->getElasticaType($this->_index)->count('batman');
+    $this->assertEquals(1, $count);
+    $result = $resultSet->current();
+    $this->assertEquals(1, $result->getId());
+    $data = $result->getData();
+    $this->assertEquals('batman', $data['title']);
+  }
 }
