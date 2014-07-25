@@ -9,5 +9,8 @@
       "email":"brian.altenhofel@vmdoh.com",
       "homepage":"http://www.vmdoh.com"
     }
-  ]
+  ],
+  "require-dev": {
+    "satooshi/php-coveralls": "dev-master"
+  }
 }
