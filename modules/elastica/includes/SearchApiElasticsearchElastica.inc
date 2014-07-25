@@ -331,9 +331,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     if (!empty($query_options['mlt'])) {
       $mlt_document = $elastica_type->getDocument($query_options['mlt']['id']);
       // @TODO Expose min_term_freq and min_doc_freq
-      $query_options['min_term_freq'] = '1';
-      $query_options['min_doc_freq'] = '1';
-      $response = $elastica_type->moreLikeThis($mlt_document, $query_options, $elastica_query);
+      $mlt_options['min_term_freq'] = '1';
+      $mlt_options['min_doc_freq'] = '1';
+      $mlt_options['search_from'] = $query_options['query_offset'];
+      $mlt_options['search_size'] = $query_options['query_limit'];
+      $response = $elastica_type->moreLikeThis($mlt_document, $mlt_options, $elastica_query);
     }
     else {
       // Perform search.
