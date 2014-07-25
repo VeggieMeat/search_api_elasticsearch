@@ -2,6 +2,7 @@
     <testsuites>
         <testsuite name="Search API Elasticsearch">
             <directory>tests/phpunit</directory>
+            <directory>modules/elastica/tests/phpunit</directory>
         </testsuite>
     </testsuites>
 </phpunit>
