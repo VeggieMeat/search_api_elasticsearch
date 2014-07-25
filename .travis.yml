@@ -62,7 +62,7 @@ script:
   - drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
 
 after_script:
-  - php ../../../../vendor/bin/coveralls -v
+  - php $TRAVIS_BUILD_DIR/vendor/bin/coveralls -v
 
 notifications:
   irc: irc.freenode.org#vmdoh
