@@ -25,4 +25,24 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->assertSame('elasticsearch_index_drupal_elastica_test_index', $this->_client->getElasticaIndex($this->_index)->getName(), 'Expected "elasticsearch_index_drupal_elastica_test_index". Found ' . $this->_client->getElasticaIndex($this->_index)->getName());
   }
 
+  public function testSupportsFeature() {
+    $features = array(
+      'search_api_autocomplete',
+      'search_api_data_type_location',
+      'search_api_facets',
+      'search_api_facets_operator_or',
+      'search_api_mlt',
+      'search_api_service_extra',
+      'search_api_test_fail',
+    );
+    foreach ($features as $feature) {
+      if ($feature === 'search_api_test_fail') {
+        $this->assertFalse($this->_client->supportsFeature($feature));
+      }
+      else {
+        $this->assertTrue($this->_client->supportsFeature($feature));
+      }
+    }
+  }
+
 }
