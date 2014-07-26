@@ -142,4 +142,107 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $resultSet = $this->_client->getElasticaType($this->_index)->search('robin');
     $this->assertEquals(1, $resultSet->count());
   }
+
+  public function testDeleteMultipleItems() {
+    $items = array(
+      '1' => array(
+        'nid' => array(
+          'value' => 1,
+        ),
+        'title' => array(
+          'value' => 'batman',
+        ),
+      ),
+      '2' => array(
+        'nid' => array(
+          'value' => 2,
+        ),
+        'title' => array(
+          'value' => 'robin',
+        ),
+      ),
+      '3' => array(
+        'nid' => array(
+          'value' => 3,
+        ),
+        'title' => array(
+          'value' => 'catwoman',
+        ),
+      ),
+    );
+    $this->_client->indexItems($this->_index, $items);
+    $this->_client->getElasticaIndex($this->_index)->refresh();
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
+    $this->assertEquals(1, $resultSet->count());
+    $result = $resultSet->current();
+    $this->assertNotFalse($result);
+    $this->assertEquals(1, $result->getId());
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('robin');
+    $this->assertEquals(1, $resultSet->count());
+    $result = $resultSet->current();
+    $this->assertNotFalse($result);
+    $this->assertEquals(2, $result->getId());
+    $this->_client->deleteItems(array('1', '2'), $this->_index);
+    $this->_client->getElasticaIndex($this->_index)->refresh();
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
+    $this->assertEquals(0, $resultSet->count());
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('robin');
+    $this->assertEquals(0, $resultSet->count());
+   $resultSet = $this->_client->getElasticaType($this->_index)->search('catwoman');
+    $this->assertEquals(1, $resultSet->count());
+  }
+
+  public function testDeleteAllItems() {
+    $items = array(
+      '1' => array(
+        'nid' => array(
+          'value' => 1,
+        ),
+        'title' => array(
+          'value' => 'batman',
+        ),
+      ),
+      '2' => array(
+        'nid' => array(
+          'value' => 2,
+        ),
+        'title' => array(
+          'value' => 'robin',
+        ),
+      ),
+      '3' => array(
+        'nid' => array(
+          'value' => 3,
+        ),
+        'title' => array(
+          'value' => 'catwoman',
+        ),
+      ),
+    );
+    $this->_client->indexItems($this->_index, $items);
+    $this->_client->getElasticaIndex($this->_index)->refresh();
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
+    $this->assertEquals(1, $resultSet->count());
+    $result = $resultSet->current();
+    $this->assertNotFalse($result);
+    $this->assertEquals(1, $result->getId());
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('robin');
+    $this->assertEquals(1, $resultSet->count());
+    $result = $resultSet->current();
+    $this->assertNotFalse($result);
+    $this->assertEquals(2, $result->getId());
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('catwoman');
+    $this->assertEquals(1, $resultSet->count());
+    $result = $resultSet->current();
+    $this->assertNotFalse($result);
+    $this->assertEquals(3, $result->getId());
+    $this->_client->deleteItems('all', $this->_index);
+    $this->_client->getElasticaIndex($this->_index)->refresh();
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
+    $this->assertEquals(0, $resultSet->count());
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('robin');
+    $this->assertEquals(0, $resultSet->count());
+    $resultSet = $this->_client->getElasticaType($this->_index)->search('catwoman');
+    $this->assertEquals(0, $resultSet->count());
+  }
 }
