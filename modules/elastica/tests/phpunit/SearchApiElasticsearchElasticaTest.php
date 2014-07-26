@@ -63,20 +63,28 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
 
   public function testIndexItems() {
     $items = array(
-      1 => array(
-        'title' => 'batman',
-        'nemesis' => array(
-          'value' => 'joker',
+      array(
+        'nid' => array(
+          'value' => 1,
+        ),
+        'title' => array(
+          'value' => 'batman',
         ),
       ),
-      2 => array(
-        'title' => 'robin',
+      array(
+        'nid' => array(
+          'value' => 2,
+        ),
+        'title' => array(
+          'value' => 'robin',
+        ),
       ),
-      3 => array(
-        'title' => 'catwoman',
-        'cohorts' => array(
-          'riddler',
-          'penguin',
+      array(
+        'nid' => array(
+          'value' => 3,
+        ),
+        'title' => array(
+          'value' => 'catwoman',
         ),
       ),
     );
