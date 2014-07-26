@@ -63,34 +63,28 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
 
   public function testIndexItems() {
     $items = array(
-      array(
-        '1' => array(
-          'nid' => array(
-            'value' => 1,
-          ),
-          'title' => array(
-            'value' => 'batman',
-          ),
+      '1' => array(
+        'nid' => array(
+          'value' => 1,
+        ),
+        'title' => array(
+          'value' => 'batman',
         ),
       ),
-      array(
-        '2' => array(
-          'nid' => array(
-            'value' => 2,
-          ),
-          'title' => array(
-            'value' => 'robin',
-          ),
+      '2' => array(
+        'nid' => array(
+          'value' => 2,
+        ),
+        'title' => array(
+          'value' => 'robin',
         ),
       ),
-      array(
-        '3' => array(
-          'nid' => array(
-            'value' => 3,
-          ),
-          'title' => array(
-            'value' => 'catwoman',
-          ),
+      '3' => array(
+        'nid' => array(
+          'value' => 3,
+        ),
+        'title' => array(
+          'value' => 'catwoman',
         ),
       ),
     );
@@ -109,34 +103,28 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
 
   public function testDeleteItem() {
     $items = array(
-      array(
-        '1' => array(
-          'nid' => array(
-            'value' => 1,
-          ),
-          'title' => array(
-            'value' => 'batman',
-          ),
+      '1' => array(
+        'nid' => array(
+          'value' => 1,
+        ),
+        'title' => array(
+          'value' => 'batman',
         ),
       ),
-      array(
-        '2' => array(
-          'nid' => array(
-            'value' => 2,
-          ),
-          'title' => array(
-            'value' => 'robin',
-          ),
+      '2' => array(
+        'nid' => array(
+          'value' => 2,
+        ),
+        'title' => array(
+          'value' => 'robin',
         ),
       ),
-      array(
-        '3' => array(
-          'nid' => array(
-            'value' => 3,
-          ),
-          'title' => array(
-            'value' => 'catwoman',
-          ),
+      '3' => array(
+        'nid' => array(
+          'value' => 3,
+        ),
+        'title' => array(
+          'value' => 'catwoman',
         ),
       ),
     );
