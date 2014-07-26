@@ -81,6 +81,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
       ),
     );
     $this->_client->indexItems($this->_index, $items);
+    $this->_client->getElasticaIndex($this->_index)->refresh();
     $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $resultSet->count());
     $count = $this->_client->getElasticaType($this->_index)->count('batman');
@@ -111,9 +112,11 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
       ),
     );
     $this->_client->indexItems($this->_index, $items);
+    $this->_client->getElasticaIndex($this->_index)->refresh();
     $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $resultSet->count());
     $this->deleteItems(array('1'), $this->_index);
+    $this->_client->getElasticaIndex($this->_index)->refresh();
     $resultSet = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(0, $resultSet->count());
     $resultSet = $this->_client->getElasticaType($this->_index)->search('robin');
