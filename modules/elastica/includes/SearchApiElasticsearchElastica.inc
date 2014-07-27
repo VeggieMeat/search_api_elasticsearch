@@ -87,6 +87,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           'search_api_autocomplete',
           'search_api_mlt',
           'search_api_data_type_location',
+          //'search_api_spellcheck',
         ));
     return isset($this->_supportedFeatures[$feature]);
   }
@@ -733,6 +734,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Parse facets.
     $search_result['search_api_facets'] = $this->parseSearchFacets($response, $query);
+    $search_result['search_api_spellcheck'] = $this->parseSuggestions($response, $query);
 
     return $search_result;
   }
@@ -929,5 +931,34 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function getElasticaClient() {
     return $this->elasticaClient;
+  }
+
+  /**
+   * Parse Elasticsearch Suggestions.
+   */
+  protected function parseSuggestions($response, $query) {
+    $return = array();
+    $suggestions = $response->getSuggests();
+    foreach ($suggestions as $suggestion_group) {
+      foreach ($suggestion_group as $suggestion_set) {
+        $return['original'] = $suggestion_set['text'];
+        foreach ($suggestion_set['options'] as $suggestion) {
+          $return['suggestions'][] = $suggestion['text'];
+        }
+      }
+    }
+
+    return $return;
+  }
+
+  protected function buildSpellcheckQuery(SearchApiQueryInterface $query) {
+    $suggest = new \Elastica\Suggest();
+    $phrase = new \Elastica\Suggest\Phrase('suggest1', 'text');
+    $phrase->setText($this->flattenKeys($this->getKeys()));
+    $phrase->setHighlight("<suggest>", "</suggest>")->setStupidBackoffSmoothing();
+    $phrase->addCandidateGenerator(new \Elastica\Suggest\CandidateGenerator\DirectGenerator("text"));
+    $suggest->addSuggestion($phrase);
+
+    return $suggest;
   }
 }
