@@ -565,7 +565,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function getElasticaType(SearchApiIndex $index) {
     $elastica_index = $this->getElasticaIndex($index);
-    return!empty($elastica_index) ? $elastica_index->getType($index->machine_name) : NULL;
+    return !empty($elastica_index) ? $elastica_index->getType($index->machine_name) : NULL;
   }
 
   /**
