@@ -190,20 +190,27 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $elastica_type = $elastica_index->getType($index->machine_name);
 
       // Create a new mapping.
-      // TODO: check if we need to delete the previous mapping first.
-      // TODO: shall we delete the items from the index?
       $mapping = new Elastica\Type\Mapping();
       $mapping->setType($elastica_type);
       $mapping->setParam('_all', array('enabled' => FALSE));
       try {
-        $mapping->setProperties($this->fieldsUpdatedProperties);
-
-        $mapping->send();
+        try {
+          // First we try a simple merge.
+          $mapping->setProperties($this->fieldsUpdatedProperties);
+          $mapping->send();
+        }
+        catch (Exception $e) {
+          // If a merge fails, we must delete the type first.
+          $elastica_type->delete();
+          $elastica_type = $elastica_index->getType($index->machine_name);
+          $mapping->setType($elastica_type);
+          $mapping->send();
+        }
       }
       catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
-        drupal_set_message(t('Fields are not re-index'), 'error');
+        drupal_set_message(t('Fields are not re-indexed'), 'error');
         return FALSE;
       }
     }
