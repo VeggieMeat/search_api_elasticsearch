@@ -68,6 +68,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           $logger->setType('Elastica');
           $this->elasticaClient->setLogger($logger);
         }
+        if (module_exists('monolog')) {
+          $logger = new \Drupal\Monolog\Logger();
+          $logger->setName('Elastica');
+          $this->elasticaClient->setLogger($logger);
+        }
       }
     }
     else {

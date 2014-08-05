@@ -173,7 +173,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
 
         if (!class_exists('\Psr\Log\AbstractLogger')) {
           $form['daemon_settings']['fieldset'][$c]['log']['#disabled'] = TRUE;
-          $form['daemon_settings']['fieldset'][$c]['log']['#description'] = t('Logging Elasticsearch queries requires the <a href="@psr3_url">PSR-3 logger</a> to be installed and available. It is recommended to install the <a href="@psr3_watchdog_url">PSR-3 Watchdog module</a>.', array('@psr_url' => url('https://packagist.org/packages/psr/log'), '@psr3_watchdog_url' => url('https://drupal.org/project/psr3_watchdog')));
+          $form['daemon_settings']['fieldset'][$c]['log']['#description'] = t('Logging Elasticsearch queries requires the <a href="@psr3_url">PSR-3 logger</a> to be installed and available. It is recommended to install the <a href="@psr3_watchdog_url">PSR-3 Watchdog module</a> or <a href="@monolog_url">Monolog module</a>.', array('@psr_url' => url('https://packagist.org/packages/psr/log'), '@psr3_watchdog_url' => url('https://drupal.org/project/psr3_watchdog'), '@monolog_url' => url('https://www.drupal.org/project/monolog')));
         }
 
         // Elasticsearch daemon retryOnConflict.
