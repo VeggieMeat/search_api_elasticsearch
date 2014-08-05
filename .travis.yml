@@ -22,7 +22,7 @@ env:
     - MODULE_PATH='build/sites/all/modules/search_api_elasticsearch'
     - ES_REQUIRE='no-dev'
   matrix:
-    - DRUPAL_3RD_PARTY='composer_manager'
+    - DRUPAL_3RD_PARTY='composer_manager psr3_watchdog'
     - DRUPAL_3RD_PARTY='libraries'
 
 mysql:
