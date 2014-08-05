@@ -121,7 +121,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $data = $result->getData();
     $this->assertEquals('batman', $data['title']);
 
-    $this->assertFalse($this->indexItems($this->_index, array()));
+    $this->assertFalse($this->_client->indexItems($this->_index, array()));
   }
 
   public function testDeleteItem() {
