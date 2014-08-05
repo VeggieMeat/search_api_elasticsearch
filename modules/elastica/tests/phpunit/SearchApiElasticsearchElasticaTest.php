@@ -87,6 +87,27 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
           'value' => 'catwoman',
         ),
       ),
+      '4' => array(
+        'nid' => array(
+          'value' => 4,
+        ),
+        'title' => array(
+          'value' => 'joker',
+        ),
+        'friends' => array(
+          'value' => array(
+            'harleyquinn',
+            'penguin',
+          ),
+        ),
+        'rivals' => array(
+          'value' => array(
+            'batman' => array(
+              'value' => 'Bruce Wayne',
+            ),
+          ),
+        ),
+      ),
     );
     $this->_client->indexItems($this->_index, $items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
@@ -99,6 +120,8 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->assertEquals(1, $result->getId());
     $data = $result->getData();
     $this->assertEquals('batman', $data['title']);
+
+    $this->assertFalse($this->indexItems($this->_index, array()));
   }
 
   public function testDeleteItem() {
@@ -299,4 +322,6 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $resultSet = $this->_client->getElasticaType($this->_index)->search('catwoman');
     $this->assertEquals(0, $resultSet->count());
   }
+
+
 }
