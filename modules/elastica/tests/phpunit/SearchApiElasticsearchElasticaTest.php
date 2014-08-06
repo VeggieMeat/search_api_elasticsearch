@@ -322,4 +322,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $resultSet = $this->_client->getElasticaType($this->_index)->search('catwoman');
     $this->assertEquals(0, $resultSet->count());
   }
+
+  public function testGetSettings() {
+    $this->assertNotFalse($this->_client->getSettings($this->_index));
+  }
+
+  public function testViewSettings() {
+    $this->assertNotFalse($this->_client->viewSettings());
+  }
 }
