@@ -270,11 +270,6 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
   }
 
   public function testDeleteAllItemsFromAllIndexes() {
-    // We don't need default node index.
-    $indexes = search_api_index_load_multiple(NULL, array('machine_name' => 'default_node_index'));
-    foreach ($indexes as $index) {
-      $index->delete();
-    }
     $items = array(
       '1' => array(
         'nid' => array(
