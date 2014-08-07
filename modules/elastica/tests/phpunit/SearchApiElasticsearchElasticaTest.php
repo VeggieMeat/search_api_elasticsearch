@@ -11,6 +11,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->_server = $this->_createServer('elastica_test', 'search_api_elasticsearch_elastica_service', array(array('host' => '127.0.0.1', 'port' => '9200')));
     $this->_index = $this->_createIndex('elastica_test_index', 'node', 'elastica_test');
     $this->_client = new SearchApiElasticsearchElastica($this->_server);
+
+    // We don't need default node index.
+    $indexes = search_api_index_load_multiple(NULL, array('machine_name' => 'default_node_index'));
+    foreach ($indexes as $index) {
+      $index->delete();
+    }
   }
 
   public function testConstructor() {
