@@ -60,11 +60,11 @@ before_script:
 script:
   - phpunit --coverage-clover $TRAVIS_BUILD_DIR/build/logs/clover.xml
   - drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
-  - phpmd ./ text codesize,naming,design || true
 
 after_script:
   - cd $TRAVIS_BUILD_DIR
   - php $TRAVIS_BUILD_DIR/vendor/bin/coveralls -v
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpmd ./ text codesize,naming,design
 
 notifications:
   irc: irc.freenode.org#vmdoh
