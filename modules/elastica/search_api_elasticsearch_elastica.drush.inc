@@ -1,11 +1,7 @@
 <?php
 /**
  * @file
- *
  * Drush integration for Search API elasticsearch.
- *
- * Part of the code is borrowed from Joseph McGuire (JoeMcGuire)'s
- * elasticsearch module.
  */
 
 /**
@@ -20,7 +16,7 @@ const SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION = '1.1.1.1';
  *
  * @var string
  */
-define('SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL','https://github.com/ruflin/Elastica/archive/v' . SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION . '.tar.gz');
+define('SEARCH_API_ELASTICSEARCH_ELASTICA_TARBALL', 'https://github.com/ruflin/Elastica/archive/v' . SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION . '.tar.gz');
 
 /**
  * Implements hook_drush_command().
@@ -114,7 +110,7 @@ function _search_api_elasticsearch_elastica_fetch_tar($url) {
   if (is_file($filename)) {
     print $filename;
     // Extract the archive.
-    drush_shell_exec('tar xf '. $filename);
+    drush_shell_exec('tar xf ' . $filename);
     // Remove the file.
     drush_op('unlink', $filename);
     // Move the directory.

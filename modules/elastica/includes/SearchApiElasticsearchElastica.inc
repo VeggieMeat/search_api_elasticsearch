@@ -92,7 +92,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           'search_api_autocomplete',
           'search_api_mlt',
           'search_api_data_type_location',
-          //'search_api_spellcheck',
+          // 'search_api_spellcheck',
         ));
     return isset($this->_supportedFeatures[$feature]);
   }
@@ -319,13 +319,13 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Results.
     $search_result = array('result count' => 0);
 
-    // Get index
+    // Get index.
     $index = $query->getIndex();
 
-    // Get index type
+    // Get index type.
     $elastica_type = $this->getElasticaType($index);
 
-    // Get query options
+    // Get query options.
     $query_options = $this->getSearchQueryOptions($query);
 
     // Check elasticsearch index.
@@ -339,7 +339,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Add facets.
     $this->addSearchFacets($elastica_query, $query);
 
-    // More Like This
+    // More Like This.
     if (!empty($query_options['mlt'])) {
       $mlt_document = $elastica_type->getDocument($query_options['mlt']['id']);
       // @TODO Expose min_term_freq and min_doc_freq
@@ -396,7 +396,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           // Nested filters.
           elseif ($filter_info instanceof SearchApiQueryFilter) {
             $nested_filters = $this->parseFilter($filter_info, $index_fields, $ignored_field_id);
-            // TODO: handle error. - here is unnecessary cause in if we thow exceptions and this is still in try{}  .
             if (!empty($nested_filters)) {
               $filters = array_merge($filters, $nested_filters);
             }
@@ -414,7 +413,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   }
 
   /**
-   * Get filter by associative array/
+   * Get filter by associative array.
    */
   protected function getFilter(array $filter_assoc) {
     // Handles "empty", "not empty" operators.
@@ -502,7 +501,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   }
 
   /**
-   * Helper function thaht set filters conjunction
+   * Helper function thaht set filters conjunction.
    */
   protected function setFiltersConjunction(&$filters, $conjunction) {
 
@@ -520,7 +519,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       else {
         throw new Exception(t('Undefined conjunction :conjunction! Available values are :avail_conjunction! Incorrect filter criteria is using for searching!',
                 array(':conjunction!' => $conjunction, ':avail_conjunction' => $conjunction)));
-        return NULL;
       }
     }
     return $filters;
@@ -621,7 +619,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $elastica_query->setFilter($query_options['query_search_filter']);
     }
 
-    // Sort
+    // Sort.
     if (!empty($query_options['sort'])) {
       $elastica_query->setSort($query_options['sort']);
     }
@@ -667,7 +665,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
         // Add the facet.
         if (!empty($facet)) {
-          // Add facet options
+          // Add facet options.
           $facet = $this->addFacetOptions($facet, $query, $facet_info, $elastica_query);
           $elastica_query->addFacet($facet);
         }
@@ -676,7 +674,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   }
 
   /**
-   * Helper function that add options and return facet
+   * Helper function that add options and return facet.
    */
   protected function addFacetOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica\Query $elastica_query) {
 
@@ -819,7 +817,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Query options.
     $query_options = $query->getOptions();
 
-    //Index fields
+    // Index fields.
     $index_fields = $this->getIndexFields($query);
 
     // Range.
@@ -845,7 +843,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       // Full text fields in which to perform the search.
       $query_full_text_fields = $query->getFields();
 
-      // Query string
+      // Query string.
       $search_string = $this->flattenKeys($keys, $query_options['parse mode']);
 
       if (!empty($search_string)) {
@@ -872,13 +870,13 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $query_search_filter = $parsed_query_filters[0];
     }
 
-    // More Like This
+    // More Like This.
     $mlt = array();
     if (isset($query_options['search_api_mlt'])) {
       $mlt = $query_options['search_api_mlt'];
     }
 
-    // Spatials
+    // Spatials.
     $spatials = array();
     if (isset($query_options['search_api_location'])) {
       $spatials = $query_options['search_api_location'];
@@ -962,6 +960,13 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     return $return;
   }
 
+  /**
+   * buildSpellcheckQuery
+   *
+   * @param SearchApiQueryInterface $query
+   * @access protected
+   * @return void
+   */
   protected function buildSpellcheckQuery(SearchApiQueryInterface $query) {
     $suggest = new \Elastica\Suggest();
     $phrase = new \Elastica\Suggest\Phrase('suggest1', 'text');

@@ -32,7 +32,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     );
 
     $form['analyzer']['standard'] = array(
-      '#title' =>t('Standard'),
+      '#title' => t('Standard'),
       '#type' => 'fieldset',
       '#description' => t('An analyzer built using the Standard Tokenizer with the Standard Token Filter, Lower Case Token Filter, and Stop Token Filter.'),
       '#collapsible' => TRUE,
@@ -61,7 +61,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     );
 
     $form['analyzer']['simple'] = array(
-      '#title' =>t('Simple'),
+      '#title' => t('Simple'),
       '#type' => 'fieldset',
       '#description' => t('An analyzer built using a Lower Case Tokenizer.'),
       '#collapsible' => TRUE,
@@ -76,7 +76,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     );
 
     $form['analyzer']['whitespace'] = array(
-      '#title' =>t('Whitespace'),
+      '#title' => t('Whitespace'),
       '#type' => 'fieldset',
       '#description' => t('An analyzer built using a Whitespace Tokenizer.'),
       '#collapsible' => TRUE,
@@ -91,7 +91,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     );
 
     $form['analyzer']['stop'] = array(
-      '#title' =>t('Stop'),
+      '#title' => t('Stop'),
       '#type' => 'fieldset',
       '#description' => t('An analyzer built using a Lower Case Tokenizer, with Stop Token Filter.'),
       '#collapsible' => TRUE,
@@ -113,7 +113,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     );
 
     $form['analyzer']['keyword'] = array(
-      '#title' =>t('Keyword'),
+      '#title' => t('Keyword'),
       '#type' => 'fieldset',
       '#description' => t('An analyzer that "tokenizes" an entire stream as a single token. This is useful for data like zip codes, ids and so on.'),
       '#collapsible' => TRUE,
@@ -128,7 +128,7 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     );
 
     $form['analyzer']['pattern'] = array(
-      '#title' =>t('Pattern'),
+      '#title' => t('Pattern'),
       '#type' => 'fieldset',
       '#description' => t('An analyzer that can flexibly separate text into terms via a regular expression.'),
       '#collapsible' => TRUE,
@@ -234,4 +234,3 @@ function search_api_elasticsearch_analysis_form_submit($form, &$form_state) {
   }
   $form['#SearchApiElasticsearchClient']->updateSettings($form['#SearchApiIndex'], $data);
 }
-

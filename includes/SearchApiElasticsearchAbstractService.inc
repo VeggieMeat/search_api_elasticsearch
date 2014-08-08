@@ -57,7 +57,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
         unset($form_state['values']['options']['form']['facet_limit']);
       }
 
-      $delta = count($form_state['values']['options']['form'])+1;
+      $delta = count($form_state['values']['options']['form']) + 1;
     }
     elseif (isset($form_state['values']['remove_delta'])) {
       unset($form_state['values']['options']['form']['add_more']);
@@ -250,7 +250,6 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
     unset($values['add_more']);
     $count_nodes = count($values);
 
-    // PATCH - Validation breaks when trying to create new server without the Search API Facetapi module installed
     if (module_exists('search_api_facetapi')) {
       // Facet limit.
       if (filter_var($values['facet_limit'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0))) === FALSE) {
@@ -479,7 +478,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   /**
    * Helper function return Facet filter.
    */
-  protected function getFacetSearchFilter(SearchApiQueryInterface $query, $facet_info ) {
+  protected function getFacetSearchFilter(SearchApiQueryInterface $query, $facet_info) {
     $index_fields = $this->getIndexFields($query);
     $facet_search_filter = '';
 
@@ -501,7 +500,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   }
 
   /**
-   * Helper function that return facet limits
+   * Helper function that return facet limits.
    */
   protected function getFacetLimit(array $facet_info) {
     // If no limit (-1) is selected, use the server facet limit option.
@@ -584,7 +583,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   }
 
   /**
-   *  Helper function that parse facets.
+   * Helper function that parse facets.
    */
   protected function parseSearchFacets($response, SearchApiQueryInterface $query) {
 
@@ -915,7 +914,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
       'info' => $cluster_health['active_primary_shards'],
     );
     $info[] = array(
-      'label' =>t('Active Shards'),
+      'label' => t('Active Shards'),
       'info' => $cluster_health['active_shards'],
     );
     $info[] = array(
