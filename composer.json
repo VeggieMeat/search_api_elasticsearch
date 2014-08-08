@@ -13,6 +13,7 @@
   "require-dev": {
     "satooshi/php-coveralls": "dev-master",
     "phpmd/phpmd": "*",
-    "phpunit/phpunit": "<=4.1.4"
+    "phpunit/phpunit": "<=4.1.4",
+    "sebastian/phpcpd": "*"
   }
 }
