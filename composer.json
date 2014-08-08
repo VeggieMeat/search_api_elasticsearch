@@ -14,6 +14,8 @@
     "satooshi/php-coveralls": "dev-master",
     "phpmd/phpmd": "*",
     "phpunit/phpunit": "<=4.1.4",
-    "sebastian/phpcpd": "*"
+    "sebastian/phpcpd": "*",
+    "squizlabse/php_codesniffer": ">=1.4.1",
+    "drupal/coder": ">7"
   }
 }
