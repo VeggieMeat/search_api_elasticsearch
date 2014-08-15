@@ -16,7 +16,19 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
   public function setUp() {
     $this->_server = $this->createServer('elastica_test', 'search_api_elasticsearch_elastica_service', array(array('host' => '127.0.0.1', 'port' => '9200')));
     $this->_index = $this->createIndex('elastica_test_index', 'node', 'elastica_test');
+    $this->_index->options['fields'] = array(
+      array('nid' => array(
+        'type' => 'integer',
+      )),
+      array('title' => array(
+        'type' => 'string',
+      )),
+      array('friends' => array(
+        'type' => 'fulltext',
+      )),
+    );
     $this->_client = new SearchApiElasticsearchElastica($this->_server);
+    $this->_query = new SearchApiQuery($this->_index);
   }
 
   /**
@@ -171,7 +183,9 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->assertEquals(1, $result->getId());
     $data = $result->getData();
     $this->assertEquals('batman', $data['title']);
-
+    $this->_query->keys('batman');
+    $result_set = $this->_client->search($this->_query);
+    $this->assertEquals(1, $result_set['result count']);
     $this->assertEmpty($this->_client->indexItems($this->_index, array()));
   }
 
