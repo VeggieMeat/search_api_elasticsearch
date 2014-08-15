@@ -21,10 +21,10 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
         'type' => 'integer',
       )),
       array('title' => array(
-        'type' => 'fulltext',
+        'type' => 'text',
       )),
       array('friends' => array(
-        'type' => 'fulltext',
+        'type' => 'text',
       )),
     );
     $this->_client = new SearchApiElasticsearchElastica($this->_server);
