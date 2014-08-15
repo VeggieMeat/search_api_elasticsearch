@@ -29,6 +29,53 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     );
     $this->_client = new SearchApiElasticsearchElastica($this->_server);
     $this->_query = new SearchApiQuery($this->_index);
+    $this->_items = array(
+      '1' => array(
+        'nid' => array(
+          'value' => 1,
+        ),
+        'title' => array(
+          'value' => 'batman',
+        ),
+      ),
+      '2' => array(
+        'nid' => array(
+          'value' => 2,
+        ),
+        'title' => array(
+          'value' => 'robin',
+        ),
+      ),
+      '3' => array(
+        'nid' => array(
+          'value' => 3,
+        ),
+        'title' => array(
+          'value' => 'catwoman',
+        ),
+      ),
+      '4' => array(
+        'nid' => array(
+          'value' => 4,
+        ),
+        'title' => array(
+          'value' => 'joker',
+        ),
+        'friends' => array(
+          'value' => array(
+            'harleyquinn',
+            'penguin',
+          ),
+        ),
+        'rivals' => array(
+          'value' => array(
+            'batman' => array(
+              'value' => 'Bruce Wayne',
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /**
@@ -125,54 +172,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
    * @return void
    */
   public function testIndexItems() {
-    $items = array(
-      '1' => array(
-        'nid' => array(
-          'value' => 1,
-        ),
-        'title' => array(
-          'value' => 'batman',
-        ),
-      ),
-      '2' => array(
-        'nid' => array(
-          'value' => 2,
-        ),
-        'title' => array(
-          'value' => 'robin',
-        ),
-      ),
-      '3' => array(
-        'nid' => array(
-          'value' => 3,
-        ),
-        'title' => array(
-          'value' => 'catwoman',
-        ),
-      ),
-      '4' => array(
-        'nid' => array(
-          'value' => 4,
-        ),
-        'title' => array(
-          'value' => 'joker',
-        ),
-        'friends' => array(
-          'value' => array(
-            'harleyquinn',
-            'penguin',
-          ),
-        ),
-        'rivals' => array(
-          'value' => array(
-            'batman' => array(
-              'value' => 'Bruce Wayne',
-            ),
-          ),
-        ),
-      ),
-    );
-    $this->_client->indexItems($this->_index, $items);
+    $this->_client->indexItems($this->_index, $this->_items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
@@ -197,33 +197,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
    * @return void
    */
   public function testDeleteItem() {
-    $items = array(
-      '1' => array(
-        'nid' => array(
-          'value' => 1,
-        ),
-        'title' => array(
-          'value' => 'batman',
-        ),
-      ),
-      '2' => array(
-        'nid' => array(
-          'value' => 2,
-        ),
-        'title' => array(
-          'value' => 'robin',
-        ),
-      ),
-      '3' => array(
-        'nid' => array(
-          'value' => 3,
-        ),
-        'title' => array(
-          'value' => 'catwoman',
-        ),
-      ),
-    );
-    $this->_client->indexItems($this->_index, $items);
+    $this->_client->indexItems($this->_index, $this->_items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
@@ -245,33 +219,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
    * @return void
    */
   public function testDeleteMultipleItems() {
-    $items = array(
-      '1' => array(
-        'nid' => array(
-          'value' => 1,
-        ),
-        'title' => array(
-          'value' => 'batman',
-        ),
-      ),
-      '2' => array(
-        'nid' => array(
-          'value' => 2,
-        ),
-        'title' => array(
-          'value' => 'robin',
-        ),
-      ),
-      '3' => array(
-        'nid' => array(
-          'value' => 3,
-        ),
-        'title' => array(
-          'value' => 'catwoman',
-        ),
-      ),
-    );
-    $this->_client->indexItems($this->_index, $items);
+    $this->_client->indexItems($this->_index, $this->_items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
@@ -300,33 +248,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
    * @return void
    */
   public function testDeleteAllItems() {
-    $items = array(
-      '1' => array(
-        'nid' => array(
-          'value' => 1,
-        ),
-        'title' => array(
-          'value' => 'batman',
-        ),
-      ),
-      '2' => array(
-        'nid' => array(
-          'value' => 2,
-        ),
-        'title' => array(
-          'value' => 'robin',
-        ),
-      ),
-      '3' => array(
-        'nid' => array(
-          'value' => 3,
-        ),
-        'title' => array(
-          'value' => 'catwoman',
-        ),
-      ),
-    );
-    $this->_client->indexItems($this->_index, $items);
+    $this->_client->indexItems($this->_index, $this->_items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
@@ -360,33 +282,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
    * @return void
    */
   public function testDeleteAllItemsFromAllIndexes() {
-    $items = array(
-      '1' => array(
-        'nid' => array(
-          'value' => 1,
-        ),
-        'title' => array(
-          'value' => 'batman',
-        ),
-      ),
-      '2' => array(
-        'nid' => array(
-          'value' => 2,
-        ),
-        'title' => array(
-          'value' => 'robin',
-        ),
-      ),
-      '3' => array(
-        'nid' => array(
-          'value' => 3,
-        ),
-        'title' => array(
-          'value' => 'catwoman',
-        ),
-      ),
-    );
-    $this->_client->indexItems($this->_index, $items);
+    $this->_client->indexItems($this->_index, $this->_items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
