@@ -44,23 +44,23 @@ install:
 
 before_script:
   - echo 'sendmail_path = /bin/true' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-  - drush --yes make tests/includes/search_api_elasticsearch.make build
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes make tests/includes/search_api_elasticsearch.make build
   - mkdir -p $MODULE_PATH
   - git archive $(git rev-parse --abbrev-ref HEAD) | tar -x -C $MODULE_PATH
   - cd build
-  - drush --yes site-install minimal --db-url="mysql://$DB_USERNAME@127.0.0.1/$DATABASE"
-  - drush runserver 127.0.0.1:8080 & until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
-  - drush --yes dis search
-  - drush --yes en $DRUPAL_3RD_PARTY
-  - drush --yes en search_api_elasticsearch
-  - drush --yes en search_api_elasticsearch_elastica
-  - drush --yes en simpletest
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes site-install minimal --db-url="mysql://$DB_USERNAME@127.0.0.1/$DATABASE"
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush runserver 127.0.0.1:8080 & until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes dis search
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en $DRUPAL_3RD_PARTY
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch_elastica
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en simpletest
   - cd sites/all/modules/search_api_elasticsearch
   - mkdir -p $TRAVIS_BUILD_DIR/build/logs
 
 script:
   - phpunit --coverage-clover $TRAVIS_BUILD_DIR/build/logs/clover.xml
-  - drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
 
 after_script:
   - cd $TRAVIS_BUILD_DIR
