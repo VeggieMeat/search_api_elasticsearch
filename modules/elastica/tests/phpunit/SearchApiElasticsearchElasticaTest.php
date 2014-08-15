@@ -183,8 +183,8 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->assertEquals(1, $result->getId());
     $data = $result->getData();
     $this->assertEquals('batman', $data['title']);
-    $this->_query->keys('batman');
-    $result_set = $this->_client->search($this->_query);
+    $query = $this->_query->keys('batman');
+    $result_set = $this->_client->search($query);
     $this->assertEquals(1, $result_set['result count']);
     $this->assertEmpty($this->_client->indexItems($this->_index, array()));
   }
