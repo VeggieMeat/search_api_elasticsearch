@@ -21,7 +21,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
         'type' => 'integer',
       )),
       array('title' => array(
-        'type' => 'string',
+        'type' => 'fulltext',
       )),
       array('friends' => array(
         'type' => 'fulltext',
