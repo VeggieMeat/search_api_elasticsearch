@@ -7,9 +7,9 @@ php:
   - hhvm
 
 matrix:
-  - allow_failures:
+  allow_failures:
     - php: hhvm
-  - fast_finish: true
+  fast_finish: true
 
 env:
   global:
