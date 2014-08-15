@@ -75,10 +75,10 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
         ),
       ),
     );
-    $this->_query = new SearchApiQuery($this->_index);
     $this->_client->indexItems($this->_index, $this->_items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
-  }
+    $this->_query = new SearchApiQuery($this->_index);
+ }
 
   /**
    * testConstructor
@@ -183,6 +183,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->assertEquals(1, $result->getId());
     $data = $result->getData();
     $this->assertEquals('batman', $data['title']);
+var_dump($this->_index->getFulltextFields());
     $this->_query->fields(array('title'));
     $this->_query->keys('batman');
     $result_set = $this->_client->search($this->_query);
