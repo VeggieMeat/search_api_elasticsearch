@@ -16,6 +16,7 @@
     "phpunit/phpunit": "<=4.1.4",
     "sebastian/phpcpd": "*",
     "squizlabs/php_codesniffer": ">=1.4.1",
-    "drupal/coder": ">7"
+    "drupal/coder": ">7",
+    "drush/drush": "6.*"
   }
 }
