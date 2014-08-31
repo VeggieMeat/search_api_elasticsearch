@@ -37,6 +37,6 @@ abstract class SearchApiElasticsearchBaseTest extends \PHPUnit_Framework_TestCas
   /**
    * Provides different transports to test.
    */
-  abstract public function transportProvider() {
+  abstract public function transportProvider();
 
 }
