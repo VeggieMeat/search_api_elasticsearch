@@ -977,4 +977,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     return $suggest;
   }
+
+  public function setTransport($transport) {
+    $this->elasticaClient->setConfigValue('transport', $transport);
+  }
 }

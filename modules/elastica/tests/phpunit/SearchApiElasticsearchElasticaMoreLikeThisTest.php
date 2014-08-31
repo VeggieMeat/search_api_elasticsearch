@@ -72,9 +72,11 @@ class SearchApiElasticsearchElasticaMoreLikeThisTest extends SearchApiElasticsea
    * testMoreLikeThis
    *
    * @access public
+   * @dataProvider transportProvider
    * @return void
    */
-  public function testMoreLikeThis() {
+  public function testMoreLikeThis($transport) {
+    $this->_client->setTransport($transport);
     $result_set = $this->_client->search($this->_query);
     $this->assertEquals(2, $result_set['result count']);
   }

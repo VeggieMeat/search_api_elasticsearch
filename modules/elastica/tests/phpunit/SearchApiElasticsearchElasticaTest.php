@@ -89,10 +89,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testAddIndex
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testAddIndex() {
+  public function testAddIndex($transport) {
+    $this->_client->setTransport($transport);
     $this->_client->addIndex($this->_index);
     $this->assertSame('elasticsearch_index_drupal_elastica_test_index', $this->_client->getElasticaIndex($this->_index)->getName(), 'Expected "elasticsearch_index_drupal_elastica_test_index". Found ' . $this->_client->getElasticaIndex($this->_index)->getName());
   }
@@ -126,10 +128,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testRemoveIndex
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testRemoveIndex() {
+  public function testRemoveIndex($transport) {
+    $this->_client->setTransport($transport);
     $status = new \Elastica\Status($this->_client->getElasticaClient());
     $this->assertTrue($status->indexExists($this->_client->getElasticaIndex($this->_index)->getName()));
     $this->_client->removeIndex($this->_index);
@@ -140,10 +144,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testFieldsUpdated
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testFieldsUpdated() {
+  public function testFieldsUpdated($transport) {
+    $this->_client->setTransport($transport);
     $this->markTestIncomplete(
       'This test has not yet been implemented.'
     );
@@ -163,10 +169,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testIndexItems
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testIndexItems() {
+  public function testIndexItems($transport) {
+    $this->_client->setTransport($transport);
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
     $count = $this->_client->getElasticaType($this->_index)->count('batman');
@@ -186,10 +194,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testDeleteItem
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testDeleteItem() {
+  public function testDeleteItem($transport) {
+    $this->_client->setTransport($transport);
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
     $result = $result_set->current();
@@ -206,10 +216,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testDeleteMultipleItems
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testDeleteMultipleItems() {
+  public function testDeleteMultipleItems($transport) {
+    $this->_client->setTransport($transport);
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
     $result = $result_set->current();
@@ -233,10 +245,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testDeleteAllItems
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testDeleteAllItems() {
+  public function testDeleteAllItems($transport) {
+    $this->_client->setTransport($transport);
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
     $result = $result_set->current();
@@ -265,10 +279,12 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testDeleteAllItemsFromAllIndexes
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testDeleteAllItemsFromAllIndexes() {
+  public function testDeleteAllItemsFromAllIndexes($transport) {
+    $this->_client->setTransport($transport);
     $result_set = $this->_client->getElasticaType($this->_index)->search('batman');
     $this->assertEquals(1, $result_set->count());
     $result = $result_set->current();
@@ -300,20 +316,24 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaB
   /**
    * testGetSettings
    *
+   * @dataProvider transportProvider
    * @access public
    * @return void
    */
-  public function testGetSettings() {
+  public function testGetSettings($transport) {
+    $this->_client->setTransport($transport);
     $this->assertNotFalse($this->_client->getSettings($this->_index));
   }
 
   /**
    * testViewSettings
    *
+   * @dataProvider transportprovider
    * @access public
    * @return void
    */
-  public function testViewSettings() {
+  public function testViewSettings($transport) {
+    $this->_client->setTransport($transport);
     $this->assertNotFalse($this->_client->viewSettings());
   }
 }
