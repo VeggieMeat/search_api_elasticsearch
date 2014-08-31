@@ -8,4 +8,10 @@
     <php>
         <server name="REMOTE_ADDR" value="127.0.0.1" />
     </php>
+    <filter>
+        <blacklist>
+            <directory>tests/phpunit</directory>
+            <directory>modules/elastica/tests/phpunit</directory>
+        </blacklist>
+    </filter>
 </phpunit>

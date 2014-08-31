@@ -5,16 +5,10 @@
  * Contains tests for SearchApiElasticsearchElastica.
  */
 
-class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest {
+class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaBaseTest {
 
-  /**
-   * setUp
-   *
-   * @access public
-   * @return void
-   */
   public function setUp() {
-    $this->_server = $this->createServer('elastica_test', 'search_api_elasticsearch_elastica_service', array(array('host' => '127.0.0.1', 'port' => '9200')));
+    parent::setUp();
     $this->_index = $this->createIndex('elastica_test_index', 'node', 'elastica_test');
     $this->_index->options['fields'] = array(
       'nid' => array(
@@ -27,8 +21,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
         'type' => 'text',
       ),
     );
-    $this->_client = new SearchApiElasticsearchElastica($this->_server);
-    $this->_items = array(
+   $this->_items = array(
       '1' => array(
         'nid' => array(
           'value' => 1,
@@ -78,7 +71,7 @@ class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchBaseTest 
     $this->_client->indexItems($this->_index, $this->_items);
     $this->_client->getElasticaIndex($this->_index)->refresh();
     $this->_query = new SearchApiQuery($this->_index);
- }
+  }
 
   /**
    * testConstructor
