@@ -5,4 +5,6 @@ core = 7.x
 php = 5.3.3
 package = Search
 files[] = includes/SearchApiElasticsearchElastica.inc
+files[] = includes/SearchApiElasticsearchElasticaMLT.inc
+files[] = includes/SearchApiElasticsearchElasticaSearcher.inc
 files[] = tests/functional/search_api_elasticsearch_elastica.test
