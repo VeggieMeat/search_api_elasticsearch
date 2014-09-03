@@ -63,6 +63,8 @@ class SearchApiElasticsearchElasticaMoreLikeThisTest extends SearchApiElasticsea
     $mlt = array(
       'id' => 1,
       'fields' => array('title'),
+      'min_doc_freq' => '1',
+      'min_term_freq' => '1',
     );
     $this->_query = new SearchApiQuery($this->_index);
     $this->_query->setOption('search_api_mlt', $mlt);

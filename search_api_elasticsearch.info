@@ -8,4 +8,5 @@ files[] = includes/SearchApiElasticsearchAbstractService.inc
 files[] = service.inc
 
 ; Views handlers/plugins
+files[] = includes/views/SearchApiElasticsearchViewsHandlerArgumentMoreLikeThis.inc
 files[] = includes/views/SearchApiElasticsearchViewsHandlerFilterFulltext.inc
