@@ -339,20 +339,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Add facets.
     $this->addSearchFacets($elastica_query, $query);
 
-    // More Like This.
-    if (!empty($query_options['mlt'])) {
-      $mlt_document = $elastica_type->getDocument($query_options['mlt']['id']);
-      // @TODO Expose min_term_freq and min_doc_freq
-      $mlt_options['min_term_freq'] = '1';
-      $mlt_options['min_doc_freq'] = '1';
-      $mlt_options['search_from'] = $query_options['query_offset'];
-      $mlt_options['search_size'] = $query_options['query_limit'];
-      $response = $elastica_type->moreLikeThis($mlt_document, $mlt_options, $elastica_query);
-    }
-    else {
-      // Perform search.
-      $response = $elastica_type->search($elastica_query);
-    }
+    $response = SearchApiElasticsearchElasticaSearcher::search($elastica_type, $elastica_query, $query_options);
 
     // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.
