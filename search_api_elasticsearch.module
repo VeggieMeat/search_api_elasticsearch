@@ -28,7 +28,7 @@ function search_api_elasticsearch_menu() {
  */
 function search_api_elasticsearch_search_api_service_info() {
   $services['search_api_elasticsearch_service'] = array(
-    'name' => t('Elasticsearch service'),
+    'name' => t('Elasticsearch service (DEPRECATED)'),
     'description' => t('DEPRECATED. WILL BE REMOVED BEFORE BETA'),
     'class' => 'SearchApiElasticsearchService',
   );
