@@ -60,7 +60,7 @@ before_script:
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch_elastica
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en simpletest
-  - if [[ "$DRUPAL_3RD_PARTY" == composer_manager ]]; then $TRAVIS_BUILD_DIR/vendor/bin/drush --yes composer-manager install --prefer-stable --no-dev; fi
+  - if [[ "$DRUPAL_3RD_PARTY" == composer_manager ]]; then $TRAVIS_BUILD_DIR/vendor/bin/drush --yes composer-manager install --prefer-source --no-dev; fi
   - cd sites/all/modules/search_api_elasticsearch
   - mkdir -p $TRAVIS_BUILD_DIR/build/logs
 
