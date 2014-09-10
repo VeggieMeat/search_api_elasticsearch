@@ -52,12 +52,15 @@ before_script:
   - git archive $(git rev-parse --abbrev-ref HEAD) | tar -x -C $MODULE_PATH
   - cd build
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes site-install minimal --db-url="mysql://$DB_USERNAME@127.0.0.1/$DATABASE"
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush vset composer_manager_autobuild_file 0
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush vset composer_manager_autobuild_packages 0
   - $TRAVIS_BUILD_DIR/vendor/bin/drush runserver 127.0.0.1:8080 & until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes dis search
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en $DRUPAL_3RD_PARTY
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch_elastica
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en simpletest
+  - $TRAVIS_BUILD_DIR/venodr/bin/drush --yes composer-manager install --prefer-stable --no-dev
   - cd sites/all/modules/search_api_elasticsearch
   - mkdir -p $TRAVIS_BUILD_DIR/build/logs
 
