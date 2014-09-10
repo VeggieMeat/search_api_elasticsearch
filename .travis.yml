@@ -60,7 +60,7 @@ before_script:
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch_elastica
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en simpletest
-  - $TRAVIS_BUILD_DIR/venodr/bin/drush --yes composer-manager install --prefer-stable --no-dev
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes composer-manager install --prefer-stable --no-dev
   - cd sites/all/modules/search_api_elasticsearch
   - mkdir -p $TRAVIS_BUILD_DIR/build/logs
 
