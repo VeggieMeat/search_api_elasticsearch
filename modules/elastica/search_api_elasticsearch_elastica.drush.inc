@@ -9,7 +9,7 @@
  *
  * @var string
  */
-const SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION = '1.1.1.1';
+const SEARCH_API_ELASTICSEARCH_ELASTICA_VERSION = '1.3.0.0';
 
 /**
  * The URL of the Elastica Github Tarball.

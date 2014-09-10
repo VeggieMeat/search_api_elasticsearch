@@ -24,13 +24,14 @@ abstract class SearchApiElasticsearchBaseTest extends \PHPUnit_Framework_TestCas
   /**
    * Create Search API index.
    */
-  protected function createIndex($name = 'test', $type, $server) {
+  protected function createIndex($name = 'test', $type, $server, $options = array()) {
     return $this->_index = entity_create('search_api_index', array(
       'name' => $name,
       'machine_name' => $name,
       'enabled' => 1,
       'item_type' => $type,
       'server' => $server,
+      'options' => $options,
     ));
   }
 
