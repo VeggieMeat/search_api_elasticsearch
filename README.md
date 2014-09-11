@@ -25,7 +25,7 @@ REQUIREMENTS
 
  * Drupal 7
  * Search API module
- * Elasticsearch 1.0.0+
+ * Elasticsearch 1.3.0+
 
 INSTALLATION
 ------------
