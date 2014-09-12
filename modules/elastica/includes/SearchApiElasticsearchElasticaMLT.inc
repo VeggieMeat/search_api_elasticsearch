@@ -7,13 +7,17 @@
 
 class SearchApiElasticsearchElasticaMLT {
 
-  static public function search($type, $options, $query) {
-    $mlt_document = $type->getDocument($options['mlt']['id']);
-    $mlt_options['min_term_freq'] = $options['mlt']['min_term_freq'];
-    $mlt_options['min_doc_freq'] = $options['mlt']['min_doc_freq'];
-    $mlt_options['search_from'] = $options['query_offset'];
-    $mlt_options['search_size'] = $options['query_limit'];
-    return $type->moreLikeThis($mlt_document, $mlt_options, $query);
+  static public function build($type, $options, $query) {
+    $mlt_query = new Elastica\Query\MoreLikeThis();
+    $mlt_query->setFields(array_values($options['mlt']['fields']));
+    $mlt_query->setParam('ids', array($options['mlt']['id']));
+    $mlt_query->setMinDocFrequency($options['mlt']['min_doc_freq']);
+    $mlt_query->setMinTermFrequency($options['mlt']['min_term_freq']);
+    $query->setQuery($mlt_query);
+
+    if (!empty($options['query_search_filter'])) {
+      $query->setQuery(new Elastica\Query\Filtered($mlt_query, $options['query_search_filter']));
+    }
   }
 
 }
