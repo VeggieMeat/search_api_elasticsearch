@@ -347,7 +347,8 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
    * Helper function. Get the Elasticsearch mapping for a field.
    */
   protected function getFieldMapping($field) {
-    $type = search_api_extract_inner_type($field['type']);
+    $field_type = (isset($field['real_type'])) ? $field['real_type'] : $field['type'];
+    $type = search_api_extract_inner_type($field_type);
 
     switch ($type) {
       case 'text':
