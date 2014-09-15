@@ -1,16 +1,5 @@
 <?php
 
-function search_api_elasticsearch_elastica_search_api_item_type_info() {
-  return array(
-    'node' => array(
-      'name' => 'Content',
-      'datasource controller' => 'SearchApiEntityDataSourceController',
-      'entity_type' => 'node',
-      'module' => 'search_api',
-    ),
-  );
-}
-
 class SearchApiElasticsearchElasticaFacetTest extends SearchApiElasticsearchElasticaBaseTest {
 
   public function setUp() {
