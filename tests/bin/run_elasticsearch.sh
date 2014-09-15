@@ -11,10 +11,11 @@ tar -xzf elasticsearch-${ES_VER}.tar.gz
 elasticsearch-${ES_VER}/bin/plugin -install elasticsearch/elasticsearch-mapper-attachments/${ES_MAPPER_ATTACHMENTS_VER}
 elasticsearch-${ES_VER}/bin/plugin -install elasticsearch/elasticsearch-transport-thrift/${ES_TRANSPORT_THRIFT_VER}
 elasticsearch-${ES_VER}/bin/plugin -install geocluster-facet --url https://github.com/zenobase/geocluster-facet/releases/download/${ES_GEOCLUSTER_FACET_VER}/geocluster-facet-${ES_GEOCLUSTER_FACET_VER}.jar
+elasticsearch-${ES_VER}/bin/plugin -install http-basic-auth --url https://github.com/Asquera/elasticsearch-http-basic/releases/download/${ES_HTTP_BASIC_AUTH_VER}/elasticsearch-http-basic-${ES_HTTP_BASIC_AUTH_VER}.jar
 
 export JAVA_OPTS="-server"
 
-for i in 0 1 2
+for i in 0 1 2 3
 do
     echo "Setup node #$i"
 
@@ -36,6 +37,12 @@ do
     # enable udp
     echo "bulk.udp.enabled: true" >> $config_yml
     echo "bulk.udp.bulk_actions: 5" >> $config_yml
+
+    if [ $i -eq 3 ] ; then
+      echo "http.basic.enabled: TRUE" >> $config_yml
+      echo "http.basic.user: testuser" >> $config_yml
+      echo "http.basic.password: testpassword" >> $config_yml
+    fi
 
     echo "Starting server on http port: $http_port"
 

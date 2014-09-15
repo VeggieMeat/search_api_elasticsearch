@@ -7,8 +7,16 @@
 
 class SearchApiElasticsearchElasticaTest extends SearchApiElasticsearchElasticaBaseTest {
 
+  /**
+   * setUp
+   *
+   * @param mixed $config
+   * @access public
+   * @return void
+   */
   public function setUp() {
-    parent::setUp();
+    $this->_server = $this->createServer('elastica_test', 'search_api_elasticsearch_elastica_service', array(array('host' => '127.0.0.1', 'port' => '9200')));
+    $this->_client = new SearchApiElasticsearchElastica($this->_server);
     $this->_index = $this->createIndex('elastica_test_index', 'node', 'elastica_test');
     $this->_index->options['fields'] = array(
       'nid' => array(

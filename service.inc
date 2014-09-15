@@ -114,6 +114,29 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#parents' => array('options', 'form', $c, 'port'),
         );
 
+        //Elasticsearch basic authentication.
+        $form['daemon_settings']['fieldset'][$c]['headers'] = array(
+          '#type' => 'fieldset',
+          '#tree' => TRUE,
+          '#title' => t('HTTP Basic Authentication'),
+          '#description' => t('If your Elasticsearch server is protected by basic HTTP authentication, enter the login data here.'),
+        );
+
+        //Elasticsearch basic authentication username.
+        $form['daemon_settings']['fieldset'][$c]['headers']['http_user'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Username'),
+          '#default_value' => (!empty($options[$c]['headers']) && !empty($options[$c]['headers']['http_user'])) ? $options[$c]['headers']['http_user'] : '',
+          '#parents' => array('options', 'form', $c, 'headers', 'http_user'),
+        );
+
+        //Elasticsearch basic password.
+        $form['daemon_settings']['fieldset'][$c]['headers']['http_pass'] = array(
+          '#type' => 'password',
+          '#title' => t('Password'),
+          '#parents' => array('options', 'form', $c, 'headers', 'http_pass'),
+        );
+
         // Elasticsearch daemon path.
         $form['daemon_settings']['fieldset'][$c]['path'] = array(
           '#type' => 'textfield',
@@ -272,6 +295,12 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
         $values[$i]['path'] = $this->setPath($values[$i]['path']);
       }
+
+      // Put http_user and http_password in correct form.
+      if (!empty($setting['headers']['http_user'])) {
+        $values[$i]['headers']['Authentication'] = 'Basic ' . base64_encode($setting['headers']['http_user'] . ':' . $setting['headers']['http_pass']);
+      }
+      unset($values[$i]['headers']['http_pass']);
     }
   }
 
