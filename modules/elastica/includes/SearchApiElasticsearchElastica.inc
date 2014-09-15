@@ -356,7 +356,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    * Recursively parse Search API filters.
    */
   protected function parseFilter(SearchApiQueryFilter $query_filter, $index_fields, $ignored_field_id = '') {
-
     if (empty($query_filter)) {
       return NULL;
     }
@@ -624,13 +623,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // SEARCH API FACETS.
     $facets = $query->getOption('search_api_facets');
     $index_fields = $this->getIndexFields($query);
-
     if (!empty($facets)) {
       // Loop trough facets.
       foreach ($facets as $facet_id => $facet_info) {
         $facet = NULL;
         $field_id = $facet_info['field'];
-
         // Skip if not recognized as a known field.
         if (!isset($index_fields[$field_id])) {
           continue;
