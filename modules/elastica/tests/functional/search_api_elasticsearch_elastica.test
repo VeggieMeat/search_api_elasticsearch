@@ -121,4 +121,48 @@ class SearchApiElasticsearchElasticaAdministrationTest extends DrupalWebTestCase
     $found = strpos($this->getUrl(), 'admin/config/search/search_api/server/test_es_cluster') !== FALSE;
     $this->assertTrue($found, 'Correct redirect.');
   }
+
+  /**
+   * Test creation of an Elasticsearch server in Search API with HTTP
+   * Basic Authentation.
+   */
+  public function testCreateElasticsearchServerAuth() {
+    $this->drupalLogin($this->privileged_user);
+    $this->drupalGet('admin/config/search/search_api/add_server');
+
+    $values = array(
+      'name' => 'Test Elasticsearch Server Auth',
+      'machine_name' => 'test_es_server_auth',
+      'class' => 'search_api_elasticsearch_elastica_service',
+    );
+    $this->drupalPostAJAX(NULL, $values, 'class');
+
+    $this->assertFieldByName('options[form][0][host]', '127.0.0.1', 'Host field for first Elasticsearch node loaded with default value of 127.0.0.1.');
+    $this->assertFieldByName('options[form][0][port]', '9200', 'Port field for first Elasticsearch node loaded with default value of 3200.');
+    $this->assertFieldByName('options[form][0][path]', '', 'Path field for first Elasticsearch node loaded with default value empty.');
+    $this->assertFieldByName('options[form][0][url]', '', 'URL field for first Elasticsearch node loaded with default value empty.');
+    $this->assertFieldByName('options[form][0][transport]', 'Http', 'Transport field for first Elasticsearch node loaded with default value of HTTP.');
+    $this->assertFieldByName('options[form][0][persistent]', '1', 'Persistent field for first Elasticsearch node loaded with default value of 1.');
+    $this->assertFieldByName('options[form][0][timeout]', '300', 'Timeout field for first Elasticsearch node loaded with default value of 300.');
+    $this->assertFieldByName('options[form][0][retryOnConflict]', '0', 'retryOnConflict field for first Elasticsearch node loaded with default value of 0.');
+
+    $values2 = array(
+      'options[form][0][host]' => '127.0.0.1',
+      'options[form][0][port]' => '9203',
+      'options[form][0][path]' => '',
+      'options[form][0][url]' => '',
+      'options[form][0][transport]' => 'Http',
+      'options[form][0][persistent]' => 0,
+      'options[form][0][timeout]' => '300',
+      'options[form][0][retryOnConflict]' => 0,
+      'options[form][0][headers][http_user]' => 'testuser',
+      'options[form][0][headers][http_pass]' => 'testpassword',
+    );
+
+    $values += $values2;
+    $this->drupalPost(NULL, $values, t('Create server'));
+    $this->assertText(t('The server was successfully created.'));
+    $found = strpos($this->getUrl(), 'admin/config/search/search_api/server/test_es_server_auth') !== FALSE;
+    $this->assertTrue($found, 'Correct redirect.');
+  }
 }
