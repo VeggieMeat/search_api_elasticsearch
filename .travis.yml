@@ -47,9 +47,9 @@ install:
   - ./tests/bin/run_elasticsearch.sh
 
 before_script:
-  - echo 'display_errors = stdout' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-  - echo 'log_errors = 1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-  - echo 'error_log = syslog' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
+  - if [[ "$TRAVIS_PHP_VERSION" != hhvm* ]]; then echo 'display_errors = stdout' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
+  - if [[ "$TRAVIS_PHP_VERSION" != hhvm* ]]; then echo 'log_errors = 1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
+  - if [[ "$TRAVIS_PHP_VERSION" != hhvm* ]]; then echo 'error_log = syslog' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
   - if [[ "$TRAVIS_PHP_VERSION" != hhvm* ]]; then echo 'sendmail_path = /bin/true' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
   - if [[ "$TRAVIS_PHP_VERSION" == hhvm* ]]; then echo -e 'sendmail_path = /bin/true' | sudo tee -a /etc/hhvm/php.ini; fi
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --debug --yes make tests/includes/search_api_elasticsearch.make build
