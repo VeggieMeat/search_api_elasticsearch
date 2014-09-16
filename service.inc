@@ -281,6 +281,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
       }
     }
 
+    $options = $this->getOptions();
     foreach ($values as $i => $setting) {
       if ($i != 'facet_limit') {
         // Daemon IP address.
@@ -298,7 +299,20 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
       // Put http_user and http_password in correct form.
       if (!empty($setting['headers']['http_user'])) {
-        $values[$i]['headers']['Authentication'] = 'Basic ' . base64_encode($setting['headers']['http_user'] . ':' . $setting['headers']['http_pass']);
+        // If username matches the old value and password is empty, then use the old Authentication.
+        if (empty($setting['headers']['http_pass'])) {
+          if ($setting['headers']['http_user'] == $options[$i]['headers']['http_user']) {
+            $values[$i]['headers']['Authentication'] = $options[$i]['headers']['Authentication'];
+          }
+          // If username does not match and password is empty, then give a validation error.
+          else {
+            form_set_error('http_pass', t('If you are changing the username, you need to supply the password.'));
+            return;
+          }
+        }
+        else {
+          $values[$i]['headers']['Authentication'] = 'Basic ' . base64_encode($setting['headers']['http_user'] . ':' . $setting['headers']['http_pass']);
+        }
       }
       unset($values[$i]['headers']['http_pass']);
     }
