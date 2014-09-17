@@ -610,8 +610,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $elastica_query->setSort($query_options['sort']);
     }
 
-    drupal_alter('search_api_elasticsearch_elastica_query', $elastica_query, $query);
-
     return $elastica_query;
   }
 
