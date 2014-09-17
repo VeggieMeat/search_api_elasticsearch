@@ -14,6 +14,7 @@ function search_api_elasticsearch_views_data_alter(&$data) {
       $key = 'search_api_index_' . $index->machine_name;
       $table = &$data[$key];
       $table['search_api_views_fulltext']['filter']['handler'] = 'SearchApiElasticsearchViewsHandlerFilterFulltext';
+      $table['search_api_views_more_like_this']['argument']['handler'] = 'SearchApiElasticsearchViewsHandlerArgumentMoreLikeThis';
     }
   }
 }
