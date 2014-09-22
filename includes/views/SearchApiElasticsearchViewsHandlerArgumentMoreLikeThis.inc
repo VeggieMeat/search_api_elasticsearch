@@ -47,8 +47,8 @@ class SearchApiElasticsearchViewsHandlerArgumentMoreLikeThis extends SearchApiVi
     }
   }
 
-  public function query() {
-    parent::query();
+  public function query($group_by = FALSE) {
+    parent::query($group_by);
     $mlt = $this->query->getOption('search_api_mlt');
     $mlt['min_doc_freq'] = $this->options['min_doc_freq'];
     $mlt['min_term_freq'] = $this->options['min_term_freq'];
