@@ -339,7 +339,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Add facets.
     $this->addSearchFacets($elastica_query, $query);
 
-    $response = SearchApiElasticsearchElasticaSearcher::search($elastica_type, $elastica_query, $query_options);
+    $response = SearchApiElasticsearchElasticaSearcher::search($elastica_type, $elastica_query, $query_options, $query);
 
     // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.

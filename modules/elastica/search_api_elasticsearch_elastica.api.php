@@ -22,7 +22,9 @@ function hook_search_api_elasticsearch_elastica_add_index_alter(array $options) 
  *
  * @param \Elastica\Query $elastica_query
  *   The Elastica query object to be altered.
+ * @param SearchApiQueryInterface $query
+ *   The original Search API query.
  */
-function hook_search_api_elasticsearch_elastica_query_alter(\Elastica\Query &$elastica_query) {
+function hook_search_api_elasticsearch_elastica_query_alter(\Elastica\Query &$elastica_query, SearchApiQueryInterface $search_api_query) {
 
 }
