@@ -796,24 +796,14 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   protected function getSearchQueryOptions(SearchApiQueryInterface $query) {
 
-    // Query options.
-    $query_options = $query->getOptions();
-
     // Index fields.
     $index_fields = $this->getIndexFields($query);
-
-    // Range.
-    $query_offset = empty($query_options['offset']) ? 0 : $query_options['offset'];
-    $query_limit = empty($query_options['limit']) ? 10 : $query_options['limit'];
 
     // Query string.
     $query_search_string = NULL;
 
     // Query filter.
     $query_search_filter = NULL;
-
-    // Query analyzer.
-    $analyzer = isset($query_options['analyzer']) ? $query_options['analyzer'] : NULL;
 
     // Full text search.
     $keys = $query->getKeys();
@@ -852,28 +842,14 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $query_search_filter = $parsed_query_filters[0];
     }
 
-    // More Like This.
-    $mlt = array();
-    if (isset($query_options['search_api_mlt'])) {
-      $mlt = $query_options['search_api_mlt'];
-    }
-
-    // Spatials.
-    $spatials = array();
-    if (isset($query_options['search_api_location'])) {
-      $spatials = $query_options['search_api_location'];
-    }
-
-    return array(
-      'query_offset' => $query_offset,
-      'query_limit' => $query_limit,
+    $query_options = array(
       'query_search_string' => $query_search_string,
       'query_search_filter' => $query_search_filter,
       'sort' => $sort,
-      'mlt' => $mlt,
-      'analyzer' => $analyzer,
-      'spatials' => $spatials,
     );
+
+    $query_options = array_merge($query_options, SearchApiElasticsearchElasticaSearcher::getOptions($query));
+    return $query_options;
   }
 
   /**
