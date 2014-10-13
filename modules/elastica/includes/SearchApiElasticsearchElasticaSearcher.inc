@@ -40,7 +40,7 @@ class SearchApiElasticsearchElasticaSearcher {
 
     foreach ($options as $key => $value) {
       if (in_array($key, $options_map)) {
-        $options[$options_map[$key]] = $options[$value];
+        $options[$options_map[$key]] = $value;
       }
     }
   }
