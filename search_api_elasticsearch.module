@@ -225,3 +225,60 @@ function search_api_elasticsearch_edit_index_submit(array $form, array &$form_st
 function search_api_elasticsearch_add_index_submit(array $form, array &$form_state) {
   form_state_values_clean($form_state);
 }
+
+/**
+ * Ajax callback for adding more nodes.
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_configuration_form_ajax($form, &$form_state) {
+  unset($form['options']['form']['add_more']);
+  if (module_exists('search_api_facetapi')) {
+    unset($form['options']['form']['facet_settings']);
+  }
+
+  return $form['options']['form'];
+}
+
+/**
+ * Ajax callback for remove nodes.
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_configuration_form_remove_ajax($form, &$form_state) {
+  unset($form['options']['form']['add_more']);
+  if (module_exists('search_api_facetapi')) {
+    unset($form['options']['form']['facet_settings']);
+  }
+
+  return $form['options']['form'];
+}
+
+/**
+ * Submit Handler for the configuration form.
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_configuration_form_submit_custom($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Submit handler on removing elements
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function _search_api_elasticsearch_configuration_form_remove_custom($form, &$form_state) {
+  $form_state['values']['remove_delta'] == 'none';
+
+  if (isset($form_state['triggering_element']['#remove_delta'])) {
+    $form_state['values']['remove_delta'] = $form_state['triggering_element']['#remove_delta'];
+  }
+
+  $form_state['rebuild'] = TRUE;
+}
+
+
