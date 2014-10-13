@@ -7,19 +7,23 @@
 
 class SearchApiElasticsearchElasticaSearcher {
 
-  static public function getOptions(SearchApiQueryInterface $search_api_query) {
-    $query_options = $search_api_query->getOptions();
+  public function __construct(SearchApiQueryInterface $search_api_query) {
+    $this->search_api_query = $search_api_query;
+  }
+
+  public function getOptions() {
+    $query_options = $this->search_api_query->getOptions();
     $this->mapOptions($query_options);
 
     return $query_options;
   }
 
-  static public function search($type, $query, $options, SearchApiQueryInterface $search_api_query) {
+  public function search($type, $query, $options) {
     if (!empty($options['mlt'])) {
       SearchApiElasticsearchElasticaMLT::build($type, $options, $query);
     }
 
-    drupal_alter('search_api_elasticsearch_elastica_query', $query, $search_api_query);
+    drupal_alter('search_api_elasticsearch_elastica_query', $query, $this->search_api_query);
 
     return $type->search($query);
   }

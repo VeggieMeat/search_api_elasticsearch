@@ -316,6 +316,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function search(SearchApiQueryInterface $query) {
 
+    $searcher = new SearchApiElasticsearchElasticaSearcher($query);
+
     // Results.
     $search_result = array('result count' => 0);
 
@@ -327,7 +329,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Get query options.
     $query_options = $this->getSearchQueryOptions($query);
-
+    $query_options = array_merge($query_options, $searcher->getOptions());
     // Check elasticsearch index.
     if (empty($elastica_type)) {
       return $search_result;
@@ -339,7 +341,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Add facets.
     $this->addSearchFacets($elastica_query, $query);
 
-    $response = SearchApiElasticsearchElasticaSearcher::search($elastica_type, $elastica_query, $query_options, $query);
+    $response = $searcher->search($elastica_type, $elastica_query, $query_options, $query);
 
     // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.
@@ -848,7 +850,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       'sort' => $sort,
     );
 
-    $query_options = array_merge($query_options, SearchApiElasticsearchElasticaSearcher::getOptions($query));
     return $query_options;
   }
 
