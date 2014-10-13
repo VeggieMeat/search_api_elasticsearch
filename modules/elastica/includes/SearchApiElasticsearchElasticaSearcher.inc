@@ -32,10 +32,10 @@ class SearchApiElasticsearchElasticaSearcher {
     // Key: Our key.
     // Value: Search API key.
     $options_map = array(
-      'offset' => 'query_offset',
-      'limit' => 'query_limit',
-      'spatials' => 'search_api_location',
-      'mlt' => 'search_api_mlt',
+      'query_offset' => 'offset',
+      'query_limit' => 'limit',
+      'search_api_location' => 'spatials',
+      'search_api_mlt' => 'mlt',
     );
 
     foreach ($options as $key => $value) {
