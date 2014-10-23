@@ -24,18 +24,6 @@ function search_api_elasticsearch_menu() {
 }
 
 /**
- * Implements hook_search_api_service_info().
- */
-function search_api_elasticsearch_search_api_service_info() {
-  $services['search_api_elasticsearch_service'] = array(
-    'name' => t('Elasticsearch service (DEPRECATED)'),
-    'description' => t('DEPRECATED. WILL BE REMOVED BEFORE BETA'),
-    'class' => 'SearchApiElasticsearchService',
-  );
-  return $services;
-}
-
-/**
  * Implements hook_views_api().
  */
 function search_api_elasticsearch_views_api() {
