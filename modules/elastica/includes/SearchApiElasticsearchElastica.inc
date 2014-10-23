@@ -335,13 +335,12 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       return $search_result;
     }
 
-    // Build Elastica query.
-    $elastica_query = $this->buildSearchQuery($query);
+    $elastica_query = $searcher->build();
 
     // Add facets.
     $this->addSearchFacets($elastica_query, $query);
 
-    $response = $searcher->search($elastica_type, $elastica_query, $query_options, $query);
+    $response = $searcher->search($elastica_type, $elastica_query, $query_options);
 
     // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.
@@ -563,56 +562,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   public function getElasticaType(SearchApiIndex $index) {
     $elastica_index = $this->getElasticaIndex($index);
     return !empty($elastica_index) ? $elastica_index->getType($index->machine_name) : NULL;
-  }
-
-  /**
-   * Helper function build search query().
-   */
-  protected function buildSearchQuery(SearchApiQueryInterface $query) {
-    // Query options.
-    $query_options = $this->getSearchQueryOptions($query);
-
-    // Main query.
-    $elastica_query = new Elastica\Query();
-    $elastica_query->setFrom($query_options['query_offset']);
-    $elastica_query->setSize($query_options['query_limit']);
-
-    // Search API Location support.
-    if (!empty($query_options['spatials'])) {
-      foreach ($query_options['spatials'] as $i => $spatial) {
-        if (empty($spatial['field']) || empty($spatial['lat']) || empty($spatial['lon'])) {
-          continue;
-        }
-
-        $field = $spatial['field'];
-        $point = array(
-          'lat' => (float) $spatial['lat'],
-          'lon' => (float) $spatial['lon'],
-        );
-
-        $radius = isset($spatial['radius']) ? (float) $spatial['radius'] : NULL;
-
-        $query_options['query_search_filter'] = new Elastica\Filter\GeoDistance($field, $point, $radius);
-      }
-    }
-
-    // Build the query.
-    if (!empty($query_options['query_search_string']) && !empty($query_options['query_search_filter'])) {
-      $elastica_query->setQuery(new Elastica\Query\Filtered($query_options['query_search_string'], $query_options['query_search_filter']));
-    }
-    elseif (!empty($query_options['query_search_string'])) {
-      $elastica_query->setQuery($query_options['query_search_string']);
-    }
-    elseif (!empty($query_options['query_search_filter'])) {
-      $elastica_query->setFilter($query_options['query_search_filter']);
-    }
-
-    // Sort.
-    if (!empty($query_options['sort'])) {
-      $elastica_query->setSort($query_options['sort']);
-    }
-
-    return $elastica_query;
   }
 
   /**
