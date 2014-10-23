@@ -316,7 +316,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function search(SearchApiQueryInterface $query) {
 
-    $searcher = new SearchApiElasticsearchElasticaSearcher($query);
+    $searcher = new SearchApiElasticsearchElasticaSearcher($query, $this);
 
     // Results.
     $search_result = array('result count' => 0);

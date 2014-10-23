@@ -7,13 +7,14 @@
 
 class SearchApiElasticsearchElasticaSearcher {
 
-  public function __construct(SearchApiQueryInterface $search_api_query) {
+  public function __construct(SearchApiQueryInterface $search_api_query, $service) {
     $this->search_api_query = $search_api_query;
+    $this->service = $service;
   }
 
   public function build() {
     // Query options.
-    $query_options = $this->getSearchQueryOptions($this->search_api_query);
+    $query_options = $this->service->getSearchQueryOptions($this->search_api_query);
 
     // Main query.
     $elastica_query = new Elastica\Query();
