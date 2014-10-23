@@ -29,8 +29,8 @@ class SearchApiElasticsearchElasticaSearcher {
   }
 
   protected function mapOptions(&$options) {
-    // Key: Our key.
-    // Value: Search API key.
+    // Key: Search API key.
+    // Value: Our key.
     $options_map = array(
       'query_offset' => 'offset',
       'query_limit' => 'limit',
@@ -39,7 +39,7 @@ class SearchApiElasticsearchElasticaSearcher {
     );
 
     foreach ($options as $key => $value) {
-      if (in_array($key, $options_map)) {
+      if (in_array($key, array_keys($options_map))) {
         $options[$options_map[$key]] = $value;
       }
     }
