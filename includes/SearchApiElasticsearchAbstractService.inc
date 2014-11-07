@@ -313,7 +313,9 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           $values[$i]['headers']['Authentication'] = 'Basic ' . base64_encode($setting['headers']['http_user'] . ':' . $setting['headers']['http_pass']);
         }
       }
-      unset($values[$i]['headers']['http_pass']);
+      if (isset($values[$i]['headers']['http_pass'])) {
+        unset($values[$i]['headers']['http_pass']);
+      }
     }
   }
 
