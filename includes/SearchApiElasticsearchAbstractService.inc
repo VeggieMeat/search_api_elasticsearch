@@ -939,42 +939,44 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
     $info = array();
 
     $cluster_health = $this->getClusterHealth();
-    $info[] = array(
-      'label' => t('Cluster Name'),
-      'info' => $cluster_health['cluster_name'],
-    );
-    $info[] = array(
-      'label' => t('Cluster Status'),
-      'info' => $cluster_health['status'],
-    );
-    $info[] = array(
-      'label' => t('Number of Nodes'),
-      'info' => $cluster_health['number_of_nodes'],
-    );
-    $info[] = array(
-      'label' => t('Number of Data Nodes'),
-      'info' => $cluster_health['number_of_data_nodes'],
-    );
-    $info[] = array(
-      'label' => t('Active Primary Shards'),
-      'info' => $cluster_health['active_primary_shards'],
-    );
-    $info[] = array(
-      'label' => t('Active Shards'),
-      'info' => $cluster_health['active_shards'],
-    );
-    $info[] = array(
-      'label' => t('Relocating Shards'),
-      'info' => $cluster_health['relocating_shards'],
-    );
-    $info[] = array(
-      'label' => t('Initializing Shards'),
-      'info' => $cluster_health['initializing_shards'],
-    );
-    $info[] = array(
-      'label' => t('Unassigned Shards'),
-      'info' => $cluster_health['unassigned_shards'],
-    );
+    if (!empty($cluster_health)) {
+      $info[] = array(
+        'label' => t('Cluster Name'),
+        'info' => $cluster_health['cluster_name'],
+      );
+      $info[] = array(
+        'label' => t('Cluster Status'),
+        'info' => $cluster_health['status'],
+      );
+      $info[] = array(
+        'label' => t('Number of Nodes'),
+        'info' => $cluster_health['number_of_nodes'],
+      );
+      $info[] = array(
+        'label' => t('Number of Data Nodes'),
+        'info' => $cluster_health['number_of_data_nodes'],
+      );
+      $info[] = array(
+        'label' => t('Active Primary Shards'),
+        'info' => $cluster_health['active_primary_shards'],
+      );
+      $info[] = array(
+        'label' => t('Active Shards'),
+        'info' => $cluster_health['active_shards'],
+      );
+      $info[] = array(
+        'label' => t('Relocating Shards'),
+        'info' => $cluster_health['relocating_shards'],
+      );
+      $info[] = array(
+        'label' => t('Initializing Shards'),
+        'info' => $cluster_health['initializing_shards'],
+      );
+      $info[] = array(
+        'label' => t('Unassigned Shards'),
+        'info' => $cluster_health['unassigned_shards'],
+      );
+    }
 
     return $info;
   }
