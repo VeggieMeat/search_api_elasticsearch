@@ -7,4 +7,5 @@ package = Search
 files[] = includes/SearchApiElasticsearchElastica.inc
 files[] = includes/SearchApiElasticsearchElasticaMLT.inc
 files[] = includes/SearchApiElasticsearchElasticaSearcher.inc
+files[] = includes/SearchApiElasticsearchElasticaSpellcheck.inc
 files[] = tests/functional/search_api_elasticsearch_elastica.test
