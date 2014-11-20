@@ -67,7 +67,7 @@ before_script:
   - if [[ "$DRUPAL_3RD_PARTY" == composer_manager ]]; then $TRAVIS_BUILD_DIR/vendor/bin/drush vset composer_manager_autobuild_packages 0; fi
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_elasticsearch_elastica
-  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_facetapi
+  - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en search_api_facetapi search_api_spellcheck
   - $TRAVIS_BUILD_DIR/vendor/bin/drush --yes en simpletest
   - if [[ "$DRUPAL_3RD_PARTY" == composer_manager ]]; then $TRAVIS_BUILD_DIR/vendor/bin/drush --yes composer-manager install --prefer-source --no-dev; fi
   - $TRAVIS_BUILD_DIR/vendor/bin/drush cc all
