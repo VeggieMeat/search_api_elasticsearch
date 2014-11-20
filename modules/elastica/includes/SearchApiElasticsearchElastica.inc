@@ -725,7 +725,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Parse facets.
     $search_result['search_api_facets'] = $this->parseSearchFacets($response, $query);
-    $search_result['search_api_spellcheck'] = $this->parseSuggestions($response, $query);
+    $search_result['search_api_spellcheck'] = new SearchApiElasticsearchElasticaSpellcheck($response);
 
     return $search_result;
   }
@@ -922,24 +922,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function getElasticaClient() {
     return $this->elasticaClient;
-  }
-
-  /**
-   * Parse Elasticsearch Suggestions.
-   */
-  protected function parseSuggestions($response, $query) {
-    $return = array();
-    $suggestions = $response->getSuggests();
-    foreach ($suggestions as $suggestion_group) {
-      foreach ($suggestion_group as $suggestion_set) {
-        $return['original'] = $suggestion_set['text'];
-        foreach ($suggestion_set['options'] as $suggestion) {
-          $return['suggestions'][] = $suggestion['text'];
-        }
-      }
-    }
-
-    return $return;
   }
 
   /**
