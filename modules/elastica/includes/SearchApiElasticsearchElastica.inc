@@ -406,7 +406,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     if (!isset($filter_assoc['filter_value'])) {
       switch ($filter_assoc['filter_operator']) {
         case '<>':
-          $filter = new Elastica\Filter\Exists($field_id);
+          $filter = new Elastica\Filter\Exists($filter_assoc['field_id']);
           break;
 
         case '=':
@@ -514,7 +514,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    * Helper function that check if filter is set correct.
    */
   protected function correctFilter($filter_assoc, $index_fields, $ignored_field_id = '') {
-    if (!isset($filter_assoc['field_id']) || !isset($filter_assoc['filter_value'])
+    if (!array_key_exists('field_id', $filter_assoc) || !array_key_exists('filter_value', $filter_assoc)
         || !isset($filter_assoc['filter_operator'])) {
       throw new Exception(t('Incorrect filter criteria is using for searching!'));
     }
