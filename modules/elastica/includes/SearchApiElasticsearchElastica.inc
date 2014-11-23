@@ -316,6 +316,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function search(SearchApiQueryInterface $query) {
 
+    $searcher = new SearchApiElasticsearchElasticaSearcher($query, $this);
+
     // Results.
     $search_result = array('result count' => 0);
 
@@ -327,19 +329,18 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Get query options.
     $query_options = $this->getSearchQueryOptions($query);
-
+    $query_options = array_merge($query_options, $searcher->getOptions());
     // Check elasticsearch index.
     if (empty($elastica_type)) {
       return $search_result;
     }
 
-    // Build Elastica query.
-    $elastica_query = $this->buildSearchQuery($query);
+    $elastica_query = $searcher->build();
 
     // Add facets.
     $this->addSearchFacets($elastica_query, $query);
 
-    $response = SearchApiElasticsearchElasticaSearcher::search($elastica_type, $elastica_query, $query_options, $query);
+    $response = $searcher->search($elastica_type, $elastica_query, $query_options);
 
     // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.
@@ -564,56 +565,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   }
 
   /**
-   * Helper function build search query().
-   */
-  protected function buildSearchQuery(SearchApiQueryInterface $query) {
-    // Query options.
-    $query_options = $this->getSearchQueryOptions($query);
-
-    // Main query.
-    $elastica_query = new Elastica\Query();
-    $elastica_query->setFrom($query_options['query_offset']);
-    $elastica_query->setSize($query_options['query_limit']);
-
-    // Search API Location support.
-    if (!empty($query_options['spatials'])) {
-      foreach ($query_options['spatials'] as $i => $spatial) {
-        if (empty($spatial['field']) || empty($spatial['lat']) || empty($spatial['lon'])) {
-          continue;
-        }
-
-        $field = $spatial['field'];
-        $point = array(
-          'lat' => (float) $spatial['lat'],
-          'lon' => (float) $spatial['lon'],
-        );
-
-        $radius = isset($spatial['radius']) ? (float) $spatial['radius'] : NULL;
-
-        $query_options['query_search_filter'] = new Elastica\Filter\GeoDistance($field, $point, $radius);
-      }
-    }
-
-    // Build the query.
-    if (!empty($query_options['query_search_string']) && !empty($query_options['query_search_filter'])) {
-      $elastica_query->setQuery(new Elastica\Query\Filtered($query_options['query_search_string'], $query_options['query_search_filter']));
-    }
-    elseif (!empty($query_options['query_search_string'])) {
-      $elastica_query->setQuery($query_options['query_search_string']);
-    }
-    elseif (!empty($query_options['query_search_filter'])) {
-      $elastica_query->setFilter($query_options['query_search_filter']);
-    }
-
-    // Sort.
-    if (!empty($query_options['sort'])) {
-      $elastica_query->setSort($query_options['sort']);
-    }
-
-    return $elastica_query;
-  }
-
-  /**
    * Helper function build facets in search.
    */
   protected function addSearchFacets(Elastica\Query $elastica_query, SearchApiQueryInterface $query) {
@@ -796,24 +747,14 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   protected function getSearchQueryOptions(SearchApiQueryInterface $query) {
 
-    // Query options.
-    $query_options = $query->getOptions();
-
     // Index fields.
     $index_fields = $this->getIndexFields($query);
-
-    // Range.
-    $query_offset = empty($query_options['offset']) ? 0 : $query_options['offset'];
-    $query_limit = empty($query_options['limit']) ? 10 : $query_options['limit'];
 
     // Query string.
     $query_search_string = NULL;
 
     // Query filter.
     $query_search_filter = NULL;
-
-    // Query analyzer.
-    $analyzer = isset($query_options['analyzer']) ? $query_options['analyzer'] : NULL;
 
     // Full text search.
     $keys = $query->getKeys();
@@ -852,28 +793,13 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $query_search_filter = $parsed_query_filters[0];
     }
 
-    // More Like This.
-    $mlt = array();
-    if (isset($query_options['search_api_mlt'])) {
-      $mlt = $query_options['search_api_mlt'];
-    }
-
-    // Spatials.
-    $spatials = array();
-    if (isset($query_options['search_api_location'])) {
-      $spatials = $query_options['search_api_location'];
-    }
-
-    return array(
-      'query_offset' => $query_offset,
-      'query_limit' => $query_limit,
+    $query_options = array(
       'query_search_string' => $query_search_string,
       'query_search_filter' => $query_search_filter,
       'sort' => $sort,
-      'mlt' => $mlt,
-      'analyzer' => $analyzer,
-      'spatials' => $spatials,
     );
+
+    return $query_options;
   }
 
   /**
