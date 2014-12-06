@@ -9,9 +9,14 @@
         <server name="REMOTE_ADDR" value="127.0.0.1" />
     </php>
     <filter>
-        <blacklist>
-            <directory>tests/phpunit</directory>
-            <directory>modules/elastica/tests/phpunit</directory>
-        </blacklist>
+        <whitelist>
+            <directory>build/sites/all/modules/search_api_elasticsearch</directory>
+            <exclude>
+                <directory>build/sites/all/modules/search_api_elasticsearch/tests/phpunit</directory>
+                <directory>build/sites/all/modules/search_api_elasticsearch/modules/elastica/tests/phpunit</directory>
+                <directory>tests/phpunit</directory>
+                <directory>modules/elastica/tests/phpunit</directory>
+            </exclude>
+        </whitelist>
     </filter>
 </phpunit>
