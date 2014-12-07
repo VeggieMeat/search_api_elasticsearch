@@ -14,6 +14,7 @@
           <exclude>
             <directory>./tests</directory>
             <directory>./modules/elastica/tests</directory>
+          </exclude>
         </whitelist>
     </filter>
 </phpunit>
