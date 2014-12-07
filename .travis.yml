@@ -73,7 +73,7 @@ before_script:
   - mkdir -p $TRAVIS_BUILD_DIR/build/logs
 
 script:
-  - phpunit --coverage-clover $TRAVIS_BUILD_DIR/build/logs/clover.xml --verbose --debug
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpunit --coverage-clover $TRAVIS_BUILD_DIR/build/logs/clover.xml --verbose --debug
   - $TRAVIS_BUILD_DIR/vendor/bin/drush test-run --uri=http://127.0.0.1:8080 'Search API Elasticsearch' --debug
 
 after_script:
