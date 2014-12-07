@@ -12,6 +12,7 @@
         <whitelist>
             <directory>./build/sites/all/modules/search_api_elasticsearch</directory>
             <exclude>
+                <directory>./build</directory>
                 <directory>./build/sites/all/modules/search_api_elasticsearch/tests/phpunit</directory>
                 <directory>./build/sites/all/modules/search_api_elasticsearch/modules/elastica/tests/phpunit</directory>
                 <directory>./tests/phpunit</directory>
