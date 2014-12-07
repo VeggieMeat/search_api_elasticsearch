@@ -12,7 +12,7 @@
         <whitelist>
           <directory suffix=".inc, .module">./*</directory>
           <exclude>
-            <directory>../../../*<directory>
+            <directory>../../../*</directory>
             <directory>./tests</directory>
             <directory>./modules/elastica/tests</directory>
           </exclude>
