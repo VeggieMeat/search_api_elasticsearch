@@ -10,7 +10,7 @@
     </php>
     <filter>
         <whitelist>
-          <directory>./</directory>
+          <directory suffix=".inc, .module">./</directory>
           <exclude>
             <directory>./tests</directory>
             <directory>./modules/elastica/tests</directory>
