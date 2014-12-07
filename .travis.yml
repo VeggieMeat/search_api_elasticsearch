@@ -33,7 +33,7 @@ mysql:
   encoding: $DB_ENCODE
 
 before_install:
-  - curl -I http://ftp.drupal.org/files/projects/drupal-7.32.tar.gz --verbose
+  - curl -I http://ftp.drupal.org/files/projects/drupal-7.34.tar.gz --verbose
   - sudo apt-get update > /dev/null
   - composer self-update
   - composer install -n --prefer-source
