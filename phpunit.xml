@@ -9,8 +9,8 @@
         <server name="REMOTE_ADDR" value="127.0.0.1" />
     </php>
     <filter>
-        <blacklist>
-            <directory>build</directory>
-        </blacklist>
+        <whitelist>
+          <directory>build/sites/all/modules/search_api_elasticsearch</directory>
+        </whitelist>
     </filter>
 </phpunit>
