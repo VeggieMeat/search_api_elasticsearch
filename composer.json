@@ -13,7 +13,7 @@
   "require-dev": {
     "satooshi/php-coveralls": "dev-master",
     "phpmd/phpmd": "*",
-    "phpunit/phpunit": "<=4.1.4",
+    "phpunit/phpunit": "4.3.3",
     "sebastian/phpcpd": "*",
     "squizlabs/php_codesniffer": ">=1.4.1",
     "drupal/coder": ">7",
