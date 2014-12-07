@@ -15,7 +15,7 @@ elasticsearch-${ES_VER}/bin/plugin -install http-basic-auth --url https://github
 
 export JAVA_OPTS="-server"
 
-for i in 0 1 2 3
+for i in 0 1
 do
     echo "Setup node #$i"
 
@@ -38,7 +38,7 @@ do
     echo "bulk.udp.enabled: true" >> $config_yml
     echo "bulk.udp.bulk_actions: 5" >> $config_yml
 
-    if [ $i -eq 3 ] ; then
+    if [ $i -eq 1 ] ; then
       echo "http.basic.enabled: TRUE" >> $config_yml
       echo "http.basic.user: testuser" >> $config_yml
       echo "http.basic.password: testpassword" >> $config_yml
@@ -56,4 +56,4 @@ do
     echo "Server #$i is up"
 done
 
-echo "three elasticsearch nodes should be up"
+echo "two elasticsearch nodes should be up"
