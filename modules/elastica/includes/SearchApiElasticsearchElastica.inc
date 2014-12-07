@@ -725,7 +725,9 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Parse facets.
     $search_result['search_api_facets'] = $this->parseSearchFacets($response, $query);
-    $search_result['search_api_spellcheck'] = new SearchApiElasticsearchElasticaSpellcheck($response);
+    if (module_exists('search_api_spellcheck')) {
+      $search_result['search_api_spellcheck'] = new SearchApiElasticsearchElasticaSpellcheck($response);
+    }
 
     return $search_result;
   }
