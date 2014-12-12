@@ -36,7 +36,7 @@ class SearchApiElasticsearchViewsHandlerFilterFulltext extends SearchApiViewsHan
     $query->entityCondition('entity_type', 'search_api_index', '=');
     $query->propertyCondition('machine_name', $index_name, '=');
     $result = $query->execute();
-    $result = reset(reset($result));
+    $result = reset($result['search_api_index']);
     $index = search_api_index_load($result->id);
     $server = $index->server();
     $service_info = search_api_get_service_info();
