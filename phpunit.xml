@@ -10,10 +10,10 @@
     </php>
     <filter>
         <whitelist>
-          <directory suffix=".inc, .module">build/sites/all/modules/search_api_elasticsearch</directory>
+          <directory suffix=".inc, .module">/home/travis/build/VeggieMeat/search_api_elasticsearch/build/sites/all/modules/search_api_elasticsearch</directory>
           <exclude>
-            <directory>build/sites/all/modules/search_api_elasticsearch/tests</directory>
-            <directory>build/sites/all/modules/search_api_elasticsearch/modules/elastica/tests</directory>
+            <directory>/home/travis/build/VeggieMeat/search_api_elasticsearch/build/sites/all/modules/search_api_elasticsearch/tests</directory>
+            <directory>/home/travis/build/VeggieMeat/search_api_elasticsearch/build/sites/all/modules/search_api_elasticsearch/modules/elastica/tests</directory>
           </exclude>
         </whitelist>
     </filter>
