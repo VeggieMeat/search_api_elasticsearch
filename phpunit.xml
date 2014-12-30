@@ -10,11 +10,10 @@
     </php>
     <filter>
         <whitelist>
-          <directory suffix=".inc, .module">./*</directory>
+          <directory suffix=".inc, .module">build/sites/all/modules/search_api_elasticsearch</directory>
           <exclude>
-            <directory>../../../*</directory>
-            <directory>./tests</directory>
-            <directory>./modules/elastica/tests</directory>
+            <directory>build/sites/all/modules/search_api_elasticsearch/tests</directory>
+            <directory>build/sites/all/modules/search_api_elasticsearch/modules/elastica/tests</directory>
           </exclude>
         </whitelist>
     </filter>
