@@ -29,9 +29,9 @@ script:
 after_script:
   - cd $TRAVIS_BUILD_DIR
   - php $TRAVIS_BUILD_DIR/vendor/bin/coveralls -v
-  - $TRAVIS_BUILD_DIR/vendor/bin/phpmd $TRAVIS_BUILD_DIR/$MODULE_PATH text codesize,naming,design
-  - $TRAVIS_BUILD_DIR/vendor/bin/phpcpd $TRAVIS_BUILD_DIR/$MODULE_PATH
-  - $TRAVIS_BUILD_DIR/vendor/bin/phpcs --standard=$TRAVIS_BUILD_DIR/vendor/drupal/coder/coder_sniffer/Drupal $TRAVIS_BUILD_DIR/$MODULE_PATH
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpmd $TRAVIS_BUILD_DIR text codesize,naming,design
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpcpd $TRAVIS_BUILD_DIR
+  - $TRAVIS_BUILD_DIR/vendor/bin/phpcs --standard=$TRAVIS_BUILD_DIR/vendor/drupal/coder/coder_sniffer/Drupal $TRAVIS_BUILD_DIR
 
 after_failure:
   - sudo cat /var/log/syslog
