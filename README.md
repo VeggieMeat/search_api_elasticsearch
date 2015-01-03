@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/VeggieMeat/search_api_elasticsearch.svg?branch=7.x-1.x)](https://travis-ci.org/VeggieMeat/search_api_elasticsearch)
-[![Coverage Status](https://coveralls.io/repos/VeggieMeat/search_api_elasticsearch/badge.png?branch=7.x-1.x)](https://coveralls.io/r/VeggieMeat/search_api_elasticsearch?branch=7.x-1.x)
+[![Build Status](https://travis-ci.org/VeggieMeat/search_api_elasticsearch.svg?branch=8.x-1.x)](https://travis-ci.org/VeggieMeat/search_api_elasticsearch)
+[![Coverage Status](https://coveralls.io/repos/VeggieMeat/search_api_elasticsearch/badge.png?branch=8.x-1.x)](https://coveralls.io/r/VeggieMeat/search_api_elasticsearch?branch=8.x-1.x)
 
 CONTENTS
 --------
@@ -23,7 +23,7 @@ to use an Elasticsearch server or cluster.
 REQUIREMENTS
 ------------
 
- * Drupal 7
+ * Drupal 8
  * Search API module
  * Elasticsearch 1.3.0+
 
@@ -38,7 +38,7 @@ DOCUMENTATION
 AUTOMATED TESTS
 ---------------
 
-After every commit, we run PHPUnit tests and Simpletests on Travis-CI. Current
+After every commit, we run PHPUnit tests on Travis-CI. Current
 build status can be seen at the top of this document.
 
 Additionally, we also use Coveralls to ensure that we can be confident that code
