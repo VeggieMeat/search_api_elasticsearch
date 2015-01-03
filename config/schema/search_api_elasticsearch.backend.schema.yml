@@ -1,0 +1,19 @@
+search_api.backend.plugin.search_api_elasticsearch:
+  type: mapping
+  label: 'Search API Elasticsearch settings'
+  mapping:
+    transport:
+      type: string
+      label: 'The transport to use for sending queries'
+    host:
+      type: string
+      label: 'The host name or IP address of the Elasticsearch server'
+    port:
+      type: string
+      label: 'The port of the Elasticsearch server'
+    http_user:
+      type: string
+      label: 'Username for basic HTTP authentication'
+    http_pass:
+      type: string
+      label: 'Password for basic HTTP authentication'

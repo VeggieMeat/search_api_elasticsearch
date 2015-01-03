@@ -10,15 +10,26 @@
       "homepage":"http://www.vmdoh.com"
     }
   ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://drupal-packagist.webflo.io/"
+    }
+  ],
   "require": {
+    "drupal/drupal": "8.0.x-dev",
+    "drupal/search_api": "8.1.0-alpha1",
     "ruflin/elastica": "v1.3.4.0"
   },
   "require-dev": {
     "satooshi/php-coveralls": "dev-master",
     "phpmd/phpmd": "*",
-    "phpunit/phpunit": "4.3.*",
     "sebastian/phpcpd": "*",
     "squizlabs/php_codesniffer": ">=1.4.1",
     "drush/drush": "7.*"
+  },
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {"Drupal\\search_api_elasticsearch\\": "src/"}
   }
 }

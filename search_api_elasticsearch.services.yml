@@ -1,0 +1,4 @@
+logger.search_api_elasticsearch:
+  class: Drupal\search_api_elasticsearch\Logger\QueryLogger
+  tags:
+    - { name: logger }
