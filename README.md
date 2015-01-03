@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/VeggieMeat/search_api_elasticsearch.svg?branch=7.x-1.x)](https://travis-ci.org/VeggieMeat/search_api_elasticsearch)
 [![Coverage Status](https://coveralls.io/repos/VeggieMeat/search_api_elasticsearch/badge.png?branch=7.x-1.x)](https://coveralls.io/r/VeggieMeat/search_api_elasticsearch?branch=7.x-1.x)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/VeggieMeat/search_api_elasticsearch/badges/quality-score.png?b=7.x-1.x)](https://scrutinizer-ci.com/g/VeggieMeat/search_api_elasticsearch/?branch=7.x-1.x)
 
 CONTENTS
 --------
