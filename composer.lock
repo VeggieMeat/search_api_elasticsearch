@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e58e68b3d625933d89294e2ff3dd7fc6",
+    "hash": "f0872da5cb3c1e1555db21f7098ddd87",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -3459,26 +3459,26 @@
         },
         {
             "name": "symfony/finder",
-            "version": "dev-master",
+            "version": "2.4.x-dev",
             "target-dir": "Symfony/Component/Finder",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Finder.git",
-                "reference": "4887a3099cc5fa55d8c4fbad529713446d6ae415"
+                "reference": "cd03920154bc6669f64fbabb803d24cc8629964c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Finder/zipball/4887a3099cc5fa55d8c4fbad529713446d6ae415",
-                "reference": "4887a3099cc5fa55d8c4fbad529713446d6ae415",
+                "url": "https://api.github.com/repos/symfony/Finder/zipball/cd03920154bc6669f64fbabb803d24cc8629964c",
+                "reference": "cd03920154bc6669f64fbabb803d24cc8629964c",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.9"
+                "php": ">=5.3.3"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.0-dev"
+                    "dev-master": "2.4-dev"
                 }
             },
             "autoload": {
@@ -3502,7 +3502,7 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "http://symfony.com",
-            "time": "2014-12-30 13:35:28"
+            "time": "2014-09-27 08:35:25"
         },
         {
             "name": "symfony/stopwatch",
