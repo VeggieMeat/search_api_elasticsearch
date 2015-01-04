@@ -6,7 +6,7 @@ use Drupal\Core\Logger\RfcLoggerTrait;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class QueryLogger
+ * Class RequestLogger
  * @package Drupal\search_api_elasticsearch\Logger
  */
 class RequestLogger implements LoggerInterface {
