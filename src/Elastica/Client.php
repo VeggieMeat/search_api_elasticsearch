@@ -2,15 +2,24 @@
 
 namespace Drupal\search_api_elasticsearch\Elastica;
 
+use Drupal\search_api_elasticsearch\Logger\RequestLogger;
 use Elastica\Client as ElasticaClient;
 use Elastica\Request;
-use Drupal\search_api_elasticsearch\Logger\RequestLogger;
+
 
 /**
  * Class Client
  * @package Drupal\search_api_elasticsearch\Elastica
  */
 class Client extends ElasticaClient {
+
+  /**
+   * @param $configuration
+   */
+  public function __construct($configuration) {
+    $settings = $this->parseConfig($configuration);
+    parent::__construct($settings);
+  }
 
   /**
    * @param string $path
@@ -46,6 +55,16 @@ class Client extends ElasticaClient {
     );
 
     $this->_logger->logQuery($path, $method, $data, $connection_info, $query);
+  }
+
+  /**
+   * @param array $config
+   * @return array
+   */
+  private function parseConfig($configuration) {
+    return array(
+
+    );
   }
 
 }
