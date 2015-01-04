@@ -31,6 +31,26 @@ use Elastica\Query\MatchAll;
 class SearchApiElasticsearchBackend extends BackendPluginBase {
 
   /**
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected $formBuilder;
+
+  /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $searchApiElasticsearchSettings;
+
+  /**
+   * @var \Drupal\search_api_elasticsearch\Elastica\Client
+   */
+  protected $client;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition, FormBuilderInterface $form_builder, ModuleHandlerInterface $module_handler, Config $settings) {

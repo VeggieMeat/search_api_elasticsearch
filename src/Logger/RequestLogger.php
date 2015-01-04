@@ -13,6 +13,21 @@ class RequestLogger implements LoggerInterface {
   use RfcLoggerTrait;
 
   /**
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * @var array
+   */
+  protected $queries = [];
+
+  /**
+   * @var bool
+   */
+  protected $debug;
+
+  /**
    * @param LoggerInterface $logger
    * @param bool $debug
      */
