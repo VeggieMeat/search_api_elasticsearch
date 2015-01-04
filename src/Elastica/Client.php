@@ -27,8 +27,8 @@ class Client extends ElasticaClient {
   }
 
   /**
-   * @param $path
-   * @param $method
+   * @param string $path
+   * @param string $method
    * @param $data
    * @param array $query
      */
