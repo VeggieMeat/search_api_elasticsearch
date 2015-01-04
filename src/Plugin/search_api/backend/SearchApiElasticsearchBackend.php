@@ -114,6 +114,7 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
       $type->addDocuments($documents);
     }
     catch (\Exception $e) {
+      // @TODO Implement this - possibly with own Exception handlers
     }
   }
 
@@ -135,7 +136,7 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
       return;
     }
 
-    $type->deleteIds($ids);
+    $type->deleteIds($item_ds);
   }
 
   /**
@@ -179,8 +180,10 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
    * @return \Elastica\Type|null
    */
   private function getElasticsearchType(IndexInterface $index) {
-    $elasticsearch_index = $this->getElasticsearchIndex($index);
-    return !empty($elasticsearch_index) ? $elasticsearch_index->getType($index->machine_name) : NULL;
+    if ($index instanceof IndexInterface) {
+      $elasticsearch_index = $this->getElasticsearchIndex($index);
+      return !empty($elasticsearch_index) ? $elasticsearch_index->getType($index->machine_name) : NULL;
+    }
   }
 
   /**
@@ -194,7 +197,7 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
       return $elasticsearch_index;
     }
     catch (\Exception $e) {
-
+      // @TODO Implement
     }
   }
 
