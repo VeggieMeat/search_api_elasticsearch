@@ -136,7 +136,7 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
       return;
     }
 
-    $type->deleteIds($item_ds);
+    $type->deleteIds($item_ids);
   }
 
   /**
