@@ -301,7 +301,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
         // If username matches the old value and password is empty, then use the old Authentication.
         if (empty($setting['headers']['http_pass'])) {
           if ($setting['headers']['http_user'] == $options[$i]['headers']['http_user']) {
-            $values[$i]['headers']['Authentication'] = $options[$i]['headers']['Authentication'];
+            $values[$i]['headers']['Authorization'] = $options[$i]['headers']['Authorization'];
           }
           // If username does not match and password is empty, then give a validation error.
           else {
@@ -310,7 +310,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           }
         }
         else {
-          $values[$i]['headers']['Authentication'] = 'Basic ' . base64_encode($setting['headers']['http_user'] . ':' . $setting['headers']['http_pass']);
+          $values[$i]['headers']['Authorization'] = 'Basic ' . base64_encode($setting['headers']['http_user'] . ':' . $setting['headers']['http_pass']);
         }
       }
       if (isset($values[$i]['headers']['http_pass'])) {
