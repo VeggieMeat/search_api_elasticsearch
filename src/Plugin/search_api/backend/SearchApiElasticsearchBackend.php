@@ -11,6 +11,7 @@ use Drupal\Core\Config\Config;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\SearchApiException;
 use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Query\FilterInterface;
@@ -72,7 +73,7 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
    *
    * @param \Drupal\search_api\IndexInterface $index
    *   The search index for which items should be indexed.
-   * @param \Drupal\search_api\Item\ItemInterface[] $items
+   * @param ItemInterface[] $items
    *   An array of items to be indexed, keyed by their item IDs.
    *   The value of fields with the "tokenized_text" type is an array of tokens.
    *   Each token is an array containing the following keys:
@@ -205,7 +206,7 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
   /**
    * @param array $fields
    */
-  private function parseFieldsForIndexing(array $fields) {
+  private function parseFieldsForIndexing(ItemInterface $fields) {
     foreach ($fields as $field_id => $field_data) {
       if (isset($field_data['value']) && is_array($field_data['value'])) {
         $this->parseMultivalueFieldData($field_id, $field_data['value']);
