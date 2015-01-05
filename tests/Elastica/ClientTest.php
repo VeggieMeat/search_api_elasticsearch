@@ -5,9 +5,9 @@ namespace Drupal\search_api_elasticsearch\tests\Elastica;
 use Elastica\Request;
 use Elastica\Transport\Null as NullTransport;
 
-class LoggingClientTest extends \PHPUnit_Framework_TestCase {
+class ClientTest extends \PHPUnit_Framework_TestCase {
   public function testRequestsAreLogged() {
-        $transport = new NullTransport;
+    $transport = new NullTransport;
     $connection = $this->getMock('Elastica\Connection');
     $connection->expects($this->any())->method('getTransportObject')->will($this->returnValue($transport));
     $connection->expects($this->any())->method('toArray')->will($this->returnValue(array()));
@@ -22,8 +22,9 @@ class LoggingClientTest extends \PHPUnit_Framework_TestCase {
              $this->isType('array'),
              $this->isType('array')
            );
-
+    
     $client = $this->getMockBuilder('Drupal\search_api_elasticsearch\Elastica\Client')
+                   ->setConstructorArgs(array(array()))
                    ->setMethods(array('getConnection'))
                    ->getMock();
 
