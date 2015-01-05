@@ -52,11 +52,6 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
   protected $client;
 
   /**
-   * @var array
-   */
-  protected $_fieldDataForIndexing = [];
-
-  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition, FormBuilderInterface $form_builder, ModuleHandlerInterface $module_handler, Config $settings) {
@@ -95,11 +90,10 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
 
     $documents = [];
     $return = [];
-    foreach ($items as $id => $fields) {
-      $this->_fieldDataForIndexing = array('id' => $id);
-      $this->parseFieldsForIndexing($fields);
-
-      $documents[] = new Document($id, $data);
+    foreach ($items as $id => $item) {
+      $document = new Document($id);
+      $this->parseItemForIndexing($item, $document);
+      $documents[] = $document;
       $return[] = $id;
     }
 
@@ -204,30 +198,43 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
   }
 
   /**
-   * @param array $fields
+   * @param \Drupal\search_api\Item\ItemInterface $item
+   * @param \Elastica\Document $document
    */
-  private function parseFieldsForIndexing(ItemInterface $fields) {
-    foreach ($fields as $field_id => $field_data) {
-      if (isset($field_data['value']) && is_array($field_data['value'])) {
-        $this->parseMultivalueFieldData($field_id, $field_data['value']);
-      }
+  private function parseItemForIndexing(ItemInterface $item, Document $document) {
+    $this->parseFieldsForIndexing($item, $document);
+  }
 
-      $this->_fieldDataForIndexing[$field_id] = $field_data['value'];
+  /**
+   * @param \Drupal\search_api\Item\ItemInterface $item
+   * @param \Elastica\Document $document
+   */
+  private function parseFieldsForIndexing(ItemInterface $item, Document $document) {
+    foreach ($item as $name => $field_data) {
+      if (isset($field_data['value']) && is_array($field_data['value'])) {
+        $document->set($name, $this->parseMultivalueFieldData($field_data['value']));
+      }
+      else {
+        $document->set($name, $field_data['value']);
+      }
     }
   }
 
   /**
-   * @param $field_id
    * @param array $values
+   * @return array
    */
-  private function parseMultivalueFieldData($field_id, array $values) {
+  private function parseMultivalueFieldData(array $values) {
+    $data = [];
     foreach ($values as $value) {
       if (is_scalar($value)) {
-        $this->_fieldDataForIndexing[$field_id][] = $value;
+        $data[] = $value;
       }
       else if (is_array($value) && isset($value['value'])) {
-        $this->_fieldDataForIndexing[$field_id][] = $value['value'];
+        $data[] = $value['value'];
       }
     }
+
+    return $data;
   }
 }
