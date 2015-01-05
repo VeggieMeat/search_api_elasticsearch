@@ -22,7 +22,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
              $this->isType('array'),
              $this->isType('array')
            );
-    
+
     $client = $this->getMockBuilder('Drupal\search_api_elasticsearch\Elastica\Client')
                    ->setConstructorArgs(array(array()))
                    ->setMethods(array('getConnection'))

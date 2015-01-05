@@ -51,6 +51,11 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
   protected $client;
 
   /**
+   * @var array
+   */
+  protected $_fieldDataForIndexing = [];
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition, FormBuilderInterface $form_builder, ModuleHandlerInterface $module_handler, Config $settings) {
@@ -74,7 +79,7 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
    *   - value: The word that the token represents.
    *   - score: A score for the importance of that word.
    *
-   * @return string[]
+   * @return array
    *   The IDs of all items that were successfully indexed.
    *
    * @throws \Drupal\search_api\SearchApiException
@@ -84,30 +89,17 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
     $type = $this->getElasticsearchType($index);
 
     if (empty($type) || empty($items)) {
-      return array();
+      return [];
     }
 
     $documents = [];
+    $return = [];
     foreach ($items as $id => $fields) {
-      $data = array('id' => $id);
-      foreach ($fields as $field_id => $field_data) {
-        if (isset($field_data['value']) && is_array($field_data['value'])) {
-          $data[$field_id] = [];
-          foreach ($field_data['value'] as $token) {
-            if (is_array($token) && isset($token['value'])) {
-              $data[$field_id][] = $token['value'];
-            }
-            else {
-              $data[$field_id][] = $token;
-            }
-          }
-        }
-        else {
-          $data[$field_id] = $field_data['value'];
-        }
-      }
+      $this->_fieldDataForIndexing = array('id' => $id);
+      $this->parseFieldsForIndexing($fields);
 
       $documents[] = new Document($id, $data);
+      $return[] = $id;
     }
 
     try {
@@ -116,6 +108,8 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
     catch (\Exception $e) {
       // @TODO Implement this - possibly with own Exception handlers
     }
+
+    return $return;
   }
 
   /**
@@ -206,5 +200,33 @@ class SearchApiElasticsearchBackend extends BackendPluginBase {
    */
   private function getIndexName(IndexInterface $index) {
 
+  }
+
+  /**
+   * @param array $fields
+   */
+  private function parseFieldsForIndexing(array $fields) {
+    foreach ($fields as $field_id => $field_data) {
+      if (isset($field_data['value']) && is_array($field_data['value'])) {
+        $this->parseMultivalueFieldData($field_id, $field_data['value']);
+      }
+
+      $this->_fieldDataForIndexing[$field_id] = $field_data['value'];
+    }
+  }
+
+  /**
+   * @param $field_id
+   * @param array $values
+   */
+  private function parseMultivalueFieldData($field_id, array $values) {
+    foreach ($values as $value) {
+      if (is_scalar($value)) {
+        $this->_fieldDataForIndexing[$field_id][] = $value;
+      }
+      else if (is_array($value) && isset($value['value'])) {
+        $this->_fieldDataForIndexing[$field_id][] = $value['value'];
+      }
+    }
   }
 }
