@@ -602,7 +602,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $elastica_query->setQuery($query_options['query_search_string']);
     }
     elseif (!empty($query_options['query_search_filter'])) {
-      $elastica_query->setFilter($query_options['query_search_filter']);
+      $elastica_query->setPostFilter($query_options['query_search_filter']);
     }
 
     // Sort.
