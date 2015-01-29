@@ -63,7 +63,7 @@ class SearchApiElasticsearchElasticaMoreLikeThisTest extends SearchApiElasticsea
     $this->_client->getElasticaIndex($this->_index)->refresh();
     $mlt = array(
       'id' => 1,
-      'fields' => array('title'),
+      'fields' => array('title', 'nid'),
       'min_doc_freq' => '1',
       'min_term_freq' => '1',
     );
