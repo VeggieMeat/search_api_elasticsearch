@@ -886,13 +886,18 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
    * Helper function. Returns the elasticsearch name of an index.
    */
   protected function getIndexName(SearchApiIndex $index) {
-    global $databases;
-
-    $site_database = $databases['default']['default']['database'];
-
     $index_machine_name = is_string($index) ? $index : $index->machine_name;
+    return self::escapeName($index_machine_name);
+  }
 
-    return self::escapeName('elasticsearch_index_' . $site_database . '_' . $index_machine_name);
+  protected function getRealIndexName(SearchApiIndex $index) {
+    return (isset($index->options['real_index_name'])) ? $index->options['real_index_name'] : NULL;
+  }
+
+  protected function setRealIndexName(SearchApiIndex $index) {
+    $name = $this->getIndexName($index);
+    $index->options['real_index_name'] = $name . '_' . REQUEST_TIME;
+    $index->save();
   }
 
   /**

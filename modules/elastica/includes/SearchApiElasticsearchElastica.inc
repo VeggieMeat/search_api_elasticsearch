@@ -172,7 +172,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     if (!empty($elastica_index)) {
       try {
         drupal_alter('search_api_elasticsearch_elastica_add_index', $index->options);
-        $response = $elastica_index->create($index->options, TRUE);
+        $elastica_index->create($index->options, TRUE);
+        $elastica_index->addAlias($this->getIndexName($index));
       }
       catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
@@ -542,7 +543,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function getElasticaIndex(SearchApiIndex $index) {
     if (!empty($index) && !empty($this->elasticaClient)) {
-      $index_name = $this->getIndexName($index);
+      $index_name = $this->getRealIndexName($index);
       try {
         $elastica_index = $this->elasticaClient->getIndex($index_name);
         return $elastica_index;
