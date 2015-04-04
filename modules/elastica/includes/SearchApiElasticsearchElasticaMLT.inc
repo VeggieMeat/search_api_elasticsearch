@@ -28,7 +28,7 @@ class SearchApiElasticsearchElasticaMLT {
    * @access private
    * @return void
    */
-  private function filterFields(&$fields, SearchApiQueryInterface $query) {
+  private static function filterFields(&$fields, SearchApiQueryInterface $query) {
     $index = $query->getIndex();
     $index_fields = $index->getFields();
     foreach ($index_fields as $name => $field) {
