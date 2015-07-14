@@ -275,6 +275,10 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
       $documents[] = new Elastica\Document($id, $data);
     }
+
+    // Allow other modules to alter documents.
+    drupal_alter('search_api_elasticsearch_elastica_documents', $documents, $index, $items);
+
     try {
       $elastica_type->addDocuments($documents);
     }

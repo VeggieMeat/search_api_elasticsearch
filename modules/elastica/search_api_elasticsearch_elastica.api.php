@@ -28,3 +28,17 @@ function hook_search_api_elasticsearch_elastica_add_index_alter(array $options) 
 function hook_search_api_elasticsearch_elastica_query_alter(\Elastica\Query &$elastica_query, SearchApiQueryInterface $search_api_query) {
 
 }
+
+/**
+ * Allows modules to alter documents before sending to Elasticsearch.
+ *
+ * @param array $documents
+ *   An array of documents ready to be indexed, generated from $items array.
+ * @param SearchApiIndex $index
+ *   The search index for which items are being indexed.
+ * @param array $items
+ *   An array of items being indexed.
+ */
+function hook_search_api_elasticsearch_elastica_documents_alter(array &$documents, SearchApiIndex $index, array $items) {
+
+}
