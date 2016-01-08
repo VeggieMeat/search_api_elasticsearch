@@ -341,7 +341,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     $elastica_query = $this->buildSearchQuery($query);
 
     // Add facets.
-    $this->addSearchFacets($elastica_query, $query);
+    $this->addSearchAggregation($elastica_query, $query);
 
     $response = SearchApiElasticsearchElasticaSearcher::search($elastica_type, $elastica_query, $query_options, $query);
 
@@ -382,7 +382,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Build the Elastica query and options.
     $elastica_query = $this->buildSearchQuery($query);
-    $this->addSearchFacets($elastica_query, $query);
+    $this->addSearchAggregation($elastica_query, $query);
     $elastica_search->setQuery($elastica_query);
     $query_options = $this->getSearchQueryOptions($query);
     $elastica_search->setOptions($query_options);
@@ -678,54 +678,61 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   }
 
   /**
-   * Helper function build facets in search.
+   * Helper function build Aggregations in search.
    */
-  protected function addSearchFacets(Elastica\Query $elastica_query, SearchApiQueryInterface $query) {
+  protected function addSearchAggregation(Elastica\Query $elastica_query, SearchApiQueryInterface $query) {
 
     // SEARCH API FACETS.
-    $facets = $query->getOption('search_api_facets');
+    $aggs = $query->getOption('search_api_facets');
     $index_fields = $this->getIndexFields($query);
-    if (!empty($facets)) {
-      // Loop trough facets.
-      foreach ($facets as $facet_id => $facet_info) {
-        $facet = NULL;
-        $field_id = $facet_info['field'];
+    if (!empty($aggs)) {
+      // Loop trough Aggregations.
+      foreach ($aggs as $agg_id => $agg_info) {
+        $agg = NULL;
+        $field_id = $agg_info['field'];
         // Skip if not recognized as a known field.
         if (!isset($index_fields[$field_id])) {
           continue;
         }
 
-        $facet_missing = $facet_info['missing'];
+        $agg_missing = $agg_info['missing'];
 
         $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
 
         // TODO: handle different types (GeoDistance and so on).
+
         if ($field_type === 'date') {
-          $facet = $this->createDateFieldFacet($facet_id);
+          $agg = $this->createDateFieldAggregation($agg_id);
+        }else if($field_type === 'string'){
+          //Check if string is latlong
+          if (strpos($agg_id,'latlon') !== false) {
+            //This is a latitude and longitude pair.
+          }else{
+            $agg = new Elastica\Aggregation\Terms($agg_id);
+          }
         }
         else {
-          $facet = new Elastica\Facet\Terms($facet_id);
-          // We may want missing facets.
-          $facet->setAllTerms($facet_missing);
+          $agg = new Elastica\Aggregation\Terms($agg_id);
+          // We may want missing Aggregation.
+          //$Agg->setAllTerms($agg_missing);
         }
 
-        // Add the facet.
-        if (!empty($facet)) {
-          // Add facet options.
-          $facet = $this->addFacetOptions($facet, $query, $facet_info, $elastica_query);
-          $elastica_query->addFacet($facet);
+        // Add the Aggregation.
+        if (!empty($agg)) {
+          // Add Aggregation options.
+          $agg = $this->addAggregationOptions($agg, $query, $agg_info, $elastica_query, $field_type);
+          $elastica_query->addAggregation($agg);
         }
       }
     }
   }
 
   /**
-   * Helper function that add options and return facet.
+   * Helper function that add options and return Aggregation.
    */
-  protected function addFacetOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica\Query $elastica_query) {
-
-    $facet_limit = $this->getFacetLimit($facet_info);
-    $facet_search_filter = $this->getFacetSearchFilter($query, $facet_info);
+  protected function addAggregationOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica\Query $elastica_query, $field_type) {
+    $facet_limit = $this->getAggregationLimit($facet_info);
+    $facet_search_filter = $this->getAggregationSearchFilter($query, $facet_info);
     // Set the field.
     $facet->setField($facet_info['field']);
 
@@ -735,7 +742,12 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Filter the facet.
     if (!empty($facet_search_filter)) {
-      $facet->setFilter($facet_search_filter);
+      $aggrFilter = new \Elastica\Aggregation\Filter($facet_info['field']);
+
+      $aggr = new \Elastica\Aggregation\Range($facet_info['field']);
+
+      $aggrFilter->addAggregation($aggr);
+      $aggrFilter->setFilter($facet_search_filter);
     }
 
     // Limit the number of returned entries.
@@ -746,25 +758,25 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     return $facet;
   }
 
-  /**
+  /*ls
+
    * Helper function create Facet for date field type.
    */
-  protected function createDateFieldFacet($facet_id) {
+  protected function createDateFieldAggregation($agg_id) {
 
-    $date_interval = $this->getDateFacetInterval($facet_id);
+    $date_interval = $this->getDateAggregationInterval($agg_id);
 
-    $facet = new Elastica\Facet\DateHistogram($facet_id);
+    $agg = new Elastica\Aggregation\DateRange($agg_id);
 
-    $facet->setInterval($date_interval);
+    $agg->setField($agg_id);
+    $agg->addRange(strtotime('-1 day'),time(),'1 Day');
+    $agg->addRange(strtotime('-7 day'),time(),'1 Weeks');
+    $agg->addRange(strtotime('-14 day'),time(),'2 Weeks');
+    $agg->addRange(strtotime('-21 day'),time(),'3 Weeks');
+    $agg->addRange(strtotime('-365 day'),time(),'All time');
+    $agg->setFormat("dd MM yyyy");
 
-    // Maybe get php timezone?
-    $facet->setTimezone('UTC');
-
-    // Use factor 1000 as we store dates as seconds from epoch
-    // not milliseconds.
-    $facet->setParam('factor', 1000);
-
-    return $facet;
+    return $agg;
   }
 
   /**
@@ -788,7 +800,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     }
 
     // Parse facets.
-    $search_result['search_api_facets'] = $this->parseSearchFacets($response, $query);
+    $search_result['search_api_facets'] = $this->parseSearchAggregation($response, $query);
     if (module_exists('search_api_spellcheck')) {
       $search_result['search_api_spellcheck'] = new SearchApiElasticsearchElasticaSpellcheck($response);
     }
