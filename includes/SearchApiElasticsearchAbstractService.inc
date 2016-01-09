@@ -323,15 +323,15 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
    * Overrides configurationFormSubmit().
    */
   public function configurationFormSubmit(array $form, array &$values, array &$form_state) {
-    $facet_limit = '';
+    $aggregation_limit = '';
 
     if (isset($values['facet_limit'])) {
-      $facet_limit = $values['facet_limit'];
+      $aggregation_limit = $values['facet_limit'];
       unset($values['facet_limit']);
     }
 
     $values = array_values($values);
-    $values['facet_limit'] = $facet_limit;
+    $values['facet_limit'] = $aggregation_limit;
     $this->options = $values;
   }
 
@@ -524,43 +524,43 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   /**
    * Helper function return Facet filter.
    */
-  protected function getFacetSearchFilter(SearchApiQueryInterface $query, $facet_info) {
+  protected function getAggregationSearchFilter(SearchApiQueryInterface $query, $aggregation_info) {
     $index_fields = $this->getIndexFields($query);
-    $facet_search_filter = '';
+    $aggregation_search_filter = '';
 
-    if (isset($facet_info['operator']) && drupal_strtolower($facet_info['operator']) == 'or') {
-      $facet_search_filter = $this->parseFilter($query->getFilter(), $index_fields, $facet_info['field']);
-      if (!empty($facet_search_filter)) {
-        $facet_search_filter = $facet_search_filter[0];
+    if (isset($aggregation_info['operator']) && drupal_strtolower($aggregation_info['operator']) == 'or') {
+      $aggregation_search_filter = $this->parseFilter($query->getFilter(), $index_fields, $aggregation_info['field']);
+      if (!empty($aggregation_search_filter)) {
+        $aggregation_search_filter = $aggregation_search_filter[0];
       }
     }
     // Normal facet, we just use the main query filters.
     else {
-      $facet_search_filter = $this->parseFilter($query->getFilter(), $index_fields);
-      if (!empty($facet_search_filter)) {
-        $facet_search_filter = $facet_search_filter[0];
+      $aggregation_search_filter = $this->parseFilter($query->getFilter(), $index_fields);
+      if (!empty($aggregation_search_filter)) {
+        $aggregation_search_filter = $aggregation_search_filter[0];
       }
     }
 
-    return $facet_search_filter;
+    return $aggregation_search_filter;
   }
 
   /**
    * Helper function that return facet limits.
    */
-  protected function getFacetLimit(array $facet_info) {
+  protected function getAggregationLimit(array $aggregation_info) {
     // If no limit (-1) is selected, use the server facet limit option.
-    $facet_limit = !empty($facet_info['limit']) ? $facet_info['limit'] : -1;
-    if ($facet_limit < 0) {
-      $facet_limit = $this->getOption('facet_limit', 10);
+    $aggregation_limit = !empty($aggregation_info['limit']) ? $aggregation_info['limit'] : -1;
+    if ($aggregation_limit < 0) {
+      $aggregation_limit = $this->getOption('facet_limit', 10);
     }
-    return $facet_limit;
+    return $aggregation_limit;
   }
 
   /**
    * Helper function which add params to date facets.
    */
-  protected function getDateFacetInterval($facet_id) {
+  protected function getDateAggregationInterval($aggregation_id) {
     // Active search corresponding to this index.
     $searcher = key(facetapi_get_active_searchers());
 
@@ -568,7 +568,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
     $adapter = isset($searcher) ? facetapi_adapter_load($searcher) : NULL;
 
     // Get the date granularity.
-    $date_gap = $this->getDateGranularity($adapter, $facet_id);
+    $date_gap = $this->getDateGranularity($adapter, $aggregation_id);
 
     switch ($date_gap) {
       // Already a selected YEAR, we want the months.
@@ -597,7 +597,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   /**
    * Helper function to return date gap.
    */
-  protected function getDateGranularity($adapter, $facet_id) {
+  protected function getDateGranularity($adapter, $aggregation_id) {
     // Date gaps.
     $gap_weight = array('YEAR' => 2, 'MONTH' => 1, 'DAY' => 0);
     $gaps = array();
@@ -606,7 +606,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
     // Get the date granularity.
     if (isset($adapter)) {
       // Get the current date gap from the active date filters.
-      $active_items = $adapter->getActiveItems(array('name' => $facet_id));
+      $active_items = $adapter->getActiveItems(array('name' => $aggregation_id));
       if (!empty($active_items)) {
         foreach ($active_items as $active_item) {
           $value = $active_item['value'];
@@ -631,28 +631,28 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   /**
    * Helper function that parse facets.
    */
-  protected function parseSearchFacets($response, SearchApiQueryInterface $query) {
+  protected function parseSearchAggregation($response, SearchApiQueryInterface $query) {
 
     $result = array();
     $index_fields = $this->getIndexFields($query);
-    $facets = $query->getOption('search_api_facets');
+    $aggregations = $query->getOption('search_api_facets');
 
-    if (!empty($facets) && $response->hasFacets()) {
-      foreach ($response->getFacets() as $facet_id => $facet_data) {
-        if (isset($facets[$facet_id])) {
-          $facet_info = $facets[$facet_id];
-          $facet_min_count = $facet_info['min_count'];
+    if (!empty($aggregations) && $response->hasAggregations()) {
+      foreach ($response->getAggregations() as $aggregation_id => $aggregation_data) {
+        if (isset($aggregations[$aggregation_id])) {
+          $aggregation_info = $aggregations[$aggregation_id];
+          $aggregation_min_count = $aggregation_info['min_count'];
 
-          $field_id = $facet_info['field'];
+          $field_id = $aggregation_info['field'];
           $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
 
           // TODO: handle different types (GeoDistance and so on).
           if ($field_type === 'date') {
-            foreach ($facet_data['entries'] as $entry) {
-              if ($entry['count'] >= $facet_min_count) {
+            foreach ($aggregation_data['buckets'] as $entry) {
+              if ($entry['count'] >= $aggregation_min_count) {
                 // Divide time by 1000 as we want seconds from epoch
                 // not milliseconds.
-                $result[$facet_id][] = array(
+                $result[$aggregation_id][] = array(
                   'count' => $entry['count'],
                   'filter' => '"' . ($entry['time'] / 1000) . '"',
                 );
@@ -660,11 +660,11 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
             }
           }
           else {
-            foreach ($facet_data['terms'] as $term) {
-              if ($term['count'] >= $facet_min_count) {
-                $result[$facet_id][] = array(
-                  'count' => $term['count'],
-                  'filter' => '"' . $term['term'] . '"',
+            foreach ($aggregation_data['buckets'] as $term) {
+              if ($term['doc_count'] >= $aggregation_min_count) {
+                $result[$aggregation_id][] = array(
+                  'count' => $term['doc_count'],
+                  'filter' => '"' . $term['key'] . '"',
                 );
               }
             }
