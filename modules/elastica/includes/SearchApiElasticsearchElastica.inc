@@ -40,8 +40,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
           try {
             $this->elasticaClient = new Elastica\Client(array('servers' => $config));
-          }
-          catch (Exception $e) {
+          } catch (Exception $e) {
             watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
             drupal_set_message(check_plain($e->getMessage()), 'error');
             return FALSE;
@@ -56,8 +55,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           }
           try {
             $this->elasticaClient = new Elastica\Client($config);
-          }
-          catch (Exception $e) {
+          } catch (Exception $e) {
             watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
             drupal_set_message(check_plain($e->getMessage()), 'error');
             return FALSE;
@@ -87,13 +85,13 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   public function supportsFeature($feature) {
     parent::supportsFeature($feature);
     $this->_supportedFeatures += drupal_map_assoc(array(
-          'search_api_facets',
-          'search_api_facets_operator_or',
-          'search_api_autocomplete',
-          'search_api_mlt',
-          'search_api_data_type_location',
-          // 'search_api_spellcheck',
-        ));
+      'search_api_facets',
+      'search_api_facets_operator_or',
+      'search_api_autocomplete',
+      'search_api_mlt',
+      'search_api_data_type_location',
+      // 'search_api_spellcheck',
+    ));
     return isset($this->_supportedFeatures[$feature]);
   }
 
@@ -126,8 +124,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     try {
       $health = !empty($this->elasticaClient) ? $this->getClusterHealth() : NULL;
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
       drupal_set_message(t('No connection to the Elasticsearch server.'), 'error');
@@ -173,8 +170,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       try {
         drupal_alter('search_api_elasticsearch_elastica_add_index', $index->options);
         $response = $elastica_index->create($index->options, TRUE);
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
         return FALSE;
@@ -203,16 +199,14 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           // First we try a simple merge.
           $mapping->setProperties($this->fieldsUpdatedProperties);
           $mapping->send();
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
           // If a merge fails, we must delete the type first.
           $elastica_type->delete();
           $elastica_type = $elastica_index->getType($index->machine_name);
           $mapping->setType($elastica_type);
           $mapping->send();
         }
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
         drupal_set_message(t('Fields are not re-indexed'), 'error');
@@ -234,8 +228,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       try {
         $response = $elastica_index->delete();
         return $response;
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
         return FALSE;
@@ -281,8 +274,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     try {
       $elastica_type->addDocuments($documents);
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
     }
@@ -341,14 +333,15 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     $elastica_query = $this->buildSearchQuery($query);
 
     // Add facets.
-    $this->addSearchAggregation($elastica_query, $query);
+    $this->addSearchFacets($elastica_query, $query);
 
     $response = SearchApiElasticsearchElasticaSearcher::search($elastica_type, $elastica_query, $query_options, $query);
 
     // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.
     if (function_exists('vpr') &&
-        $elastica_param_query = $elastica_query->getParam('query')) {
+      $elastica_param_query = $elastica_query->getParam('query')
+    ) {
       vpr(drupal_json_encode($elastica_param_query));
     }
 
@@ -382,7 +375,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Build the Elastica query and options.
     $elastica_query = $this->buildSearchQuery($query);
-    $this->addSearchAggregation($elastica_query, $query);
+    $this->addSearchFacets($elastica_query, $query);
     $elastica_search->setQuery($elastica_query);
     $query_options = $this->getSearchQueryOptions($query);
     $elastica_search->setOptions($query_options);
@@ -408,7 +401,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Show Elasticsearch query string from Elastica
     // as json output when views debug output is enabled.
     if (function_exists('vpr') &&
-        $elastica_param_query = $elastica_query->getParam('query')) {
+      $elastica_param_query = $elastica_query->getParam('query')
+    ) {
       vpr(drupal_json_encode($elastica_param_query));
     }
 
@@ -452,8 +446,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           }
         }
         $filters = $this->setFiltersConjunction($filters, $conjunction);
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
       }
@@ -494,43 +487,46 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
         case '>':
           $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
-                'from' => $filter_assoc['filter_value'],
-                'to' => NULL,
-                'include_lower' => FALSE,
-                'include_upper' => FALSE,
-              ));
+            'from' => $filter_assoc['filter_value'],
+            'to' => NULL,
+            'include_lower' => FALSE,
+            'include_upper' => FALSE,
+          ));
           break;
 
         case '>=':
           $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
-                'from' => $filter_assoc['filter_value'],
-                'to' => NULL,
-                'include_lower' => TRUE,
-                'include_upper' => FALSE,
-              ));
+            'from' => $filter_assoc['filter_value'],
+            'to' => NULL,
+            'include_lower' => TRUE,
+            'include_upper' => FALSE,
+          ));
           break;
 
         case '<':
           $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
-                'from' => NULL,
-                'to' => $filter_assoc['filter_value'],
-                'include_lower' => FALSE,
-                'include_upper' => FALSE,
-              ));
+            'from' => NULL,
+            'to' => $filter_assoc['filter_value'],
+            'include_lower' => FALSE,
+            'include_upper' => FALSE,
+          ));
           break;
 
         case '<=':
           $filter = new Elastica\Filter\Range($filter_assoc['field_id'], array(
-                'from' => NULL,
-                'to' => $filter_assoc['filter_value'],
-                'include_lower' => FALSE,
-                'include_upper' => TRUE,
-              ));
+            'from' => NULL,
+            'to' => $filter_assoc['filter_value'],
+            'include_lower' => FALSE,
+            'include_upper' => TRUE,
+          ));
           break;
 
         default:
           throw new Exception(t('Undefined operator :field_operator for :field_id field! Incorrect filter criteria is using for searching!',
-                  array(':field_operator' => $filter_assoc['filter_operator'], ':field_id' => $filter_assoc['field_id'])));
+            array(
+              ':field_operator' => $filter_assoc['filter_operator'],
+              ':field_id' => $filter_assoc['field_id']
+            )));
       }
     }
 
@@ -568,7 +564,10 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       }
       else {
         throw new Exception(t('Undefined conjunction :conjunction! Available values are :avail_conjunction! Incorrect filter criteria is using for searching!',
-                array(':conjunction!' => $conjunction, ':avail_conjunction' => $conjunction)));
+          array(
+            ':conjunction!' => $conjunction,
+            ':avail_conjunction' => $conjunction
+          )));
       }
     }
     return $filters;
@@ -579,7 +578,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   protected function correctFilter($filter_assoc, $index_fields, $ignored_field_id = '') {
     if (!array_key_exists('field_id', $filter_assoc) || !array_key_exists('filter_value', $filter_assoc)
-        || !isset($filter_assoc['filter_operator'])) {
+      || !isset($filter_assoc['filter_operator'])
+    ) {
       throw new Exception(t('Incorrect filter criteria is using for searching!'));
     }
 
@@ -610,8 +610,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       try {
         $elastica_index = $this->elasticaClient->getIndex($index_name);
         return $elastica_index;
-      }
-      catch (Exception $e) {
+      } catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
         drupal_set_message(check_plain($e->getMessage()), 'error');
       }
@@ -632,6 +631,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   protected function buildSearchQuery(SearchApiQueryInterface $query) {
     // Query options.
+    dd('BUILDSEARCH QUERY');
+    dd($query_options);
     $query_options = $this->getSearchQueryOptions($query);
 
     // Main query.
@@ -654,9 +655,10 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
         $radius = isset($spatial['radius']) ? (float) $spatial['radius'] : NULL;
 
-        $query_options['query_search_filter'] = new Elastica\Filter\GeoDistance($field, $point, $radius);
+        $query_options['query_search_filter'] = new Elastica\Filter\GeoDistance($field, $point, $radius . 'km');
       }
     }
+
 
     // Build the query.
     if (!empty($query_options['query_search_string']) && !empty($query_options['query_search_filter'])) {
@@ -669,70 +671,95 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $elastica_query->setPostFilter($query_options['query_search_filter']);
     }
 
+
     // Sort.
+
+    //TODO remove this variable.
+    $sort_spatial = FALSE;
+
     if (!empty($query_options['sort'])) {
-      $elastica_query->setSort($query_options['sort']);
+      if (!empty($query_options['spatials'])) {
+        foreach ($query_options['spatials'] as $i => $spatial) {
+          if (empty($spatial['field']) || empty($spatial['lat']) || empty($spatial['lon'])) {
+            continue;
+          }
+          $sort_spatial = TRUE;
+          //TODO fix this query can not combine with setSort(lower).
+          $elastica_query->addSort(
+            [
+              '_geo_distance' => [
+                $spatial['field'] => array(
+                  'lat' => $spatial['lat'],
+                  'lon' => $spatial['lon'],
+                ),
+                'order' => 'asc',
+                'unit' => 'km'
+              ]
+            ]
+          );
+          unset($query_options['sort'][$spatial['field']]);
+
+        }
+      }
+      if (!$sort_spatial) {
+        $elastica_query->setSort($query_options['sort']);
+       }
     }
 
     return $elastica_query;
   }
 
   /**
-   * Helper function build Aggregations in search.
+   * Helper function build facets in search.
    */
-  protected function addSearchAggregation(Elastica\Query $elastica_query, SearchApiQueryInterface $query) {
+  protected
+  function addSearchFacets(Elastica\Query $elastica_query, SearchApiQueryInterface $query) {
 
     // SEARCH API FACETS.
-    $aggs = $query->getOption('search_api_facets');
+    $facets = $query->getOption('search_api_facets');
     $index_fields = $this->getIndexFields($query);
-    if (!empty($aggs)) {
-      // Loop trough Aggregations.
-      foreach ($aggs as $agg_id => $agg_info) {
-        $agg = NULL;
-        $field_id = $agg_info['field'];
+    if (!empty($facets)) {
+      // Loop trough facets.
+      foreach ($facets as $facet_id => $facet_info) {
+        $facet = NULL;
+        $field_id = $facet_info['field'];
         // Skip if not recognized as a known field.
         if (!isset($index_fields[$field_id])) {
           continue;
         }
 
-        $agg_missing = $agg_info['missing'];
+        $facet_missing = $facet_info['missing'];
 
         $field_type = search_api_extract_inner_type($index_fields[$field_id]['type']);
 
         // TODO: handle different types (GeoDistance and so on).
-
         if ($field_type === 'date') {
-          $agg = $this->createDateFieldAggregation($agg_id);
-        }else if($field_type === 'string'){
-          //Check if string is latlong
-          if (strpos($agg_id,'latlon') !== false) {
-            //This is a latitude and longitude pair.
-          }else{
-            $agg = new Elastica\Aggregation\Terms($agg_id);
-          }
+          $facet = $this->createDateFieldFacet($facet_id);
         }
         else {
-          $agg = new Elastica\Aggregation\Terms($agg_id);
-          // We may want missing Aggregation.
-          //$Agg->setAllTerms($agg_missing);
+          $facet = new Elastica\Facet\Terms($facet_id);
+          // We may want missing facets.
+          $facet->setAllTerms($facet_missing);
         }
 
-        // Add the Aggregation.
-        if (!empty($agg)) {
-          // Add Aggregation options.
-          $agg = $this->addAggregationOptions($agg, $query, $agg_info, $elastica_query, $field_type);
-          $elastica_query->addAggregation($agg);
+        // Add the facet.
+        if (!empty($facet)) {
+          // Add facet options.
+          $facet = $this->addFacetOptions($facet, $query, $facet_info, $elastica_query);
+          $elastica_query->addFacet($facet);
         }
       }
     }
   }
 
   /**
-   * Helper function that add options and return Aggregation.
+   * Helper function that add options and return facet.
    */
-  protected function addAggregationOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica\Query $elastica_query, $field_type) {
-    $facet_limit = $this->getAggregationLimit($facet_info);
-    $facet_search_filter = $this->getAggregationSearchFilter($query, $facet_info);
+  protected
+  function addFacetOptions(&$facet, SearchApiQueryInterface $query, $facet_info, Elastica\Query $elastica_query) {
+
+    $facet_limit = $this->getFacetLimit($facet_info);
+    $facet_search_filter = $this->getFacetSearchFilter($query, $facet_info);
     // Set the field.
     $facet->setField($facet_info['field']);
 
@@ -742,12 +769,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
 
     // Filter the facet.
     if (!empty($facet_search_filter)) {
-      $aggrFilter = new \Elastica\Aggregation\Filter($facet_info['field']);
-
-      $aggr = new \Elastica\Aggregation\Range($facet_info['field']);
-
-      $aggrFilter->addAggregation($aggr);
-      $aggrFilter->setFilter($facet_search_filter);
+      $facet->setFilter($facet_search_filter);
     }
 
     // Limit the number of returned entries.
@@ -758,31 +780,33 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     return $facet;
   }
 
-  /*ls
-
+  /**
    * Helper function create Facet for date field type.
    */
-  protected function createDateFieldAggregation($agg_id) {
+  protected
+  function createDateFieldFacet($facet_id) {
 
-    $date_interval = $this->getDateAggregationInterval($agg_id);
+    $date_interval = $this->getDateFacetInterval($facet_id);
 
-    $agg = new Elastica\Aggregation\DateRange($agg_id);
+    $facet = new Elastica\Facet\DateHistogram($facet_id);
 
-    $agg->setField($agg_id);
-    $agg->addRange(strtotime('-1 day'),time(),'1 Day');
-    $agg->addRange(strtotime('-7 day'),time(),'1 Weeks');
-    $agg->addRange(strtotime('-14 day'),time(),'2 Weeks');
-    $agg->addRange(strtotime('-21 day'),time(),'3 Weeks');
-    $agg->addRange(strtotime('-365 day'),time(),'All time');
-    $agg->setFormat("dd MM yyyy");
+    $facet->setInterval($date_interval);
 
-    return $agg;
+    // Maybe get php timezone?
+    $facet->setTimezone('UTC');
+
+    // Use factor 1000 as we store dates as seconds from epoch
+    // not milliseconds.
+    $facet->setParam('factor', 1000);
+
+    return $facet;
   }
 
   /**
    * Helper function which parse facets in search().
    */
-  public function parseSearchResponse($response, SearchApiQueryInterface $query) {
+  public
+  function parseSearchResponse($response, SearchApiQueryInterface $query) {
 
     $search_result = array('results' => array());
 
@@ -800,7 +824,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     }
 
     // Parse facets.
-    $search_result['search_api_facets'] = $this->parseSearchAggregation($response, $query);
+    $search_result['search_api_facets'] = $this->parseSearchFacets($response, $query);
     if (module_exists('search_api_spellcheck')) {
       $search_result['search_api_spellcheck'] = new SearchApiElasticsearchElasticaSpellcheck($response);
     }
@@ -811,14 +835,14 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   /**
    * Update settings.
    */
-  public function updateSettings(SearchApiIndex $index, $data) {
+  public
+  function updateSettings(SearchApiIndex $index, $data) {
     try {
       $elastica_index = $this->getElasticaIndex($index);
       $elastica_index->close();
       $elastica_index->setSettings($data);
       $elastica_index->open();
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
       return FALSE;
@@ -828,7 +852,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   /**
    * Get settings.
    */
-  public function getSettings(SearchApiIndex $index) {
+  public
+  function getSettings(SearchApiIndex $index) {
     try {
       $elastica_index = $this->getElasticaIndex($index);
 
@@ -840,8 +865,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
           return $settings;
         }
       }
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message(check_plain($e->getMessage()), 'error');
     }
@@ -852,7 +876,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   /**
    * Get settings.
    */
-  public function filterSettings($settings) {
+  public
+  function filterSettings($settings) {
     $new_settings = array();
 
     foreach ($settings as $setting => $value) {
@@ -861,7 +886,10 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     }
 
     foreach ($new_settings as $new_setting => $new_settings_value) {
-      if (in_array($new_setting, array('number_of_shards', 'number_of_replicas'))) {
+      if (in_array($new_setting, array(
+        'number_of_shards',
+        'number_of_replicas'
+      ))) {
         unset($new_settings[$new_setting]);
       }
     }
@@ -872,7 +900,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   /**
    * Helper function return associative array with query options.
    */
-  protected function getSearchQueryOptions(SearchApiQueryInterface $query) {
+  protected
+  function getSearchQueryOptions(SearchApiQueryInterface $query) {
 
     // Query options.
     $query_options = $query->getOptions();
@@ -918,8 +947,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     // Sort.
     try {
       $sort = $this->getSortSearchQuery($query);
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
       drupal_set_message($e->getMessage(), 'error');
     }
@@ -962,7 +990,8 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    *   Key: Transport name used by library.
    *   Value: Display name.
    */
-  protected function getTransportOptions() {
+  protected
+  function getTransportOptions() {
     $options = array(
       'Http' => 'HTTP',
       'Https' => 'HTTPS',
@@ -984,21 +1013,24 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   /**
    * Get Cluster health.
    */
-  protected function getClusterHealth() {
+  protected
+  function getClusterHealth() {
     return $this->elasticaClient->getCluster()->getHealth()->getData();
   }
 
   /**
    * Get Cluster state.
    */
-  protected function getClusterState() {
+  protected
+  function getClusterState() {
     return $this->elasticaClient->getCluster()->getState();
   }
 
   /**
    * Return Elastica Client.
    */
-  public function getElasticaClient() {
+  public
+  function getElasticaClient() {
     return $this->elasticaClient;
   }
 
@@ -1009,18 +1041,21 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    * @access protected
    * @return void
    */
-  protected function buildSpellcheckQuery(SearchApiQueryInterface $query) {
+  protected
+  function buildSpellcheckQuery(SearchApiQueryInterface $query) {
     $suggest = new \Elastica\Suggest();
     $phrase = new \Elastica\Suggest\Phrase('suggest1', 'text');
     $phrase->setText($this->flattenKeys($this->getKeys()));
-    $phrase->setHighlight("<suggest>", "</suggest>")->setStupidBackoffSmoothing();
+    $phrase->setHighlight("<suggest>", "</suggest>")
+      ->setStupidBackoffSmoothing();
     $phrase->addCandidateGenerator(new \Elastica\Suggest\CandidateGenerator\DirectGenerator("text"));
     $suggest->addSuggestion($phrase);
 
     return $suggest;
   }
 
-  public function setTransport($transport) {
+  public
+  function setTransport($transport) {
     $this->elasticaClient->setConfigValue('transport', $transport);
   }
 }
