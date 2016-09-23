@@ -631,8 +631,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   protected function buildSearchQuery(SearchApiQueryInterface $query) {
     // Query options.
-    dd('BUILDSEARCH QUERY');
-    dd($query_options);
     $query_options = $this->getSearchQueryOptions($query);
 
     // Main query.
