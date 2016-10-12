@@ -137,7 +137,6 @@ function search_api_elasticsearch_theme($existing, $type, $theme, $path) {
  */
 function template_preprocess_search_api_elasticsearch_index(&$variables) {
   $settings = $variables['settings'];
-  dpm($settings);
   $variables['read_only'] = '';
 
   $variables['name'] = $settings['name'];
