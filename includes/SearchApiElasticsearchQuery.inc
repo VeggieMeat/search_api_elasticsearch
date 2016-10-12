@@ -1,4 +1,15 @@
 <?php
+use Elastica\Aggregation\AbstractSimpleAggregation;
+use Elastica\Aggregation\DateRange;
+use Elastica\Aggregation\Filter;
+use Elastica\Aggregation\Range;
+use Elastica\Aggregation\Terms;
+use Elastica\Query;
+use Elastica\Query\BoolQuery;
+use Elastica\Query\Exists;
+use Elastica\Query\QueryString;
+use Elastica\Query\Range as RangeQuery;
+use Elastica\ResultSet;
 
 /**
  * @file
@@ -17,7 +28,7 @@ class SearchApiElasticsearchQuery {
   protected $search_api_service;
 
   /**
-   * @var \Elastica\Query
+   * @var Query
    */
   protected $query;
 
@@ -44,7 +55,7 @@ class SearchApiElasticsearchQuery {
    * @throws Exception
    */
   protected function build() {
-    $this->query = new \Elastica\Query();
+    $this->query = new Query();
     $offset = (empty($this->query_options['offset'])) ? 0 : $this->query_options['offset'];
     $limit = (empty($this->query_options['limit'])) ? 10 : $this->query_options['limit'];
 
@@ -58,7 +69,7 @@ class SearchApiElasticsearchQuery {
       $string = $this->flattenKeys($keys, $this->query_options['parse mode']);
 
       if (!empty($string)) {
-        $query_string = new \Elastica\Query\QueryString($string);
+        $query_string = new QueryString($string);
         $query_string->setFields(array_values($full_text_fields));
       }
     }
@@ -73,7 +84,7 @@ class SearchApiElasticsearchQuery {
     $this->query->setSize($limit);
 
     if (isset($query_string) && isset($search_filter)) {
-      $bool_query = new \Elastica\Query\BoolQuery();
+      $bool_query = new BoolQuery();
       $bool_query->addMust($query_string);
       $bool_query->addFilter($search_filter);
       $this->query->setQuery($bool_query);
@@ -106,10 +117,10 @@ class SearchApiElasticsearchQuery {
   /**
    * Parse Elasticsearch results for use by Search API.
    *
-   * @param \Elastica\ResultSet $result_set
+   * @param ResultSet $result_set
    * @return array
    */
-  protected function parseResults(\Elastica\ResultSet $result_set) {
+  protected function parseResults(ResultSet $result_set) {
     $search_result = ['results' => []];
     $search_result['result count'] = $result_set->getTotalHits();
 
@@ -130,10 +141,10 @@ class SearchApiElasticsearchQuery {
   /**
    * Parse aggregations for Facet API.
    *
-   * @param \Elastica\ResultSet $result_set
+   * @param ResultSet $result_set
    * @return array
    */
-  protected function parseAggregations(\Elastica\ResultSet $result_set) {
+  protected function parseAggregations(ResultSet $result_set) {
     $result = [];
     $aggregations = $this->search_api_query->getOption('search_api_facets');
 
@@ -188,7 +199,7 @@ class SearchApiElasticsearchQuery {
         $field_type = search_api_extract_inner_type($this->index_fields[$field_id]['type']);
 
         if ($field_type === 'date') {
-          $aggregation = new \Elastica\Aggregation\DateRange($aggregation_id);
+          $aggregation = new DateRange($aggregation_id);
           $aggregation->setField($aggregation_id);
           $aggregation->addRange(strtotime('-1 day'), time(), '1 Day');
           $aggregation->addRange(strtotime('-7 day'), time(), '1 Week');
@@ -202,7 +213,7 @@ class SearchApiElasticsearchQuery {
 
           }
           else {
-            $aggregation = new \Elastica\Aggregation\Terms($aggregation_id);
+            $aggregation = new Terms($aggregation_id);
           }
         }
 
@@ -216,18 +227,18 @@ class SearchApiElasticsearchQuery {
 
   /**
    * Configure an aggregation.
-   * @param \Elastica\Aggregation\AbstractSimpleAggregation $aggregation
+   * @param AbstractSimpleAggregation $aggregation
    * @param $field_type
    * @param $aggregation_info
    */
-  protected function setAggregationOptions(\Elastica\Aggregation\AbstractSimpleAggregation $aggregation, $field_type, $aggregation_info) {
+  protected function setAggregationOptions(AbstractSimpleAggregation $aggregation, $field_type, $aggregation_info) {
     $aggregation_limit = $this->getAggregationLimit($aggregation_info);
     $aggregation_filter = $this->getAggregationFilter($aggregation_info);
     $aggregation->setField($aggregation_info['field']);
 
     if (!empty($aggregation_filter)) {
-      $filter = new \Elastica\Aggregation\Filter($aggregation_info['field']);
-      $range = new \Elastica\Aggregation\Range($aggregation_info['field']);
+      $filter = new Filter($aggregation_info['field']);
+      $range = new Range($aggregation_info['field']);
       $filter->addAggregation($range);
       $filter->setFilter($aggregation_filter);
       $aggregation->addAggregation($filter);
@@ -358,10 +369,10 @@ class SearchApiElasticsearchQuery {
     if (!isset($filter_array['filter_value'])) {
       switch ($filter_array['filter_operator']) {
         case '<>':
-          return new \Elastica\Query\Exists($filter_array['field_id']);
+          return new Exists($filter_array['field_id']);
         case '=':
-          $query = new \Elastica\Query\BoolQuery();
-          $query->addMustNot(new \Elastica\Query\Exists($filter_array['field_id']));
+          $query = new BoolQuery();
+          $query->addMustNot(new Exists($filter_array['field_id']));
           return $query;
       }
     }
@@ -369,13 +380,13 @@ class SearchApiElasticsearchQuery {
     else {
       switch ($filter_array['filter_value']) {
         case '>':
-          return new \Elastica\Query\Range($filter_array['field_id'], ['gt' => $filter_array['filter_value']]);
+          return new RangeQuery($filter_array['field_id'], ['gt' => $filter_array['filter_value']]);
         case '>=':
-          return new \Elastica\Query\Range($filter_array['field_id'], ['gte' => $filter_array['filter_value']]);
+          return new RangeQuery($filter_array['field_id'], ['gte' => $filter_array['filter_value']]);
         case '<':
-          return new \Elastica\Query\Range($filter_array['field_id'], ['lt' => $filter_array['filter_value']]);
+          return new RangeQuery($filter_array['field_id'], ['lt' => $filter_array['filter_value']]);
         case '<=':
-          return new \Elastica\Query\Range($filter_array['field_id'], ['lte' => $filter_array['filter_value']]);
+          return new RangeQuery($filter_array['field_id'], ['lte' => $filter_array['filter_value']]);
       }
     }
 
@@ -392,12 +403,12 @@ class SearchApiElasticsearchQuery {
   protected function joinFilters(&$filters, $conjunction) {
     if (count($filters) > 1) {
       if ($conjunction === 'OR') {
-        $query = new \Elastica\Query\BoolQuery();
+        $query = new BoolQuery();
         $query->addShould($filters);
         $filters = array($query);
       }
       elseif ($conjunction === 'AND') {
-        $query = new \Elastica\Query\BoolQuery();
+        $query = new BoolQuery();
         $query->addMust($filters);
         $filters = array($query);
       }

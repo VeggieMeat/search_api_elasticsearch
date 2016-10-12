@@ -1,5 +1,11 @@
 <?php
 
+use Elastica\Document;
+use Elastica\Index;
+use Elastica\Query\MatchAll;
+use Elastica\Type;
+use Elastica\Type\Mapping;
+
 class SearchApiElasticsearchIndex {
 
   /**
@@ -100,7 +106,7 @@ class SearchApiElasticsearchIndex {
    * Delete all documents in an Elasticsearch index.
    */
   public function deleteAllItems() {
-    $match_all = new \Elastica\Query\MatchAll();
+    $match_all = new MatchAll();
     $index = $this->getRealIndex($this->search_api_index);
     $index->deleteByQuery($match_all);
   }
@@ -113,7 +119,7 @@ class SearchApiElasticsearchIndex {
   public function deleteItems($ids) {
     $documents = [];
     foreach ($ids as $id) {
-      $documents[] = new \Elastica\Document($id);
+      $documents[] = new Document($id);
     }
     $index = $this->getRealIndex($this->search_api_index);
     $index->deleteDocuments($documents);
@@ -121,7 +127,7 @@ class SearchApiElasticsearchIndex {
 
   /**
    * Get Elasticsearch index using Search API index machine name as alias.
-   * @return \Elastica\Index
+   * @return Index
    */
   public function getElasticsearchIndex() {
     return $this->search_api_service->getClient()->getIndex($this->search_api_index->machine_name);
@@ -134,21 +140,21 @@ class SearchApiElasticsearchIndex {
    * @TODO
    *
    * @param SearchApiIndex $index
-   * @param \Elastica\Index $old_index
+   * @param Index $old_index
    */
-  protected function replaceIndex(SearchApiIndex $index, \Elastica\Index $old_index) {
+  protected function replaceIndex(SearchApiIndex $index, Index $old_index) {
     $this->search_api_service->addIndex($index);
   }
 
   /**
    * Create Elasticsearch mapping.
    *
-   * @param \Elastica\Type $type
-   * @return \Elastica\Type\Mapping
+   * @param Type $type
+   * @return Mapping
    */
-  protected function createElasticsearchMapping(\Elastica\Type $type) {
+  protected function createElasticsearchMapping(Type $type) {
     $this->setMapping($this->search_api_index);
-    $mapping = new \Elastica\Type\Mapping();
+    $mapping = new Mapping();
     $mapping->setType($type);
     $mapping->setParam('_all', ['enabled' => FALSE]);
     $mapping->setProperties($this->mapping);
@@ -226,7 +232,7 @@ class SearchApiElasticsearchIndex {
    * Get Elasticsearch index.
    *
    * @param SearchApiIndex $index
-   * @return \Elastica\Index
+   * @return Index
    */
   protected function getRealIndex(SearchApiIndex $index) {
     return $this->search_api_service->getClient()->getIndex($this->getRealIndexName($index));

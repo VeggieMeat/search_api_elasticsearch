@@ -1,5 +1,6 @@
 <?php
 use Elastica\Client;
+use Elastica\Document;
 
 /**
  * @file
@@ -39,7 +40,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
         }
       }
 
-      $documents[] = new \Elastica\Document($id, $data, $index->machine_name);
+      $documents[] = new Document($id, $data, $index->machine_name);
     }
 
     return $elasticsearch_index->indexItems($documents);
