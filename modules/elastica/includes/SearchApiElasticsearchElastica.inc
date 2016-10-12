@@ -978,6 +978,10 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $options['Thrift'] = 'Thrift';
     }
 
+    if (class_exists('\Aws\AwsClient')) {
+      $options['AwsAuthV4'] = 'AwsAuthV4';
+    }
+
     return $options;
   }
 

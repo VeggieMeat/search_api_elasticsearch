@@ -137,6 +137,41 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
           '#parents' => array('options', 'form', $c, 'headers', 'http_pass'),
         );
 
+        //Elasticsearch basic authentication.
+        $form['daemon_settings']['fieldset'][$c]['aws'] = array(
+          '#type' => 'fieldset',
+          '#tree' => TRUE,
+          '#title' => t('AWS IAM Authentication'),
+          '#description' => t('If your Elasticsearch server is protected by basic AWS authentication, enter the IAM credentials here, you shoul use the AwsAuthV4 transporter.'),
+        );
+
+        //Elasticsearch AWS Access Key.
+        $form['daemon_settings']['fieldset'][$c]['aws']['aws_access_key_id'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Access Key'),
+          '#default_value' => (!empty($options[$c]['aws']) && !empty($options[$c]['aws']['aws_access_key_id'])) ? $options[$c]['aws']['aws_access_key_id'] : '',
+          '#description' => t('IAM Access Key ID.'),
+          '#parents' => array('options', 'form', $c, 'aws', 'aws_access_key_id'),
+        );
+
+        //Elasticsearch AWS Secret Key.
+        $form['daemon_settings']['fieldset'][$c]['aws']['aws_secret_access_key'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Secret Key'),
+          '#default_value' => (!empty($options[$c]['aws']) && !empty($options[$c]['aws']['aws_secret_access_key'])) ? $options[$c]['aws']['aws_secret_access_key'] : '',
+          '#description' => t('IAM Secret Access Key.'),
+          '#parents' => array('options', 'form', $c, 'aws', 'aws_secret_access_key'),
+        );
+
+        //Elasticsearch AWS Region.
+        $form['daemon_settings']['fieldset'][$c]['aws']['aws_region'] = array(
+          '#type' => 'textfield',
+          '#title' => t('AWS Region'),
+          '#default_value' => (!empty($options[$c]['aws']) && !empty($options[$c]['aws']['aws_region'])) ? $options[$c]['aws']['aws_region'] : '',
+          '#description' => t('Region where is installed your ElasticSearch Service Instance.'),
+          '#parents' => array('options', 'form', $c, 'aws', 'aws_region'),
+        );
+
         // Elasticsearch daemon path.
         $form['daemon_settings']['fieldset'][$c]['path'] = array(
           '#type' => 'textfield',
@@ -315,6 +350,27 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
       }
       if (isset($values[$i]['headers']['http_pass'])) {
         unset($values[$i]['headers']['http_pass']);
+      }
+
+      // Put aws_access_key_id and aws_secret_access_keyword in correct form.
+      if (!empty($setting['aws']['aws_access_key_id'])) {
+        if (empty($setting['aws']['aws_secret_access_key'])) {
+            form_set_error('aws_secret_access_key', t('Access Secret Key is required to generate the Access token.'));
+            return;
+        }
+        if (empty($setting['aws']['aws_region'])) {
+            form_set_error('aws_region', t('Region of the Elasticsearch Service must be specified.'));
+            return;
+        }
+      }
+      if (isset($values[$i]['aws']['aws_access_key_id'])) {
+        $values[$i]['aws_access_key_id'] = $values[$i]['aws']['aws_access_key_id'];
+      }
+      if (isset($values[$i]['aws']['aws_secret_access_key'])) {
+        $values[$i]['aws_secret_access_key'] = $values[$i]['aws']['aws_secret_access_key'];
+      }
+      if (isset($values[$i]['aws']['aws_region'])) {
+        $values[$i]['aws_region'] = $values[$i]['aws']['aws_region'];
       }
     }
   }
