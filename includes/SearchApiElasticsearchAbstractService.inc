@@ -908,7 +908,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
    */
   public function fieldsUpdated(SearchApiIndex $index) {
     $this->fieldsUpdatedProperties = array(
-      'id' => array('type' => 'integer', 'include_in_all' => FALSE),
+      'id' => array('type' => 'string', 'include_in_all' => FALSE),
     );
     foreach ($index->getFields() as $field_id => $field_data) {
       $this->fieldsUpdatedProperties[$field_id] = $this->getFieldMapping($field_data);
