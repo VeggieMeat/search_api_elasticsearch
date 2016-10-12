@@ -1,0 +1,7 @@
+<?php
+
+/**
+ * @file
+ * Install/Uninstall/Update tasks for the Search API Elasticsearch module.
+ */
+
