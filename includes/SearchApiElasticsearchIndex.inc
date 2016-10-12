@@ -163,7 +163,7 @@ class SearchApiElasticsearchIndex {
   protected function setMapping(SearchApiIndex $index) {
     $this->mapping = [
       'id' => [
-        'type' => 'integer',
+        'type' => 'string',
         'include_in_all' => FALSE,
       ],
     ];
