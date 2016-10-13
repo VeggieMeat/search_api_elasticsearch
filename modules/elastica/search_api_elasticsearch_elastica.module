@@ -201,4 +201,19 @@ function search_api_elasticsearch_elastica_add_options($server_machine_name) {
   return FALSE;
 }
 
+/**
+ * Implements hook_search_api_index_reindex.
+ * Since there is no way to put a mapping and settings on an index simultaneously,
+ * we allow users to delete and remap an index by using the clear index feature.
+ * This approximates the ElasticSearch recommendation to destroy and recreate
+ * indices to update their configuration.
+ */
+function search_api_elasticsearch_elastica_search_api_index_reindex(SearchApiIndex $index, $clear = FALSE) {
+  $server = search_api_index_get_server($index);
+  // Only act on index provided by search_api_elasticsearch
+  if ($clear && $server->class == "search_api_elasticsearch_elastica_service") {
+    $server->removeIndex($index);
+    $server->addIndex($index);
+  }
+}
 

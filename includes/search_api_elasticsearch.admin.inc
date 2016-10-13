@@ -23,10 +23,23 @@ function search_api_elasticsearch_analysis_form($form, &$form_state, SearchApiIn
     $analysis_settings = $elasticsearch_client->getAnalysisSettings($index);
 
     // Build our form.
+    $form['default'] = array(
+      '#title' => t("Default analyzer"),
+      '#type' => 'select',
+      '#description' => t("The default analyzer for all fields of this index. You do not need to enable a custom analyzer below to configure a default analyzer."),
+      '#options' => array(
+        0 => t('-Select-'),
+        t('Built-in') => drupal_map_assoc(array(
+        'standard', 'simple', 'whitespace', 'stop', 'keyword', 'pattern', 'snowball')),
+        t('Language') => drupal_map_assoc(array('arabic', 'armenian', 'basque', 'brazilian', 'bulgarian', 'catalan', 'cjk', 'czech', 'danish', 'dutch', 'english', 'finnish', 'french', 'galician', 'german', 'greek', 'hindi', 'hungarian', 'indonesian', 'irish', 'italian', 'latvian', 'lithuanian', 'norwegian', 'persian', 'portuguese', 'romanian', 'russian', 'sorani', 'spanish', 'swedish', 'turkish', 'thai')),
+      ),
+      '#default_value' => isset($analysis_settings['analyzer']['default']) ? $analysis_settings['analyzer']['default']['type'] : 0,
+    );
+
     $form['analyzer'] = array(
       '#title' => t('Analyzers'),
       '#type' => 'fieldset',
-      '#description' => t('Select the analyzers to use on this index. If none are selected, the default will be used. See <a href="@elasticsearch_analyzers_url">Elasticsearch Analyzers</a>.', array('@elasticsearch_analyzers_url' => url('http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-analyzers.html'))),
+      '#description' => t('Select the analyzers to customize on this index. See <a href="@elasticsearch_analyzers_url">Elasticsearch Analyzers</a>.', array('@elasticsearch_analyzers_url' => url('http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-analyzers.html'))),
       '#collapsible' => FALSE,
       '#tree' => TRUE,
     );
@@ -225,6 +238,13 @@ function search_api_elasticsearch_analysis_form_validate($form, &$form_state) {
  */
 function search_api_elasticsearch_analysis_form_submit($form, &$form_state) {
   $data = array();
+
+  if (!empty($form_state['values']['default'])) {
+    $data['analysis']['analyzer']['default'] = array(
+      'type' => $form_state['values']['default'],
+    );
+  }
+
   foreach ($form_state['values']['analyzer'] as $analyzer => $settings) {
     if ($settings['enabled'] == TRUE) {
       unset($settings['enabled']);
@@ -232,5 +252,9 @@ function search_api_elasticsearch_analysis_form_submit($form, &$form_state) {
       $data['analysis']['analyzer'][$analyzer] = $settings;
     }
   }
+
+  $form['#SearchApiIndex']->update(
+    array('options' => array_merge($form['#SearchApiIndex']->options, $data))
+  );
   $form['#SearchApiElasticsearchClient']->updateSettings($form['#SearchApiIndex'], $data);
 }
