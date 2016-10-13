@@ -815,7 +815,9 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     try {
       $elastica_index = $this->getElasticaIndex($index);
       $elastica_index->close();
-      $elastica_index->setSettings($data);
+      if ($data) {
+        $elastica_index->setSettings($data);
+      }
       $elastica_index->open();
     }
     catch (Exception $e) {
