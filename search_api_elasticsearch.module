@@ -5,6 +5,8 @@
  * Provides an elasticsearch-based service class for the Search API.
  */
 
+include_once('search_api_elasticsearch.location.inc');
+
 /**
  * Implements hook_menu().
  */
