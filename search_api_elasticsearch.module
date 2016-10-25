@@ -42,7 +42,9 @@ function search_api_elasticsearch_views_api() {
 /**
  * Get server ID by name.
  *
- * @param integer $server_machine_name
+ * @param string $server_machine_name
+ *
+ * @return int
  */
 function search_api_elasticsearch_get_server_id_by_name($server_machine_name) {
   $query = '';
@@ -55,7 +57,7 @@ function search_api_elasticsearch_get_server_id_by_name($server_machine_name) {
     $result = $query->execute()->fetchAssoc();
   }
   catch (Exception $e) {
-    watchdog('Elasticsearch', $e->getMessage(), array(), WATCHDOG_ERROR);
+    watchdog('Search API Elasticsearch', $e->getMessage(), array(), WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -178,6 +180,9 @@ function _search_api_elasticsearch_configuration_form_remove_custom($form, &$for
 
 /**
  * Implements hook_search_api_index_reindex().
+ *
+ * @param SearchApiIndex $index
+ * @param bool $clear
  */
 function search_api_elasticsearch_search_api_index_reindex(SearchApiIndex $index, $clear = false) {
   $elasticsearch_index = new SearchApiElasticsearchIndex($index);
