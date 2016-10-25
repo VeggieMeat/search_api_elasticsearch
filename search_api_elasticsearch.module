@@ -9,16 +9,7 @@
  * Implements hook_menu().
  */
 function search_api_elasticsearch_menu() {
-  $items['admin/config/search/search_api/index/%search_api_index/analysis'] = array(
-    'title' => 'Analysis',
-    'description' => 'Configure Elasticsearch analysis',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('search_api_elasticsearch_analysis_form', 5),
-    'access arguments' => array('administer search_api'),
-    'file' => 'includes/search_api_elasticsearch.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_INLINE | MENU_CONTEXT_PAGE,
-  );
+  $items = [];
 
   return $items;
 }
