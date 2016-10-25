@@ -111,14 +111,14 @@ function search_api_elasticsearch_attach_ajax_callback(&$form) {
  * @param  array  $form_state
  */
 function search_api_elasticsearch_edit_index_submit(array $form, array &$form_state) {
-  form_state_values_clean($form_state);
+  /*form_state_values_clean($form_state);
   $merge_types = array();
 
   $elastic_server_id = search_api_elasticsearch_get_server_id_by_name($form_state['index']->server);
   $elastic_server = search_api_server_load($elastic_server_id);
   $index = $form_state['index'];
 
-  $elastic_server->updateSettings($index, $merge_types);
+  $elastic_server->updateSettings($index, $merge_types);*/
 }
 
 /**
@@ -185,4 +185,11 @@ function _search_api_elasticsearch_configuration_form_remove_custom($form, &$for
   $form_state['rebuild'] = TRUE;
 }
 
+/**
+ * Implements hook_search_api_index_reindex().
+ */
+function search_api_elasticsearch_search_api_index_reindex(SearchApiIndex $index, $clear = false) {
+  $elasticsearch_index = new SearchApiElasticsearchIndex($index);
+  $elasticsearch_index->create();
+}
 

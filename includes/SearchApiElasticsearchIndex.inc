@@ -28,9 +28,11 @@ class SearchApiElasticsearchIndex {
    * @param SearchApiIndex $index
    * @param SearchApiElasticsearchService $service
    */
-  public function __construct(SearchApiIndex $index, SearchApiElasticsearchService $service) {
+  public function __construct(SearchApiIndex $index, SearchApiElasticsearchService $service = null) {
     $this->search_api_index = $index;
-    $this->search_api_service = $service;
+    // We load the service directly for DX, but can fallback to the Search API
+    // Server object because it has a proxy to the service.
+    $this->search_api_service = isset($service) ? $service : $index->server();
   }
 
   /**
@@ -62,13 +64,23 @@ class SearchApiElasticsearchIndex {
   }
 
   /**
-   * Create Elasticsearch index.
+   * Create Elasticsearch a new index.
    */
   public function create() {
-    $this->setRealIndexName($this->search_api_index);
-    $index = $this->getRealIndex($this->search_api_index);
+    $this->setRealIndexName();
+    $index = $this->getRealIndex();
     $index->create($this->getIndexOptions($this->search_api_index), TRUE);
     $index->addAlias($this->search_api_index->machine_name);
+  }
+
+  /**
+   * Add an Elasticsearch index, but don't expose it to Drupal via alias.
+   */
+  public function add() {
+    $name = $this->getNewIndexName();
+    $index = $this->getRealIndex($name);
+    $index->create($this->getIndexOptions($this->search_api_index), TRUE);
+    $this->setNewIndexName($name);
   }
 
   /**
@@ -77,7 +89,7 @@ class SearchApiElasticsearchIndex {
    */
   public function addAlias($alias = null) {
     $new_alias = ($alias) ?: $this->search_api_index->machine_name;
-    $index = $this->getRealIndex($this->search_api_index);
+    $index = $this->getRealIndex();
     $index->addAlias($new_alias);
   }
 
@@ -85,7 +97,7 @@ class SearchApiElasticsearchIndex {
    * Delete Elasticsearch index.
    */
   public function delete() {
-    $index = $this->getRealIndex($this->search_api_index);
+    $index = $this->getRealIndex();
     $index->delete();
   }
 
@@ -96,7 +108,7 @@ class SearchApiElasticsearchIndex {
    * @return array
    */
   public function indexItems($documents) {
-    $index = $this->getRealIndex($this->search_api_index);
+    $index = $this->getRealIndex();
     $index->addDocuments($documents);
     $index->refresh();
     return array_keys($documents);
@@ -107,7 +119,7 @@ class SearchApiElasticsearchIndex {
    */
   public function deleteAllItems() {
     $match_all = new MatchAll();
-    $index = $this->getRealIndex($this->search_api_index);
+    $index = $this->getRealIndex();
     $index->deleteByQuery($match_all);
   }
 
@@ -121,7 +133,7 @@ class SearchApiElasticsearchIndex {
     foreach ($ids as $id) {
       $documents[] = new Document($id);
     }
-    $index = $this->getRealIndex($this->search_api_index);
+    $index = $this->getRealIndex();
     $index->deleteDocuments($documents);
   }
 
@@ -231,31 +243,55 @@ class SearchApiElasticsearchIndex {
   /**
    * Get Elasticsearch index.
    *
-   * @param SearchApiIndex $index
+   * @param string $name
+   *
    * @return Index
    */
-  protected function getRealIndex(SearchApiIndex $index) {
-    return $this->search_api_service->getClient()->getIndex($this->getRealIndexName($index));
+  protected function getRealIndex($name = null) {
+    $index_name = isset($name) ? $name : $this->getCurrentIndexName();
+    return $this->search_api_service->getClient()->getIndex($index_name);
   }
 
   /**
-   * Get Elasticsearch Index name.
+   * Get a new Elasticsearch index name.
    *
-   * @param SearchApiIndex|NULL $index
-   * @return null
+   * @return string;
    */
-  protected function getRealIndexName(SearchApiIndex $index = null) {
-    return variable_get('search_api_elasticsearch_' . $index->machine_name . '_real_index_name');
+  protected function getNewIndexName() {
+    return $this->search_api_index->machine_name . '_' . REQUEST_TIME;
+  }
+
+  /**
+   * Set a new Elasticsearch index name.
+   *
+   * @param string $name
+   */
+  protected function setNewIndexName($name) {
+    $index = search_api_index_load($this->search_api_index->machine_name);
+    $options = $index->options;
+    $options['search_api_elasticsearch']['new_index'] = $name;
+    $index->update(['options' => $options]);
+  }
+
+  /**
+   * Get current Elasticsearch Index name.
+   *
+   * @return string
+   */
+  protected function getCurrentIndexName() {
+    $index = search_api_index_load($this->search_api_index->machine_name);
+    return $index->options['search_api_elasticsearch']['current_index'];
   }
 
   /**
    * Map Elasticsearch alias to index for Drupal.
-   *
-   * @param SearchApiIndex $index
    */
-  protected function setRealIndexName(SearchApiIndex $index) {
-    $real_index_name = $index->machine_name . '_' . REQUEST_TIME;
-    variable_set('search_api_elasticsearch_' . $index->machine_name . '_real_index_name', $real_index_name);
+  protected function setRealIndexName() {
+    $real_index_name = $this->getNewIndexName();
+    $index = search_api_index_load($this->search_api_index->machine_name);
+    $options = $index->options;
+    $options['search_api_elasticsearch']['current_index'] = $real_index_name;
+    $index->update(['options' => $options]);
   }
 
   /**
