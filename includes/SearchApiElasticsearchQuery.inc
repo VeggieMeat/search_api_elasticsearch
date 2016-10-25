@@ -9,6 +9,7 @@ use Elastica\Query\BoolQuery;
 use Elastica\Query\Exists;
 use Elastica\Query\QueryString;
 use Elastica\Query\Range as RangeQuery;
+use Elastica\Query\Terms as TermsQuery;
 use Elastica\ResultSet;
 
 /**
@@ -99,6 +100,8 @@ class SearchApiElasticsearchQuery {
     if (!empty($sort)) {
       $this->query->setSort($sort);
     }
+
+    $this->addAggregations();
   }
 
   /**
@@ -134,7 +137,6 @@ class SearchApiElasticsearchQuery {
     }
 
     $search_result['search_api_facets'] = $this->parseAggregations($result_set);
-
     return $search_result;
   }
 
@@ -234,12 +236,9 @@ class SearchApiElasticsearchQuery {
   protected function setAggregationOptions(AbstractSimpleAggregation $aggregation, $field_type, $aggregation_info) {
     $aggregation_limit = $this->getAggregationLimit($aggregation_info);
     $aggregation_filter = $this->getAggregationFilter($aggregation_info);
-    $aggregation->setField($aggregation_info['field']);
 
     if (!empty($aggregation_filter)) {
       $filter = new Filter($aggregation_info['field']);
-      $range = new Range($aggregation_info['field']);
-      $filter->addAggregation($range);
       $filter->setFilter($aggregation_filter);
       $aggregation->addAggregation($filter);
     }
@@ -247,6 +246,8 @@ class SearchApiElasticsearchQuery {
     if ($aggregation_limit > 0 && method_exists($aggregation, 'setSize')) {
       $aggregation->setSize($aggregation_limit);
     }
+
+    $aggregation->setField($aggregation_info['field']);
   }
 
   /**
@@ -256,8 +257,8 @@ class SearchApiElasticsearchQuery {
    */
   protected function getAggregationLimit($aggregation_info) {
     $aggregation_limit = !empty($aggregation_info['limit']) ? $aggregation_info['limit'] : -1;
-    if ($aggregation_limit < 0) {
-      $aggregation_limit = $this->getOption('facet_limit', 10);
+    if ($aggregation_limit > 0) {
+      $aggregation_limit = $this->search_api_query->getOption('facet_limit', 10);
     }
     return $aggregation_limit;
   }
@@ -266,7 +267,7 @@ class SearchApiElasticsearchQuery {
    * Helper method to get filters for aggregations.
    *
    * @param $aggregation_info
-   * @return array|string
+   * @return AbstractSimpleAggregation
    */
   protected function getAggregationFilter($aggregation_info) {
     $aggregation_filter = '';
@@ -279,6 +280,7 @@ class SearchApiElasticsearchQuery {
     // Normal facet
     else {
       $aggregation_filter = $this->parseFilter($this->search_api_query->getFilter());
+
       if (!empty($aggregation_filter)) {
         $aggregation_filter = $aggregation_filter[0];
       }
@@ -327,6 +329,7 @@ class SearchApiElasticsearchQuery {
         }
       }
       $this->joinFilters($filters, $conjunction);
+
       return $filters;
     }
   }
@@ -340,7 +343,7 @@ class SearchApiElasticsearchQuery {
    * @throws Exception
    */
   protected function verifyFilterConfiguration($filter_array, $ignored_field) {
-    if (!array_key_exists('field_id', $filter_array) || !array_key_exists('filter_value', $filter_array)
+    if (!array_key_exists('field_id', $filter_array) || !array_key_exists('field_value', $filter_array)
       || !isset($filter_array['filter_operator'])) {
       throw new Exception(t('Incorrect filter criteria is using for searching!'));
     }
@@ -366,7 +369,7 @@ class SearchApiElasticsearchQuery {
    */
   protected function getFilter($filter_array) {
     // Handle "empty", "not empty" operators.
-    if (!isset($filter_array['filter_value'])) {
+    if (!isset($filter_array['field_value'])) {
       switch ($filter_array['filter_operator']) {
         case '<>':
           return new Exists($filter_array['field_id']);
@@ -378,16 +381,24 @@ class SearchApiElasticsearchQuery {
     }
     // Normal filters
     else {
-      switch ($filter_array['filter_value']) {
+      switch ($filter_array['field_value']) {
         case '>':
-          return new RangeQuery($filter_array['field_id'], ['gt' => $filter_array['filter_value']]);
+          $query = new RangeQuery($filter_array['field_id'], ['gt' => $filter_array['field_value']]);
+          break;
         case '>=':
-          return new RangeQuery($filter_array['field_id'], ['gte' => $filter_array['filter_value']]);
+          $query = new RangeQuery($filter_array['field_id'], ['gte' => $filter_array['field_value']]);
+          break;
         case '<':
-          return new RangeQuery($filter_array['field_id'], ['lt' => $filter_array['filter_value']]);
+          $query = new RangeQuery($filter_array['field_id'], ['lt' => $filter_array['field_value']]);
+          break;
         case '<=':
-          return new RangeQuery($filter_array['field_id'], ['lte' => $filter_array['filter_value']]);
+          $query = new RangeQuery($filter_array['field_id'], ['lte' => $filter_array['field_value']]);
+          break;
+        default:
+          $query = new Query\Term();
+          $query->setTerm($filter_array['field_id'], $filter_array['field_value']);
       }
+      return $query;
     }
 
     return null;
