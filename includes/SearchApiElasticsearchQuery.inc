@@ -5,6 +5,7 @@ use Elastica\Aggregation\Filter;
 use Elastica\Aggregation\Range;
 use Elastica\Aggregation\Terms;
 use Elastica\Query;
+use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\Exists;
 use Elastica\Query\QueryString;
@@ -267,7 +268,7 @@ class SearchApiElasticsearchQuery {
    * Helper method to get filters for aggregations.
    *
    * @param $aggregation_info
-   * @return AbstractSimpleAggregation
+   * @return AbstractQuery
    */
   protected function getAggregationFilter($aggregation_info) {
     $aggregation_filter = '';
@@ -365,7 +366,7 @@ class SearchApiElasticsearchQuery {
    * Get Elasticsearch aggregation queries for Search API filters.
    *
    * @param $filter_array
-   * @return \Elastica\Query\AbstractQuery || null
+   * @return AbstractQuery || null
    */
   protected function getFilter($filter_array) {
     // Handle "empty", "not empty" operators.
