@@ -169,7 +169,7 @@ function _search_api_elasticsearch_configuration_form_submit_custom($form, &$for
  * @param array $form_state
  */
 function _search_api_elasticsearch_configuration_form_remove_custom($form, &$form_state) {
-  $form_state['values']['remove_delta'] == 'none';
+  $form_state['values']['remove_delta'] = 'none';
 
   if (isset($form_state['triggering_element']['#remove_delta'])) {
     $form_state['values']['remove_delta'] = $form_state['triggering_element']['#remove_delta'];
