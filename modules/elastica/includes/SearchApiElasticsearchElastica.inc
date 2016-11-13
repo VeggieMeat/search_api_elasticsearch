@@ -168,11 +168,12 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    * Overrides addIndex().
    */
   public function addIndex(SearchApiIndex $index) {
-    $elastica_index = $this->getElasticaIndex($index);
+    $elastica_index = $this->getElasticaIndex($index, TRUE);
     if (!empty($elastica_index)) {
       try {
         drupal_alter('search_api_elasticsearch_elastica_add_index', $index->options);
-        $response = $elastica_index->create($index->options, TRUE);
+        $elastica_index->create($index->options, TRUE);
+        $elastica_index->addAlias($this->getIndexName($index));
       }
       catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
@@ -190,7 +191,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    */
   public function fieldsUpdated(SearchApiIndex $index) {
     parent::fieldsUpdated($index);
-    $elastica_index = $this->getElasticaIndex($index);
+    $elastica_index = $this->getElasticaIndex($index, TRUE);
     if (!empty($elastica_index)) {
       $elastica_type = $elastica_index->getType($index->machine_name);
 
@@ -228,7 +229,7 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
    * Overrides removeIndex().
    */
   public function removeIndex($index) {
-    $elastica_index = $this->getElasticaIndex($index);
+    $elastica_index = $this->getElasticaIndex($index, TRUE);
     // PATCH - Only delete the index's data if the index isn't read-only.
     if (!empty($elastica_index) && $index->read_only != 1) {
       try {
@@ -604,9 +605,9 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
   /**
    * Helper function. Get an Elastica index.
    */
-  public function getElasticaIndex(SearchApiIndex $index) {
+  public function getElasticaIndex(SearchApiIndex $index, $direct = FALSE) {
     if (!empty($index) && !empty($this->elasticaClient)) {
-      $index_name = $this->getIndexName($index);
+      $index_name = ($direct) ? $this->getRealIndexName($index) : $this->getIndexName($index);
       try {
         $elastica_index = $this->elasticaClient->getIndex($index_name);
         return $elastica_index;
