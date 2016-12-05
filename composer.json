@@ -11,6 +11,6 @@
     }
   ],
   "require": {
-    "ruflin/elastica": "^3.2.3"
+    "ruflin/elastica": "3.2.3"
   }
 }
