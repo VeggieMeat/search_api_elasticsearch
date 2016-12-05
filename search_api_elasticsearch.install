@@ -5,3 +5,22 @@
  * Install/Uninstall/Update tasks for the Search API Elasticsearch module.
  */
 
+/**
+ * Implements hook_requirements().
+ */
+function search_api_elasticsearch_requirements($phase) {
+  $requirements = [];
+  $t = get_t();
+
+  if ($phase == 'runtime') {
+    if (!class_exists('\Elastica\Client')) {
+      $requirements['elastica'] = [
+        'title' => $t('Elastica'),
+        'description' => $t('Search API Elasticsearch requires the Elastica library to be installed.'),
+        'severity' => REQUIREMENT_ERROR,
+      ];
+    }
+  }
+
+  return $requirements;
+}
