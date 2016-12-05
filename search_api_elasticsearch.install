@@ -16,7 +16,7 @@ function search_api_elasticsearch_requirements($phase) {
     if (!class_exists('\Elastica\Client')) {
       $requirements['elastica'] = [
         'title' => $t('Elastica'),
-        'description' => $t('Search API Elasticsearch requires the Elastica library to be installed.'),
+        'description' => $t('Search API Elasticsearch requires the Elastica library (version 3.2.3) to be installed.'),
         'severity' => REQUIREMENT_ERROR,
       ];
     }
