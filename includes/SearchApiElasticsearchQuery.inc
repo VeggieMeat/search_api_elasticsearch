@@ -1,8 +1,6 @@
 <?php
 use Elastica\Aggregation\AbstractSimpleAggregation;
-use Elastica\Aggregation\DateRange;
 use Elastica\Aggregation\Filter;
-use Elastica\Aggregation\Range;
 use Elastica\Aggregation\Terms;
 use Elastica\Query;
 use Elastica\Query\AbstractQuery;
@@ -10,7 +8,6 @@ use Elastica\Query\BoolQuery;
 use Elastica\Query\Exists;
 use Elastica\Query\QueryString;
 use Elastica\Query\Range as RangeQuery;
-use Elastica\Query\Terms as TermsQuery;
 use Elastica\ResultSet;
 
 /**
@@ -162,10 +159,10 @@ class SearchApiElasticsearchQuery {
 
           if ($field_type === 'date') {
             foreach ($aggregation_data['buckets'] as $entry) {
-              if ($entry['count'] >= $aggregation_min_count) {
+              if ($entry['doc_count'] >= $aggregation_min_count) {
                 $result[$aggregation_id][] = [
-                  'count' => $entry['count'],
-                  'filter' => '"' . ($entry['time'] / 1000) . '"',
+                  'count' => $entry['doc_count'],
+                  'filter' => '"' . ($entry['key'] / 1000) . '"',
                 ];
               }
             }
@@ -192,24 +189,71 @@ class SearchApiElasticsearchQuery {
   protected function addAggregations() {
     $aggregations = $this->search_api_query->getOption('search_api_facets');
     if (!empty($aggregations)) {
+      $searcher = key(facetapi_get_active_searchers());
+      /** @var SearchApiFacetapiAdapter $adapter */
+      $adapter = isset($searcher) ? facetapi_adapter_load($searcher) : NULL;
+      $enabled_facets = $adapter->getEnabledFacets();
       foreach ($aggregations as $aggregation_id => $aggregation_info) {
         $aggregation = null;
         $field_id = $aggregation_info['field'];
         if (!isset($this->index_fields[$field_id])) {
           continue;
         }
-        $aggregation_missing = $aggregation_info['missing'];
+
         $field_type = search_api_extract_inner_type($this->index_fields[$field_id]['type']);
 
+        /** @var FacetapiFacet $facet */
+        $facet = $adapter->getFacet($enabled_facets[$aggregation_id]);
+        $facet_settings = $facet->getSettings();
+
         if ($field_type === 'date') {
-          $aggregation = new DateRange($aggregation_id);
-          $aggregation->setField($aggregation_id);
-          $aggregation->addRange(strtotime('-1 day'), time(), '1 Day');
-          $aggregation->addRange(strtotime('-7 day'), time(), '1 Week');
-          $aggregation->addRange(strtotime('-14 day'), time(), '2 Weeks');
-          $aggregation->addRange(strtotime('-21 day'), time(), '3 Weeks');
-          $aggregation->addRange(strtotime('-365 day'), time(), 'All time');
-          $aggregation->setFormat("dd MM yyyy");
+          $gap_weight = array('YEAR' => 2, 'MONTH' => 1, 'DAY' => 0);
+          // Get the date granularity.
+          $date_gap = $facet_settings->settings['date_granularity'];
+          // Get the current date gap from the active date filters.
+          $active_items = $adapter->getActiveItems(array('name' => $aggregation_id));
+          if (!empty($active_items)) {
+            foreach ($active_items as $active_item) {
+              $value = $active_item['value'];
+              if (strpos($value, ' TO ') > 0) {
+                list($date_min, $date_max) = explode(' TO ', str_replace(array(
+                  '[',
+                  ']'
+                ), '', $value), 2);
+                $gap = facetapi_get_timestamp_gap($date_min, $date_max);
+                if (isset($gap_weight[$gap])) {
+                  $gaps[] = $gap_weight[$gap];
+                }
+              }
+            }
+            if (!empty($gaps)) {
+              // Minimum gap.
+              $date_gap = array_search(min($gaps), $gap_weight);
+            }
+          }
+
+          switch ($date_gap) {
+            // Already a selected YEAR, we want the months.
+            case 'YEAR':
+              $date_interval = 'month';
+              break;
+
+            // Already a selected MONTH, we want the days.
+            case 'MONTH':
+              $date_interval = 'day';
+              break;
+
+            // Already a selected DAY, we want the hours and so on.
+            case 'DAY':
+              $date_interval = 'hour';
+              break;
+
+            // By default we return result counts by year.
+            default:
+              $date_interval = 'year';
+          }
+
+          $aggregation = new \Elastica\Aggregation\DateHistogram($aggregation_id, $field_id, $date_interval);
         }
         elseif ($field_type === 'string') {
           if (strpos($aggregation_id, 'latlon') !== false) {
@@ -236,7 +280,7 @@ class SearchApiElasticsearchQuery {
    */
   protected function setAggregationOptions(AbstractSimpleAggregation $aggregation, $field_type, $aggregation_info) {
     $aggregation_limit = $this->getAggregationLimit($aggregation_info);
-    $aggregation_filter = $this->getAggregationFilter($aggregation_info);
+    $aggregation_filter = $this->getAggregationFilter($aggregation_info, $field_type);
 
     if (!empty($aggregation_filter)) {
       $filter = new Filter($aggregation_info['field']);
@@ -267,20 +311,20 @@ class SearchApiElasticsearchQuery {
   /**
    * Helper method to get filters for aggregations.
    *
-   * @param $aggregation_info
+   * @param array $aggregation_info
+   * @param string $field_type
    * @return AbstractQuery
    */
-  protected function getAggregationFilter($aggregation_info) {
-    $aggregation_filter = '';
+  protected function getAggregationFilter($aggregation_info, $field_type) {
     if (isset($aggregation_info['operator']) && drupal_strtolower($aggregation_info['operator']) === 'or') {
-      $aggregation_filter = $this->parseFilter($this->search_api_query->getFilter(), $aggregation_info['field']);
+      $aggregation_filter = $this->parseFilter($this->search_api_query->getFilter(), $field_type, $aggregation_info['field']);
       if (!empty($aggregation_filter)) {
         $aggregation_filter = $aggregation_filter[0];
       }
     }
     // Normal facet
     else {
-      $aggregation_filter = $this->parseFilter($this->search_api_query->getFilter());
+      $aggregation_filter = $this->parseFilter($this->search_api_query->getFilter(), $field_type);
 
       if (!empty($aggregation_filter)) {
         $aggregation_filter = $aggregation_filter[0];
@@ -294,12 +338,13 @@ class SearchApiElasticsearchQuery {
    * Parse Search API filters.
    *
    * @param SearchApiQueryFilterInterface $query_filter
-   * @param null $ignored_field
+   * @param string $field_type
+   * @param string $ignored_field
    * @return array|null
    * @throws Exception
    */
-  protected function parseFilter(SearchApiQueryFilterInterface $query_filter, $ignored_field = null) {
-    if (empty($query_filter)) {
+  protected function parseFilter(SearchApiQueryFilterInterface $query_filter, $field_type = null, $ignored_field = null) {
+    if (empty($query_filter) || empty($field_type)) {
       return null;
     }
     else {
@@ -317,13 +362,18 @@ class SearchApiElasticsearchQuery {
             'filter_operator' => $filter_operator,
           ];
           $this->verifyFilterConfiguration($filter_array, $ignored_field);
+
+          // Handle parse date filters.
+          if ($field_type == 'date') {
+            $filter_array['field_value'] = date('Y-m-d\TH:i:s.uP', $filter_array['field_value']);
+          }
           $filter = $this->getFilter($filter_array);
           if (!empty($filter)) {
             $filters[] = $filter;
           }
         }
         elseif ($filter_info instanceof SearchApiQueryFilterInterface) {
-          $nested_filters = $this->parseFilter($filter_info);
+          $nested_filters = $this->parseFilter($filter_info, $field_type);
           if (!empty($nested_filters)) {
             $filters = array_merge($filters, $nested_filters);
           }
@@ -360,6 +410,8 @@ class SearchApiElasticsearchQuery {
     if (empty($filter_array['filter_operator'])) {
       throw new Exception(t('Empty filter operator for :field_id field! Incorrect filter criteria is using for searching!', array(':field_id' => $field_id)));
     }
+
+    return TRUE;
   }
 
   /**

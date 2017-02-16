@@ -6,6 +6,17 @@
  */
 
 /**
+ * Implements hook_entity_presave().
+ */
+function search_api_elasticsearch_entity_presave($entity, $type) {
+  if ($type == 'search_api_index') {
+    if ($entity->is_new) {
+      SearchApiElasticsearchIndex::setCurrentIndexName($entity);
+    }
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function search_api_elasticsearch_menu() {
@@ -177,15 +188,3 @@ function _search_api_elasticsearch_configuration_form_remove_custom($form, &$for
 
   $form_state['rebuild'] = TRUE;
 }
-
-/**
- * Implements hook_search_api_index_reindex().
- *
- * @param SearchApiIndex $index
- * @param bool $clear
- */
-function search_api_elasticsearch_search_api_index_reindex(SearchApiIndex $index, $clear = false) {
-  $elasticsearch_index = new SearchApiElasticsearchIndex($index);
-  $elasticsearch_index->create();
-}
-

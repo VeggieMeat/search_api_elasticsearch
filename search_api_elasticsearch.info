@@ -7,3 +7,5 @@ package = Search
 files[] = includes/SearchApiElasticsearchIndex.inc
 files[] = includes/SearchApiElasticsearchQuery.inc
 files[] = includes/SearchApiElasticsearchService.inc
+files[] = includes/views/SearchApiElasticsearchViewsHandlerFieldDate.inc
+files[] = includes/views/SearchApiElasticsearchViewsHandlerFilterDate.inc

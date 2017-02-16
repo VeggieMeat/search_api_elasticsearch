@@ -27,16 +27,23 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
         if (isset($field_data['value']) && is_array($field_data['value'])) {
           $data[$field_id] = array();
           foreach ($field_data['value'] as $token) {
-            if (is_array($token) && isset($token['value'])) {
-              $data[$field_id][] = $token['value'];
+            $value = is_array($token) && isset($token['value']) ? $token['value'] : $token;
+
+            if ($field_data['type'] === 'date') {
+              $value = date('Y-m-d\TH:i:s.uP', $value);
             }
-            else {
-              $data[$field_id][] = $token;
-            }
+
+            $data[$field_id][] = $value;
           }
         }
         else {
-          $data[$field_id] = $field_data['value'];
+          $value = $field_data['value'];
+
+          if ($field_data['type'] === 'date') {
+            $value = date('Y-m-d\TH:i:s.uP', $value);
+          }
+
+          $data[$field_id][] = $value;
         }
       }
 
@@ -142,7 +149,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
             '%default' => $defaults['host'],
           )),
           '#required' => TRUE,
-          '#default_value' => isset($this->options[$c]['host']) ?: $defaults['host'],
+          '#default_value' => isset($this->options[$c]['host']) ? $this->options[$c]['host'] : $defaults['host'],
           '#parents' => array('options', 'form', $c, 'host'),
         );
         // Elasticsearch daemon port.
@@ -153,7 +160,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
             '%default' => $defaults['port'],
           )),
           '#required' => TRUE,
-          '#default_value' => isset($this->options[$c]['port']) ?: $defaults['port'],
+          '#default_value' => isset($this->options[$c]['port']) ? $this->options[$c]['port'] : $defaults['port'],
           '#parents' => array('options', 'form', $c, 'port'),
         );
         //Elasticsearch basic authentication.
@@ -182,7 +189,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#title' => t('Elasticsearch path prefix'),
           '#description' => t('Normally empty. Use when you have remapped the Elasticsearch server API path.'),
           '#required' => FALSE,
-          '#default_value' => isset($this->options[$c]['path']) ?: $defaults['path'],
+          '#default_value' => isset($this->options[$c]['path']) ? $this->options[$c]['path'] : $defaults['path'],
           '#parents' => array('options', 'form', $c, 'path'),
         );
         // Elasticsearch daemon URL.
@@ -191,7 +198,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#title' => t('Elasticsearch url'),
           '#description' => t('Normally empty. Use instead of host/port when you have remapped the Elasticsearch server API url.'),
           '#required' => FALSE,
-          '#default_value' => isset($this->options[$c]['url']) ?: $defaults['url'],
+          '#default_value' => isset($this->options[$c]['url']) ? $this->options[$c]['url'] : $defaults['url'],
           '#parents' => array('options', 'form', $c, 'url'),
         );
         // Elasticsearch daemon transport.
@@ -200,7 +207,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#title' => t('Select transport'),
           '#description' => t('Transport to connect to this elasticsearch server.'),
           '#options' => $this->getTransportOptions(),
-          '#default_value' => isset($this->options[$c]['transport']) ?: $defaults['transport'],
+          '#default_value' => isset($this->options[$c]['transport']) ? $this->options[$c]['transport'] : $defaults['transport'],
           '#parents' => array('options', 'form', $c, 'transport'),
         );
         // Elasticsearch daemon persistent.
@@ -208,7 +215,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#type' => 'checkbox',
           '#title' => t('Persistent connection'),
           '#description' => t('Use persistent connection when connecting to this node.'),
-          '#default_value' => isset($this->options[$c]['persistent']) ?: $defaults['persistent'],
+          '#default_value' => isset($this->options[$c]['persistent']) ? $this->options[$c]['persistent'] : $defaults['persistent'],
           '#parents' => array('options', 'form', $c, 'persistent'),
         );
         // Elasticsearch daemon timeout.
@@ -216,7 +223,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#type' => 'textfield',
           '#title' => t('Timeout in ms'),
           '#description' => t('Timeout in ms for waiting this elastic server to respond'),
-          '#default_value' => isset($this->options[$c]['timeout']) ?: $defaults['timeout'],
+          '#default_value' => isset($this->options[$c]['timeout']) ? $this->options[$c]['timeout'] : $defaults['timeout'],
           '#parents' => array('options', 'form', $c, 'timeout'),
         );
         // Elasticsearch daemon log.
@@ -224,7 +231,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#type' => 'checkbox',
           '#title' => t('Log'),
           '#description' => t('Log this elasticsearch server queries to the default log.'),
-          '#default_value' => isset($this->options[$c]['log']) ?: $defaults['log'],
+          '#default_value' => isset($this->options[$c]['log']) ? $this->options[$c]['log'] : $defaults['log'],
           '#parents' => array('options', 'form', $c, 'log'),
         );
         if (!class_exists('\Psr\Log\AbstractLogger')) {
@@ -236,7 +243,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '#type' => 'textfield',
           '#title' => t('retryOnConflict'),
           '#description' => t('Sets the number of retries of a version conflict occurs because the document was updated between getting it and updating it.'),
-          '#default_value' => isset($this->options[$c]['retryOnConflict']) ?: $defaults['retryOnConflict'],
+          '#default_value' => isset($this->options[$c]['retryOnConflict']) ? $this->options[$c]['retryOnConflict'] : $defaults['retryOnConflict'],
           '#parents' => array('options', 'form', $c, 'retryOnConflict'),
         );
         if ((!isset($form_state['values']['remove_delta']) && $delta > 1) || (isset($form_state['values']['remove_delta']) && $delta > 2)) {
@@ -286,7 +293,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           '%default' => $default,
         )),
         '#required' => TRUE,
-        '#default_value' => (isset($this->options['facet_limit'])) ?: $default,
+        '#default_value' => (isset($this->options['facet_limit'])) ? $this->options['facet_limit'] : $default,
         '#parents' => array('options', 'form', 'facet_limit'),
       );
     }
@@ -298,7 +305,6 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
    */
   public function configurationFormValidate(array $form, array &$values, array &$form_state) {
     unset($values['add_more']);
-    $count_nodes = count($values);
     if (module_exists('search_api_facetapi')) {
       // Facet limit.
       if (filter_var($values['facet_limit'], FILTER_VALIDATE_INT, array('options' => array('min_range' => 0))) === FALSE) {
@@ -453,6 +459,22 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
   public function fieldsUpdated(SearchApiIndex $index) {
     $helper = new SearchApiElasticsearchIndex($index, $this);
     return $helper->updateFields();
+  }
+
+  /**
+   * Helper function. Return the path in the correct format.
+   *
+   * @param string $path
+   *
+   * @return string
+   */
+  protected function setPath($path) {
+    if (isset($path) && !empty($path)) {
+      $trimmed_path = trim($path, '/');
+      $path = $trimmed_path . '/';
+    }
+
+    return $path;
   }
 
 }
