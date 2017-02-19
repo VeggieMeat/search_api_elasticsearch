@@ -30,7 +30,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
             $value = is_array($token) && isset($token['value']) ? $token['value'] : $token;
 
             if ($field_data['type'] === 'date') {
-              $value = date('Y-m-d\TH:i:s.uP', $value);
+              $value = date(SEARCH_API_ELASTICSEARCH_DATE_FORMAT, $value);
             }
 
             $data[$field_id][] = $value;
@@ -40,7 +40,7 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
           $value = $field_data['value'];
 
           if ($field_data['type'] === 'date') {
-            $value = date('Y-m-d\TH:i:s.uP', $value);
+            $value = date(SEARCH_API_ELASTICSEARCH_DATE_FORMAT, $value);
           }
 
           $data[$field_id][] = $value;
@@ -372,6 +372,9 @@ class SearchApiElasticsearchService extends SearchApiAbstractService {
 
     if (count($this->options) > 1) {
       foreach ($this->options as $id => $option) {
+        if ($id === 'facet_limit') {
+          continue;
+        }
         $config[] = $option;
       }
     }

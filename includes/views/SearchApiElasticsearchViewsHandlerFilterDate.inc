@@ -31,7 +31,7 @@ class SearchApiElasticsearchViewsHandlerFilterDate extends SearchApiViewsHandler
       $server = $index->server();
       $class = search_api_get_service_info($server->class);
       if (is_numeric($v) && $class['class'] === 'SearchApiElasticsearchService') {
-        $v = date('Y-m-d\TH:i:s.uP', $v);
+        $v = date(SEARCH_API_ELASTICSEARCH_DATE_FORMAT, $v);
       }
       if ($v !== FALSE) {
         $this->query->condition($this->real_field, $v, $this->operator, $this->options['group']);

@@ -365,7 +365,7 @@ class SearchApiElasticsearchQuery {
 
           // Handle parse date filters.
           if ($field_type == 'date') {
-            $filter_array['field_value'] = date('Y-m-d\TH:i:s.uP', $filter_array['field_value']);
+            $filter_array['field_value'] = date(SEARCH_API_ELASTICSEARCH_DATE_FORMAT, $filter_array['field_value']);
           }
           $filter = $this->getFilter($filter_array);
           if (!empty($filter)) {
