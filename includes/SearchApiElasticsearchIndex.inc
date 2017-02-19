@@ -2,6 +2,8 @@
 
 use Elastica\Document;
 use Elastica\Index;
+use Elastica\Node;
+use Elastica\Node\Info;
 use Elastica\Query\MatchAll;
 use Elastica\Type;
 use Elastica\Type\Mapping;
@@ -106,7 +108,6 @@ class SearchApiElasticsearchIndex {
    * @return array
    */
   public function indexItems($documents) {
-    //watchdog('search_api_elasticsearch', print_r($documents, TRUE));
     $index = $this->getRealIndex();
     $index->addDocuments($documents);
     $index->refresh();
@@ -117,9 +118,18 @@ class SearchApiElasticsearchIndex {
    * Delete all documents in an Elasticsearch index.
    */
   public function deleteAllItems() {
-    $match_all = new MatchAll();
-    $index = $this->getRealIndex();
-    $index->deleteByQuery($match_all);
+    $names = $this->search_api_service->getClient()->getCluster()->getNodeNames();
+    $name = reset($names);
+    $node = new Node($name, $this->search_api_service->getClient());
+    $info = new Info($node);
+    if ($info->hasPlugin('delete-by-query')) {
+      $match_all = new MatchAll();
+      $index = $this->getRealIndex();
+      $index->deleteByQuery($match_all);
+    }
+    else {
+      $this->replaceIndex($this->search_api_index, $this->getRealIndex());
+    }
   }
 
   /**
