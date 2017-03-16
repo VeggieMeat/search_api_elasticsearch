@@ -454,7 +454,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
     switch ($type) {
       case 'text':
         return array(
-          'type' => 'string',
+          'type' => 'text',
           'boost' => $field['boost'],
         );
 
@@ -462,7 +462,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
       case 'string':
       case 'token':
         return array(
-          'type' => 'string',
+          'type' => 'keyword',
           'index' => 'not_analyzed',
         );
 
@@ -944,7 +944,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
   protected function getIndexName(SearchApiIndex $index) {
     global $databases;
 
-    $site_database = $databases['default']['default']['database'];
+    $site_database = strtolower($databases['default']['default']['database']);
 
     $index_machine_name = is_string($index) ? $index : $index->machine_name;
 
@@ -964,7 +964,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
    */
   public function fieldsUpdated(SearchApiIndex $index) {
     $this->fieldsUpdatedProperties = array(
-      'id' => array('type' => 'string', 'include_in_all' => FALSE),
+      'id' => array('type' => 'keyword', 'include_in_all' => FALSE),
     );
     foreach ($index->getFields() as $field_id => $field_data) {
       $this->fieldsUpdatedProperties[$field_id] = $this->getFieldMapping($field_data);

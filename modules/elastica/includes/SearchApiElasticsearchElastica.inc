@@ -204,12 +204,6 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $mapping->setParam('_all', array('enabled' => FALSE));
       try {
         $fields = array();
-        foreach ($this->fieldsUpdatedProperties as $key => $value) {
-          if ($value['type']=='string') {
-            $value['type'] = 'keyword';
-          }
-          $fields[$key] = $value;
-        }
         $mapping->setProperties($fields);
         $mapping->send();
       }
