@@ -172,7 +172,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     if (!empty($elastica_index)) {
       try {
         drupal_alter('search_api_elasticsearch_elastica_add_index', $index->options);
-        $response = $elastica_index->create($index->options, TRUE);
+        $options = [
+          'number_of_shards' => $index->options['number_of_shards'],
+          'number_of_replicas' => $index->options['number_of_replicas']
+        ];
+        $response = $elastica_index->create($options, TRUE);
       }
       catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
@@ -199,18 +203,15 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
       $mapping->setType($elastica_type);
       $mapping->setParam('_all', array('enabled' => FALSE));
       try {
-        try {
-          // First we try a simple merge.
-          $mapping->setProperties($this->fieldsUpdatedProperties);
-          $mapping->send();
+        $fields = array();
+        foreach ($this->fieldsUpdatedProperties as $key => $value) {
+          if ($value['type']=='string') {
+            $value['type'] = 'keyword';
+          }
+          $fields[$key] = $value;
         }
-        catch (Exception $e) {
-          // If a merge fails, we must delete the type first.
-          $elastica_type->delete();
-          $elastica_type = $elastica_index->getType($index->machine_name);
-          $mapping->setType($elastica_type);
-          $mapping->send();
-        }
+        $mapping->setProperties($fields);
+        $mapping->send();
       }
       catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);

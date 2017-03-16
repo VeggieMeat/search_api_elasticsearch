@@ -15,6 +15,7 @@ function search_api_elasticsearch_elastica_search_api_service_info() {
     <p>Index items using a !url_elasticsearch search server.</p>
     <ul>
     <li>All field types are supported.</li>
+    <li>Drupal <i>string</i> maps to Elasticsearch <i>keyword</> .</li>
     <li>Search API facets are supported.</li>
     <li>More Like This searches are supported.</li>
     <li>Will use internal elasticsearch preprocessors, so Search API preprocessors should for the most part be deactivated.</li>
@@ -141,6 +142,13 @@ function search_api_elasticsearch_elastica_form_alter(&$form, &$form_state, $for
       $add_options = search_api_elasticsearch_elastica_add_options($form_state['values']['server']);
       if ($add_options != FALSE) {
         search_api_elasticsearch_elastica_return_form_options($form, $form_state, $default_values, 'edit');
+      }
+    }
+  } elseif ($form_id == 'search_api_admin_index_fields') {
+    $fields = $form['fields'];
+    foreach ($fields as $key => $info) {
+      if ($form['fields'][$key]['type']['#type']== 'select') {
+        $form['fields'][$key]['type']['#options']['keyword'] = 'Keyword';
       }
     }
   }

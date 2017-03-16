@@ -11,6 +11,6 @@
     }
   ],
   "require": {
-    "ruflin/elastica": ">=v1.3.4.0"
+    "ruflin/elastica": ">=v5.1.0"
   }
 }
