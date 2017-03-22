@@ -485,7 +485,7 @@ abstract class SearchApiElasticsearchAbstractService extends SearchApiAbstractSe
       case 'date':
         return array(
           'type' => 'date',
-          'format' => 'date_time',
+          'format' => 'date_time||epoch_millis||date_time_no_millis||date',
         );
 
       case 'location':
