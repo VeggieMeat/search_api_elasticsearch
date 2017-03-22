@@ -197,6 +197,11 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
     $elastica_index = $this->getElasticaIndex($index);
     if (!empty($elastica_index)) {
       $elastica_type = $elastica_index->getType($index->machine_name);
+      $elastica_index_mapping = $elastica_index->getMapping();
+      $current_fields = array();
+      if(isset($elastica_index_mapping[$index->machine_name])) {
+        $current_fields = $elastica_index_mapping[$index->machine_name]['properties'];
+      }
 
       // Create a new mapping.
       $mapping = new Elastica\Type\Mapping();
@@ -207,8 +212,14 @@ class SearchApiElasticsearchElastica extends SearchApiElasticsearchAbstractServi
         foreach ($this->fieldsUpdatedProperties as $key => $value) {
           $fields[$key] = $value;
         }
-        $mapping->setProperties($fields);
-        $mapping->send();
+        //Get the new fields if this is an existing mapping.
+        if(!empty($current_fields) && count($current_fields) > 0) {
+          $fields = array_diff_key($fields,$current_fields);
+        }
+        if(count($fields) > 0) {
+          $mapping->setProperties($fields);
+          $mapping->send();
+        }
       }
       catch (Exception $e) {
         watchdog('Elasticsearch', check_plain($e->getMessage()), array(), WATCHDOG_ERROR);
